@@ -9,26 +9,41 @@
 // Ontbrekende definities worden aangemaakt. Idempotent: schrijft enkel wat verschilt.
 // Schrijft een log met de oude waarden.
 //
-//   node packages/catalog/set-tapijt-tags.mjs <export.json> [--type Vloerkleed] [--go]
+// Behang van één merk (Boråstapeter, 11/2026): `--type "Behang,Fotobehang op maat" --merk "Boråstapeter"`.
+// Waarden uit de export die nog niet in de keuzelijst van de definitie staan, komen erbij.
+//
+//   node packages/catalog/set-tapijt-tags.mjs <export.json> [--type Vloerkleed] [--merk <vendor>] [--go]
 import { readFileSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import { admin, DOMAIN } from "./_shopify.mjs";
 
 const GO = process.argv.includes("--go");
 const args = process.argv.slice(2);
-const typeArg = args.includes("--type") ? args[args.indexOf("--type") + 1] : "Vloerkleed";
-const pad = args.find((a, i) => !a.startsWith("--") && args[i - 1] !== "--type");
+const optie = (naam) => (args.includes(naam) ? args[args.indexOf(naam) + 1] : undefined);
+const typeArg = optie("--type") ?? "Vloerkleed";
+const merkArg = optie("--merk");
+const pad = args.find((a, i) => !a.startsWith("--") && args[i - 1] !== "--type" && args[i - 1] !== "--merk");
 if (!pad) {
-  console.error("Gebruik: node packages/catalog/set-tapijt-tags.mjs <export.json> [--type Vloerkleed] [--go]");
+  console.error("Gebruik: node packages/catalog/set-tapijt-tags.mjs <export.json> [--type Vloerkleed] [--merk <vendor>] [--go]");
   process.exit(1);
 }
 // Producttypes uit de export (komma's = meerdere): enkel die producten worden vergeleken.
-const PRODUCT_QUERY = typeArg.split(",").map((t) => `product_type:"${t.trim()}"`).join(" OR ");
+// Met --merk enkel de producten van die vendor: de rest van dat type staat niet in de export.
+const TYPES = typeArg.split(",").map((t) => `product_type:"${t.trim()}"`).join(" OR ");
+const PRODUCT_QUERY = merkArg ? `(${TYPES}) AND vendor:"${merkArg}"` : TYPES;
 
-// Vaste lijsten = die van de reviewpagina. Uitbreiden (bv. voor behang) = hier + de keuzelijst
-// van de definitie bijwerken. Kleuren = de keuzelijst van brunic.kleurfamilie in Shopify.
-const MOTIEVEN = ["Effen", "Structuur", "Strepen", "Grafisch", "Ruiten", "Abstract", "Oosters", "Kelim", "Berber", "Bloemen", "Bladeren", "Marmer", "Betonlook", "Dierenhuid", "Dieren"];
-const STIJLEN = ["Modern", "Klassiek", "Vintage", "Scandinavisch", "Japandi", "Landelijk", "Industrieel", "Retro", "Color blocking", "Etnisch", "Lief"];
+// Vaste lijsten = die van de reviewpagina's. De eerste rij komt van de vloerkleden en stoffen, de
+// tweede van behang: de waarden die de behangfilter al kent uit de leveranciersspecificaties
+// (ESTAhome, Origin), zodat een merk met fototags onder dezelfde filterwaarden valt.
+// Kleuren = de keuzelijst van brunic.kleurfamilie in Shopify.
+const MOTIEVEN = [
+  "Effen", "Structuur", "Strepen", "Grafisch", "Ruiten", "Abstract", "Oosters", "Kelim", "Berber", "Bloemen", "Bladeren", "Marmer", "Betonlook", "Dierenhuid", "Dieren",
+  "Stippen", "Sterren", "Linnen", "Barok", "Toile de Jouy", "Bos", "Natuur", "Landschap", "Wolken", "Jungle", "Stad", "Wereldkaart", "Tekst", "Hartjes", "Hout", "Steen", "Tegels",
+];
+const STIJLEN = [
+  "Modern", "Klassiek", "Vintage", "Scandinavisch", "Japandi", "Landelijk", "Industrieel", "Retro", "Color blocking", "Etnisch", "Lief",
+  "Romantisch", "Botanisch", "Basics", "Art deco", "Japans", "Tropisch", "Maritiem",
+];
 const KLEUREN = ["Beige", "Taupe", "Bruin", "Ecru", "Naturel", "Wit", "Grijs", "Antraciet", "Zwart", "Blauw", "Turquoise", "Groen", "Geel", "Oranje", "Rood", "Roze", "Paars", "Multicolor", "Goud/metallic", "Zilver/metallic"];
 const LIJST = "list.single_line_text_field";
 const TEKST = "single_line_text_field";
@@ -44,16 +59,31 @@ const perHandle = new Map(exp.producten.map((p) => [p.handle, p]));
 console.log(`winkel: ${DOMAIN} · export: ${exp.producten.length} producten`);
 
 const bestaat = {};
+const keuzesNu = {};
 for (const d of DEFINITIES) {
-  const r = await admin(`{ metafieldDefinitions(first:1, ownerType: ${d.ownerType}, namespace:"brunic", key:"${d.key}"){ nodes{ id type{ name } } } }`);
+  const r = await admin(`{ metafieldDefinitions(first:1, ownerType: ${d.ownerType}, namespace:"brunic", key:"${d.key}"){ nodes{ id type{ name } validations{ name value } } } }`);
   const def = r.metafieldDefinitions.nodes[0];
   if (def && def.type.name !== LIJST) {
     console.error(`brunic.${d.key} (${d.ownerType}) bestaat al als ${def.type.name}, niet als ${LIJST}. Eerst beslissen wat ermee moet.`);
     process.exit(1);
   }
   bestaat[d.key] = Boolean(def);
+  const keuzes = def?.validations.find((v) => v.name === "choices")?.value;
+  keuzesNu[d.key] = keuzes ? JSON.parse(keuzes) : null;
   console.log(`definitie brunic.${d.key} (${d.ownerType.toLowerCase()}): ${def ? "bestaat" : "wordt aangemaakt"}`);
 }
+
+// Waarden uit de export die de keuzelijst in Shopify nog niet kent (bv. behangmotieven): die komen
+// erbij, achteraan. Enkel waarden uit de vaste lijsten hierboven; de rest meldt de vergelijking als probleem.
+const gebruikt = {
+  motief: exp.producten.flatMap((p) => p.motief ?? []),
+  stijl: exp.producten.flatMap((p) => p.stijl ?? []),
+  accentkleuren: exp.producten.flatMap((p) => p.kleuren.flatMap((k) => k.accenten ?? [])),
+};
+const uitbreiden = DEFINITIES.filter((d) => keuzesNu[d.key])
+  .map((d) => ({ d, erbij: [...new Set(gebruikt[d.key])].filter((w) => d.keuzes.includes(w) && !keuzesNu[d.key].includes(w)) }))
+  .filter((x) => x.erbij.length);
+for (const { d, erbij } of uitbreiden) console.log(`keuzelijst brunic.${d.key} (${d.ownerType.toLowerCase()}): + ${erbij.join(", ")}`);
 
 // Huidige stand ophalen.
 const shop = [];
@@ -142,7 +172,18 @@ for (const d of DEFINITIES) {
   console.log(`definitie brunic.${d.key} aangemaakt`);
 }
 
-const SET = `mutation($mfs:[MetafieldsSetInput!]!){ metafieldsSet(metafields:$mfs){ userErrors{ field message } } }`;
+// Eerst de keuzelijsten uitbreiden: Shopify weigert een waarde die er niet in staat.
+for (const { d, erbij } of uitbreiden) {
+  const r = await admin(
+    `mutation($d: MetafieldDefinitionUpdateInput!){ metafieldDefinitionUpdate(definition: $d){ updatedDefinition{ id } userErrors{ field message } } }`,
+    { d: { namespace: "brunic", key: d.key, ownerType: d.ownerType, validations: [{ name: "choices", value: JSON.stringify([...keuzesNu[d.key], ...erbij]) }] } },
+  );
+  const errs = r.metafieldDefinitionUpdate.userErrors;
+  if (errs.length) { console.error(`keuzelijst brunic.${d.key} uitbreiden mislukt: ${errs.map((e) => e.message).join("; ")}`); process.exit(1); }
+  console.log(`keuzelijst brunic.${d.key} uitgebreid met ${erbij.join(", ")}`);
+}
+
+const SET =`mutation($mfs:[MetafieldsSetInput!]!){ metafieldsSet(metafields:$mfs){ userErrors{ field message } } }`;
 const fouten = [];
 for (let i = 0; i < schrijven.length; i += 25) {
   const r = await admin(SET, { mfs: schrijven.slice(i, i + 25) });
