@@ -203,7 +203,8 @@ function lijstGegevens(p: Product) {
   return g;
 }
 
-function kaartVan(p: Product): CardProduct {
+/** `toCard`, één keer berekend per product (lijsten en zoekresultaten vragen dezelfde kaarten telkens opnieuw). */
+export function kaartVan(p: Product): CardProduct {
   let k = KAARTEN.get(p);
   if (!k) {
     k = toCard(p);

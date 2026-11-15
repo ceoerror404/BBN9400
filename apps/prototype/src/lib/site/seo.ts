@@ -4,7 +4,7 @@
  * krijgt een Product zonder Offer.
  */
 import type { CategoryNode, Product, SalesUnit } from "@/lib/catalog/types";
-import { normalize } from "@/lib/catalog/search";
+import { normalize } from "@/lib/catalog/tekst";
 import { routes } from "@/lib/routes";
 import { SITE } from "./config";
 

@@ -1,0 +1,434 @@
+<title>Vragen aan Brunic</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+  /* Layout: één leeskolom met vragenkaarten; een smalle kleefbalk bovenaan toont de voortgang en filtert op dringendheid. */
+  :root {
+    --bg: #f3f4f8;
+    --surface: #ffffff;
+    --field: #f7f8fc;
+    --ink: #171a2b;
+    --ink-2: #555b75;
+    --line: #d7dae6;
+    --accent: #3443a8;
+    --accent-bg: #e8eafa;
+    --urgent: #a8261e;
+    --urgent-bg: #fbe9e7;
+    --soon: #8a5200;
+    --soon-bg: #fff1d6;
+    --done: #1b6e40;
+    --done-bg: #e3f4ea;
+    --font-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+    --font-body: "Inter", "Segoe UI", system-ui, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12141c; --surface: #1b1e2a; --field: #151824; --ink: #eceef6; --ink-2: #a4aac0; --line: #2f3445;
+      --accent: #9aa5f5; --accent-bg: #252a45; --urgent: #ff8a80; --urgent-bg: #3a1c1a; --soon: #f2c063; --soon-bg: #35290f;
+      --done: #7fd6a0; --done-bg: #15301f; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12141c; --surface: #1b1e2a; --field: #151824; --ink: #eceef6; --ink-2: #a4aac0; --line: #2f3445;
+    --accent: #9aa5f5; --accent-bg: #252a45; --urgent: #ff8a80; --urgent-bg: #3a1c1a; --soon: #f2c063; --soon-bg: #35290f;
+    --done: #7fd6a0; --done-bg: #15301f; color-scheme: dark;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.55;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 0 64px;
+  }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+  .pagina { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+
+  .kop { padding-top: 32px; display: flex; flex-direction: column; gap: 8px; }
+  h1 { font-family: var(--font-display); font-weight: 600; font-size: 2rem; line-height: 1.15; margin: 0; text-wrap: balance; }
+  .kop p { margin: 0; color: var(--ink-2); max-width: 62ch; }
+  .kop .stand-datum { font-size: 0.875rem; }
+
+  /* Kleefbalk: voortgang, filters, kopiëren */
+  .balk {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+    background: var(--bg); border-bottom: 1px solid var(--line);
+    padding-block: 12px; display: flex; flex-direction: column; gap: 10px;
+  }
+  .balk-rij { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+  .voortgang { flex: 1 1 140px; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+  .voortgang-tekst { font-size: 0.875rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .voortgang-baan { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+  .voortgang-vulling { height: 100%; width: 0; background: var(--accent); border-radius: 3px; transition: width 0.25s ease; }
+  .filters { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    font: inherit; font-size: 0.8125rem; font-weight: 500; line-height: 1.2; cursor: pointer;
+    padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink-2);
+  }
+  .chip[aria-pressed="true"] { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
+  .knop {
+    font: inherit; font-size: 0.875rem; font-weight: 600; cursor: pointer; white-space: nowrap;
+    padding: 9px 14px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: var(--surface);
+  }
+  .chip:focus-visible, .knop:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .melding { margin: 0; padding: 10px 14px; border-radius: 8px; background: var(--soon-bg); color: var(--soon); font-size: 0.875rem; }
+  .kopie { display: flex; flex-direction: column; gap: 6px; }
+  .kopie label { font-size: 0.8125rem; color: var(--ink-2); }
+
+  h2 { font-family: var(--font-display); font-weight: 600; font-size: 1.25rem; line-height: 1.25; margin: 12px 0 0; text-wrap: balance; }
+  .groep { display: flex; flex-direction: column; gap: 14px; }
+  .groep-uitleg { margin: 0; color: var(--ink-2); font-size: 0.9375rem; }
+
+  .vraag {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+    padding: 20px; display: flex; flex-direction: column; gap: 14px; min-width: 0;
+  }
+  .vraag-kop { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 12px; }
+  /* Het nummer als staallabel: een kaartje met een ponsgaatje, zoals aan een stofstaal. */
+  .nr {
+    font-family: var(--font-mono); font-size: 0.8125rem; font-weight: 600; font-variant-numeric: tabular-nums;
+    display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px 3px 7px;
+    border: 1px solid var(--line); border-radius: 4px; background: var(--field); color: var(--ink-2);
+  }
+  .nr::before { content: ""; width: 5px; height: 5px; border-radius: 50%; border: 1px solid var(--ink-2); background: var(--surface); }
+  h3 { font-family: var(--font-display); font-weight: 600; font-size: 1.125rem; line-height: 1.3; margin: 0; flex: 1 1 220px; min-width: 0; text-wrap: balance; }
+  .pil { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.02em; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+  .pil-dringend { background: var(--urgent-bg); color: var(--urgent); }
+  .pil-livegang { background: var(--soon-bg); color: var(--soon); }
+  .pil-later { background: var(--field); color: var(--ink-2); border: 1px solid var(--line); }
+  .pil-beantwoord { background: var(--done-bg); color: var(--done); }
+
+  .tekst, .gegeven-inhoud { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .tekst p, .gegeven-inhoud p, .tekst ul, .gegeven-inhoud ul { margin: 0; }
+  .tekst ul, .gegeven-inhoud ul { padding-left: 1.2em; display: flex; flex-direction: column; gap: 6px; }
+  .tekst strong { font-weight: 600; color: var(--ink); }
+  .tekst { color: var(--ink-2); }
+  .tekst code, .gegeven-inhoud code { font-family: var(--font-mono); font-size: 0.85em; overflow-wrap: anywhere; }
+  li.vakje { list-style: none; margin-left: -1.2em; padding-left: 1.6em; position: relative; }
+  li.vakje::before { content: ""; position: absolute; left: 0; top: 0.3em; width: 0.85em; height: 0.85em; border: 1.5px solid var(--ink-2); border-radius: 3px; }
+  li.vakje.aan::before { background: var(--done); border-color: var(--done); }
+  .tabel { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.875rem; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 7px 12px 7px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-weight: 600; color: var(--ink); }
+  td.rechts, th.rechts { text-align: right; padding-right: 0; padding-left: 12px; }
+
+  .gegeven { border-radius: 8px; background: var(--done-bg); padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+  .gegeven-kop { margin: 0; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--done); }
+  .gegeven-inhoud { font-size: 0.9375rem; }
+
+  .antwoord { display: flex; flex-direction: column; gap: 6px; }
+  .antwoord label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); }
+  textarea {
+    font: inherit; color: var(--ink); background: var(--field); width: 100%; box-sizing: border-box;
+    border: 1.5px solid var(--line); border-radius: 8px; padding: 12px 14px; min-height: 92px; resize: vertical;
+  }
+  textarea:focus { border-color: var(--accent); background: var(--surface); }
+  textarea:disabled { opacity: 0.7; cursor: default; }
+  textarea.ingevuld { border-color: var(--accent); }
+  .stand { margin: 0; min-height: 1.3em; font-size: 0.8125rem; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .stand[data-soort="bewaard"] { color: var(--done); }
+  .stand[data-soort="fout"] { color: var(--urgent); }
+  .bron { margin: 0; font-size: 0.75rem; color: var(--ink-2); font-family: var(--font-mono); }
+
+  details.archief { display: flex; flex-direction: column; }
+  details.archief > summary {
+    cursor: pointer; font-family: var(--font-display); font-weight: 600; font-size: 1.25rem; line-height: 1.25;
+    padding: 12px 0; border-top: 1px solid var(--line); margin-top: 12px;
+  }
+  details.archief > .groep { margin-top: 8px; }
+
+  @media (max-width: 480px) {
+    h1 { font-size: 1.625rem; }
+    .vraag { padding: 16px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .voortgang-vulling { transition: none; } }
+</style>
+
+<div class="pagina">
+  <header class="kop">
+    <h1>Vragen aan Brunic</h1>
+    <p>Deze vragen komen uit de controles van de nieuwe webshop. Het gaat om zaken die alleen Brunic kan beslissen of bevestigen. Typ het antwoord in het kader onder de vraag: het wordt vanzelf bewaard.</p>
+    <p class="stand-datum"><!--@STAND--></p>
+  </header>
+
+  <div class="balk">
+    <div class="balk-rij">
+      <div class="voortgang">
+        <span class="voortgang-tekst" id="voortgang-tekst"><!--@VOORTGANG--></span>
+        <div class="voortgang-baan" role="presentation"><div class="voortgang-vulling" id="voortgang-vulling"></div></div>
+      </div>
+      <button type="button" class="knop" id="kopieer">Kopieer antwoorden</button>
+    </div>
+  </div>
+
+  <!-- Buiten de kleefbalk: op een gsm zou die anders een kwart van het scherm innemen. -->
+  <div class="filters" role="group" aria-label="Toon vragen">
+    <button type="button" class="chip" data-filter="alle" aria-pressed="true">Alle open</button>
+    <button type="button" class="chip" data-filter="dringend" aria-pressed="false">Dringend</button>
+    <button type="button" class="chip" data-filter="livegang" aria-pressed="false">Vóór de livegang</button>
+    <button type="button" class="chip" data-filter="later" aria-pressed="false">Kan daarna</button>
+    <button type="button" class="chip" data-filter="leeg" aria-pressed="false">Nog in te vullen</button>
+  </div>
+
+  <p class="melding" id="melding" role="status" hidden></p>
+  <div class="kopie" id="kopie" hidden>
+    <label for="kopie-tekst">Kopiëren lukte niet vanzelf. Selecteer de tekst hieronder en kopieer hem.</label>
+    <textarea id="kopie-tekst" readonly rows="8"></textarea>
+  </div>
+
+  <main id="vragen">
+<!--@KAARTEN-->
+  </main>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var VRAGEN = /*@DATA*/[];
+  var CONCEPT = "vragen-brunic-concept";
+  var FILTER = "vragen-brunic-filter";
+  var db = null, lokaal = false, alleenLezen = false, geladen = false;
+  var st = {};
+  VRAGEN.forEach(function (v) { st[v.nr] = { bewaard: "", bezig: false, opnieuw: false, timer: 0, herkanst: false }; });
+
+  function veld(nr) { return document.getElementById("antwoord-v" + nr); }
+  function standEl(nr) { return document.getElementById("stand-v" + nr); }
+  function kaart(nr) { return document.getElementById("vraag-" + nr); }
+
+  var tijd = new Intl.DateTimeFormat("nl-BE", { hour: "2-digit", minute: "2-digit" });
+  var dag = new Intl.DateTimeFormat("nl-BE", { day: "2-digit", month: "2-digit" });
+  function wanneer(iso) {
+    var d = iso ? new Date(iso) : new Date();
+    if (isNaN(d)) return "";
+    var nu = new Date();
+    var vandaag = d.toDateString() === nu.toDateString();
+    return vandaag ? "om " + tijd.format(d) : "op " + dag.format(d) + " om " + tijd.format(d);
+  }
+  function toonStand(nr, soort, tekst) {
+    var el = standEl(nr);
+    if (!el) return;
+    el.dataset.soort = soort;
+    el.textContent = tekst || "";
+  }
+  function meld(tekst) {
+    var el = document.getElementById("melding");
+    el.textContent = tekst || "";
+    el.hidden = !tekst;
+  }
+  function groei(el) {
+    el.style.height = "auto";
+    el.style.height = Math.max(92, el.scrollHeight + 2) + "px";
+  }
+  function veldenAan(aan) {
+    VRAGEN.forEach(function (v) {
+      var el = veld(v.nr);
+      el.disabled = !aan;
+      el.placeholder = aan ? (v.deel === 2 ? "Typ hier een aanvulling…" : "Typ hier het antwoord…") : (alleenLezen ? "" : "Antwoorden laden…");
+    });
+  }
+
+  /* Voortgang en filters */
+  function telOp() {
+    var open = VRAGEN.filter(function (v) { return v.deel === 1; });
+    var klaar = open.filter(function (v) { return veld(v.nr).value.trim() !== ""; }).length;
+    document.getElementById("voortgang-tekst").textContent = klaar + " van de " + open.length + " open vragen ingevuld";
+    document.getElementById("voortgang-vulling").style.width = (open.length ? Math.round((klaar / open.length) * 100) : 0) + "%";
+    VRAGEN.forEach(function (v) { veld(v.nr).classList.toggle("ingevuld", veld(v.nr).value.trim() !== ""); });
+  }
+  var filter = "alle";
+  function pasFilterToe() {
+    VRAGEN.forEach(function (v) {
+      if (v.deel !== 1) return;
+      var zichtbaar = filter === "alle" || (filter === "leeg" ? veld(v.nr).value.trim() === "" : v.urgentie === filter);
+      kaart(v.nr).hidden = !zichtbaar;
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("section.groep[data-deel='1']"), function (g) {
+      g.hidden = !g.querySelector(".vraag:not([hidden])");
+    });
+    Array.prototype.forEach.call(document.querySelectorAll(".chip"), function (c) {
+      c.setAttribute("aria-pressed", c.dataset.filter === filter ? "true" : "false");
+    });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll(".chip"), function (c) {
+    c.addEventListener("click", function () {
+      filter = c.dataset.filter;
+      try { localStorage.setItem(FILTER, filter); } catch (e) { /* geen opslag: filter geldt voor dit bezoek */ }
+      pasFilterToe();
+    });
+  });
+  try {
+    var bewaardFilter = localStorage.getItem(FILTER);
+    if (bewaardFilter && document.querySelector('.chip[data-filter="' + bewaardFilter + '"]')) filter = bewaardFilter;
+  } catch (e) { /* geen opslag */ }
+
+  /* Concepten in de browser: enkel als de centrale opslag er niet is */
+  function leesConcept() {
+    try { return JSON.parse(localStorage.getItem(CONCEPT) || "{}") || {}; } catch (e) { return {}; }
+  }
+  function schrijfConcept() {
+    var c = {};
+    VRAGEN.forEach(function (v) { if (veld(v.nr).value.trim()) c[v.nr] = veld(v.nr).value; });
+    try { localStorage.setItem(CONCEPT, JSON.stringify(c)); return true; } catch (e) { return false; }
+  }
+  function startLokaal(reden) {
+    lokaal = true;
+    db = null;
+    var c = leesConcept();
+    VRAGEN.forEach(function (v) {
+      var el = veld(v.nr);
+      if (!el.value && typeof c[v.nr] === "string") el.value = c[v.nr];
+      groei(el);
+      toonStand(v.nr, "", "");
+    });
+    veldenAan(true);
+    meld(reden || "Deze weergave kan de antwoorden niet centraal bewaren. Wat u typt, blijft enkel in deze browser staan. Open de pagina in Claude en meld u aan om ze te bewaren.");
+    telOp();
+    pasFilterToe();
+  }
+
+  /* Bewaren: één schrijfactie tegelijk per vraag, enkel als de tekst veranderd is */
+  function plan(nr) {
+    clearTimeout(st[nr].timer);
+    st[nr].timer = setTimeout(function () { bewaar(nr); }, 900);
+  }
+  function bewaar(nr) {
+    var s = st[nr], el = veld(nr);
+    clearTimeout(s.timer);
+    if (lokaal) {
+      toonStand(nr, "", el.value.trim() ? (schrijfConcept() ? "Enkel in deze browser bewaard" : "Niet bewaard") : "");
+      return;
+    }
+    if (!db || alleenLezen) return;
+    if (s.bezig) { s.opnieuw = true; return; }
+    var tekst = el.value.trim() === "" ? "" : el.value;
+    if (tekst === s.bewaard) return;
+    s.bezig = true;
+    toonStand(nr, "bezig", "Bewaren…");
+    var ref = db.collection("antwoorden").doc("v" + nr);
+    var nu = new Date().toISOString();
+    var actie = tekst === "" ? ref.delete() : ref.set({ nr: nr, antwoord: tekst, bijgewerkt: nu });
+    actie.then(function () {
+      s.bewaard = tekst;
+      s.herkanst = false;
+      toonStand(nr, tekst ? "bewaard" : "", tekst ? "Bewaard " + wanneer(nu) : "");
+    }).catch(function (e) {
+      var code = e && e.code;
+      if (code === "unavailable" && !s.herkanst) {
+        s.herkanst = true;
+        setTimeout(function () { bewaar(nr); }, 500 + Math.random() * 900);
+        return;
+      }
+      if (code === "invalid_argument") {
+        alleenLezen = true;
+        veldenAan(false);
+        meld("U kunt de antwoorden hier lezen, niet wijzigen. Vraag de eigenaar van de pagina om u als bijdrager toe te voegen.");
+        toonStand(nr, "fout", "Niet bewaard");
+        return;
+      }
+      if (code === "quota_exceeded" || code === "resource_exhausted") {
+        toonStand(nr, "fout", "Niet bewaard: de opslag van deze pagina is vol of overbelast. Kopieer uw antwoorden met de knop bovenaan.");
+        return;
+      }
+      if (code === "revoked" || code === "not_granted" || code === "capability_disabled" || code === "capability_removed") {
+        startLokaal("De centrale opslag is niet meer beschikbaar in deze weergave. Wat u typt, blijft enkel in deze browser staan. Kopieer uw antwoorden met de knop bovenaan.");
+        return;
+      }
+      toonStand(nr, "fout", "Niet bewaard. Typ verder of klik buiten het kader om het opnieuw te proberen.");
+    }).then(function () {
+      s.bezig = false;
+      if (s.opnieuw) { s.opnieuw = false; bewaar(nr); }
+    });
+  }
+
+  VRAGEN.forEach(function (v) {
+    var el = veld(v.nr);
+    el.addEventListener("input", function () { groei(el); telOp(); plan(v.nr); });
+    el.addEventListener("blur", function () { bewaar(v.nr); if (filter === "leeg") pasFilterToe(); });
+  });
+
+  /* Laden: één abonnement op alle antwoorden */
+  function abonneer() {
+    var klok = setTimeout(function () {
+      if (!geladen) {
+        geladen = true;
+        veldenAan(!alleenLezen);
+      }
+      meld("De bewaarde antwoorden zijn nog niet bereikbaar. Wat u hier ziet, kan verouderd zijn.");
+    }, 10000);
+    db.collection("antwoorden").onSnapshot(function (snap) {
+      var ver = {};
+      snap.docs.forEach(function (d) { ver[d.id] = d.data() || {}; });
+      VRAGEN.forEach(function (v) {
+        var r = ver["v" + v.nr];
+        var tekst = r && typeof r.antwoord === "string" ? r.antwoord : "";
+        var s = st[v.nr], el = veld(v.nr);
+        var eigen = el.value.trim() === "" ? "" : el.value;
+        var vuil = eigen !== s.bewaard && eigen !== tekst;
+        s.bewaard = tekst;
+        if (!vuil) {
+          if (el.value !== tekst) { el.value = tekst; groei(el); }
+          toonStand(v.nr, tekst ? "bewaard" : "", tekst ? "Bewaard " + wanneer(r.bijgewerkt) : "");
+        } else if (!geladen) {
+          plan(v.nr);
+        }
+      });
+      if (!geladen) { geladen = true; veldenAan(!alleenLezen); }
+      if (!snap.metadata.fromCache) { clearTimeout(klok); if (!alleenLezen) meld(""); }
+      telOp();
+      pasFilterToe();
+    }, function () {
+      clearTimeout(klok);
+      startLokaal("De bewaarde antwoorden kunnen nu niet geladen worden. Wat u typt, blijft enkel in deze browser staan. Herlaad de pagina later opnieuw.");
+    });
+  }
+
+  /* Alle antwoorden kopiëren, bijvoorbeeld om te mailen */
+  document.getElementById("kopieer").addEventListener("click", function () {
+    var knop = this;
+    var regels = [];
+    VRAGEN.forEach(function (v) {
+      var t = veld(v.nr).value.trim();
+      if (t) regels.push("Vraag " + v.nr + ": " + v.titel + "\n" + (v.deel === 2 ? "Aanvulling: " : "Antwoord: ") + t);
+    });
+    if (!regels.length) { knop.textContent = "Nog niets ingevuld"; setTimeout(function () { knop.textContent = "Kopieer antwoorden"; }, 2200); return; }
+    var tekst = "Vragen aan Brunic: antwoorden\n\n" + regels.join("\n\n") + "\n";
+    function toonZelf() {
+      var blok = document.getElementById("kopie"), ta = document.getElementById("kopie-tekst");
+      ta.value = tekst; blok.hidden = false; ta.focus(); ta.select();
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(tekst).then(function () {
+        knop.textContent = regels.length + (regels.length === 1 ? " antwoord gekopieerd" : " antwoorden gekopieerd");
+        setTimeout(function () { knop.textContent = "Kopieer antwoorden"; }, 2200);
+      }).catch(toonZelf);
+    } else { toonZelf(); }
+  });
+
+  /* Start */
+  VRAGEN.forEach(function (v) { groei(veld(v.nr)); });
+  telOp();
+  pasFilterToe();
+  var use = window.claude && typeof window.claude.use === "function" ? window.claude.use.bind(window.claude) : null;
+  if (!use) { startLokaal(); return; }
+  veldenAan(false);
+  Promise.all([use("db"), use("user")]).then(function (r) {
+    var d = r[0], user = r[1];
+    if (!d) { startLokaal(); return; }
+    db = d;
+    var mag = user && user.can ? user.can("data.write") : Promise.resolve(null);
+    mag.then(function (ja) {
+      if (ja === false) {
+        alleenLezen = true;
+        meld("U kunt de antwoorden hier lezen, niet wijzigen. Vraag de eigenaar van de pagina om u als bijdrager toe te voegen.");
+      }
+      abonneer();
+    });
+  }).catch(function () { startLokaal(); });
+})();
+</script>

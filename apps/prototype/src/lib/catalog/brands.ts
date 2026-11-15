@@ -1,6 +1,6 @@
 import { catalog } from "./repository";
 import { sfeerfoto } from "./imagery";
-import { normalize } from "./search";
+import { normalize } from "./tekst";
 import type { ImageRef, Product } from "./types";
 import { MERK_LOGO, MERK_ONDER } from "@/data/merken";
 

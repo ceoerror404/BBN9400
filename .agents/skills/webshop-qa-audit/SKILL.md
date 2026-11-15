@@ -120,14 +120,14 @@ Tip: leg getoonde aantallen naast een eigen telling op de momentopname. Zo test 
 
 **Test ook vanaf een gescrolde positie.** Filteren, sorteren, een chip verwijderen en alles wissen test je ver in een lange lijst, met een lang en met een kort resultaat. Controleer telkens wat in beeld staat: de eerste kaart, de filterbalk, de knoppen van het open paneel. Dat de klant na een filterkeuze bij de footer belandde, kwam pas in de vijfde ronde boven (R5-04).
 
-**Zoeken** is voor de klant ook een filter. Stel uit de momentopname een vaste reeks van minstens 30 zoekopdrachten samen en bewaar ze bij je scripts, zodat de volgende ronde dezelfde gebruikt:
+**Zoeken** is voor de klant ook een filter. Sinds 15/11/2026 zoekt de site met Shopify Search (`docs/zoeken.md`): Shopify bepaalt de resultaten, de zoekpagina toont de filters uit Search & Discovery zonder aantal per waarde, en een totaal staat er enkel als alle resultaten opgehaald zijn. De vaste reeks van 55 zoekopdrachten staat in `apps/prototype/scripts/test-zoeken.mjs`; `pnpm --filter @brunic/prototype test:zoeken` leest alleen en mag je draaien. Een zoekopdracht die faalt is meestal werk in Shopify (taal, tags, Search & Discovery), geen codefout: schrijf dat erbij. Breid de reeks daar uit, zodat de volgende ronde dezelfde gebruikt. Ze dekt:
 - een exacte productnaam, en een deel ervan;
 - een merk, een merk zonder speciale tekens (Borastapeter), en een merk dat onder een ander valt (Desso);
 - een kleurnaam, een kleurcode (901D) en een collectie;
 - een type in enkelvoud en in meervoud;
 - een tikfout, en een woord dat nergens voorkomt.
 
-Noteer per zoekopdracht of het verwachte product bij de eerste tien staat, of het aantal in de kop gelijk is aan dat van de lijst, en of de lege staat de klant een uitweg biedt.
+Noteer per zoekopdracht of het verwachte product bij de eerste tien staat, of een getoond aantal gelijk is aan het aantal kaarten (laad de lijst tot het einde), en of de lege staat de klant een uitweg biedt.
 
 ## 3. Controleer productfoto's en hoverbeelden
 

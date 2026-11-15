@@ -1,6 +1,9 @@
 # Vragen aan Brunic
 
 > **Intern, niet meesturen.** Dit is de enige plek voor vragen aan Brunic over de webshop. Elke audit verwijst hiernaar en schrijft haar nieuwe vragen hier bij, met het volgende nummer. Nummers veranderen nooit: andere documenten verwijzen ernaar ("vraag 11").
+> - **Invulpagina:** <https://claude.ai/artifact/Egqnqt3MPAggE7nZuj39qF> toont deel 1 en 2 met per vraag een antwoordkader. Wat daar getypt wordt, bewaart de pagina zelf (opslag van het artifact: verzameling `antwoorden`, document `v<nummer>` met `antwoord` en `bijgewerkt`). De pagina is privé tot ze via haar Share-menu gedeeld wordt; wie mag invullen, heeft de rol Contributor nodig.
+> - **Antwoorden van de invulpagina naar dit bestand:** vraag Claude "zet de antwoorden uit de invulpagina in vragen-aan-brunic.md". Claude leest de verzameling `antwoorden` (tool ArtifactData) en vult ze hier in volgens de regel hieronder. Dit bestand blijft de bron; de pagina is een afdruk.
+> - **Dit bestand gewijzigd** (nieuwe vraag, vraag naar deel 2)? Bouw de pagina opnieuw met `node docs/tools/vragen-artifact/bouw.mjs <uitvoer.html>` en publiceer naar dezelfde link. De getypte antwoorden blijven staan.
 > - **Doorsturen:** deel 1 (open vragen) is geschreven voor Brunic en kan zo mee. Deel 2 en 3 zijn voor ons.
 > - **Een antwoord binnen?** Vul het in onder "Antwoord", zet de status in het overzicht op "Beantwoord" en verplaats de vraag naar deel 2. Een antwoord is vanaf dan een regel voor elke audit.
 > - **Niet hier:** zakelijke vragen (offerte, accounts, domein) staan in het J.A.R.V.I.S-dossier (`clients/brunic/17-losse-eindjes-en-vragenlijst.md`). De juridische teksten en de fotorechten die Brunic nog moet valideren: `apps/prototype/README.md` §4, punten 6 en 7.

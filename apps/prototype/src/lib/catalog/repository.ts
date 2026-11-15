@@ -14,7 +14,6 @@
  */
 import { buildCategoryTree, descendantIds, findByPath, ancestry, type CategoryTree } from "./tree";
 import type { Category, CategoryId, CategoryNode, Product } from "./types";
-import { searchProducts } from "./search";
 import { laadShopifyCatalogus, snapshotBestaat, snapshotVersie } from "./shopify-adapter";
 
 export type CatalogRepository = {
@@ -30,7 +29,6 @@ export type CatalogRepository = {
   getAllProducts(): Promise<Product[]>;
   getNewArrivals(limit?: number): Promise<Product[]>;
   getOffers(limit?: number): Promise<Product[]>;
-  search(query: string): Promise<Product[]>;
 };
 
 function createRepository(categories: Category[], products: Product[], source: CatalogRepository["source"]): CatalogRepository {
@@ -86,9 +84,6 @@ function createRepository(categories: Category[], products: Product[], source: C
       const list = products.filter((p) => p.badges.includes("aanbieding")).sort((a, b) => b.popularity - a.popularity);
       return limit ? list.slice(0, limit) : list;
     },
-    async search(query) {
-      return searchProducts(products, tree, query);
-    },
   };
 }
 
@@ -129,5 +124,4 @@ export const catalog: CatalogRepository = {
   getAllProducts: () => actueel().getAllProducts(),
   getNewArrivals: (limit) => actueel().getNewArrivals(limit),
   getOffers: (limit) => actueel().getOffers(limit),
-  search: (query) => actueel().search(query),
 };

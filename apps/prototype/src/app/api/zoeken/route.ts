@@ -1,24 +1,25 @@
 import { NextResponse } from "next/server";
-import { catalog } from "@/lib/catalog/repository";
-import { searchCategories } from "@/lib/catalog/search";
-import { toCard } from "@/lib/catalog/view";
-import { ancestry } from "@/lib/catalog/tree";
-import { routes } from "@/lib/routes";
+import { meld } from "@/lib/melding";
+import { zoekSuggesties, zoekterm, type Zoeksuggesties } from "@/lib/zoeken/zoeken";
 
-/** Zoeksuggesties voor het zoekveld in de header (categorieën + producten). */
+const LEEG: Zoeksuggesties = { products: [], categories: [], pages: [], queries: [] };
+
+/**
+ * Suggesties voor het zoekveld in de header: een dunne doorgang naar Shopify Predictive Search
+ * (lib/zoeken/zoeken.ts). De token blijft op de server; de browser praat enkel met deze route.
+ */
 export async function GET(req: Request) {
-  const q = new URL(req.url).searchParams.get("q")?.trim() ?? "";
-  if (q.length < 2) return NextResponse.json({ categories: [], products: [], total: 0 });
-  const tree = await catalog.getTree();
-  const products = await catalog.search(q);
-  const categories = searchCategories(tree, q).map((c) => ({
-    id: c.id,
-    name: c.name,
-    href: routes.category(c),
-    trail: ancestry(tree, c.id)
-      .slice(0, -1)
-      .map((a) => a.name)
-      .join(" › "),
-  }));
-  return NextResponse.json({ categories, products: products.slice(0, 6).map(toCard), total: products.length });
+  const q = zoekterm(new URL(req.url).searchParams.get("q") ?? undefined);
+  if (q.length < 2) return NextResponse.json(LEEG);
+  try {
+    const buyerIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || undefined;
+    return NextResponse.json(await zoekSuggesties(q, { buyerIp }), {
+      // Dezelfde term van een andere bezoeker komt een minuut lang uit de CDN-cache.
+      headers: { "Cache-Control": "public, max-age=0, s-maxage=60, stale-while-revalidate=300" },
+    });
+  } catch (e) {
+    // Geen zoekterm in de melding: die kan persoonsgegevens bevatten.
+    meld("zoeken", "Shopify Predictive Search antwoordt niet", { fout: (e as Error).message.slice(0, 200) });
+    return NextResponse.json({ error: "De suggesties zijn tijdelijk niet beschikbaar." }, { status: 502, headers: { "Cache-Control": "no-store" } });
+  }
 }

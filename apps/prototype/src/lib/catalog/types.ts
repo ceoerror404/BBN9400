@@ -155,7 +155,7 @@ export type Product = {
   title: string;
   /** Merk waaronder het product op de site staat (Shopify vendor, of het moedermerk: src/data/merken.ts). */
   brand?: string;
-  /** De Shopify-vendor als die onder een moedermerk valt (Desso onder Tarkett): blijft vindbaar in de zoekfunctie. */
+  /** De Shopify-vendor als die onder een moedermerk valt (Desso onder Tarkett). Zoeken op "Desso" werkt via Shopify Search, dat de vendor doorzoekt. */
   merkBron?: string;
   /** Collectie-/lijnnaam, groot getoond op de PDP (zoals de modelnaam bij de referentie). */
   line?: string;

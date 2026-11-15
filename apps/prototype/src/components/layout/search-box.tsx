@@ -6,14 +6,19 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Icon } from "@/components/ui/icon";
 import { ImageSlot } from "@/components/ui/image-slot";
 import { Price } from "@/components/catalog/price";
-import type { CardProduct } from "@/lib/catalog/view";
+import type { Zoeksuggesties } from "@/lib/zoeken/zoeken";
 import { routes } from "@/lib/routes";
 
-type Suggest = { categories: { id: string; name: string; href: string; trail: string }[]; products: CardProduct[]; total: number };
+/** Vanaf zoveel tekens vraagt het veld suggesties op. */
+const MIN_TEKENS = 2;
+/** Wachttijd na de laatste toetsaanslag (ms): wie doortypt, stuurt geen verzoek per letter. */
+const VERTRAGING = 220;
 
 /**
- * Groot zoekveld met live suggesties (zoals de referentie: links categorieën,
- * rechts producten + "Alles bekijken"). Enter → zoekresultatenpagina.
+ * Groot zoekveld met suggesties tijdens het typen. De suggesties komen van Shopify Predictive
+ * Search, via /api/zoeken: producten, en waar Shopify ze geeft ook zoektermen, categorieën en
+ * pagina's. Enter of "Bekijk alle resultaten" opent de zoekpagina. Het paneel toont geen aantal:
+ * Shopify geeft hier hoogstens tien suggesties, geen totaal.
  */
 export function SearchBox({ className = "" }: { className?: string }) {
   const router = useRouter();
@@ -21,41 +26,59 @@ export function SearchBox({ className = "" }: { className?: string }) {
   const params = useSearchParams();
   const [q, setQ] = useState(pathname === routes.search() ? (params.get("q") ?? "") : "");
   const [open, setOpen] = useState(false);
-  const [data, setData] = useState<Suggest | null>(null);
+  // Suggesties en fouten onthouden bij welke zoekterm ze horen: wat niet bij de huidige term hoort, telt als "nog bezig".
+  const [resultaat, setResultaat] = useState<{ term: string; data: Zoeksuggesties } | null>(null);
+  const [foutBij, setFoutBij] = useState<string | null>(null);
+  const [poging, setPoging] = useState(0);
   const wrap = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
   const panel = useRef<HTMLDivElement>(null);
-
-  /** Pijltoetsen: van het veld naar de suggesties en ertussen; Escape terug naar het veld. */
-  const moveFocus = (dir: 1 | -1) => {
-    const links = Array.from(panel.current?.querySelectorAll<HTMLAnchorElement>("a[data-suggestie]") ?? []);
-    if (links.length === 0) return;
-    const i = links.indexOf(document.activeElement as HTMLAnchorElement);
-    if (i === -1) links[dir === 1 ? 0 : links.length - 1].focus();
-    else if (i + dir < 0) input.current?.focus();
-    else links[Math.min(links.length - 1, i + dir)].focus();
-  };
   const panelId = useId();
+  // Escape in het paneel zet de focus terug in het veld: dat mag het paneel niet opnieuw openen.
+  const focusZonderOpenen = useRef(false);
 
-  // Live suggesties (kleine vertraging tegen overbodige requests).
+  const term = q.trim();
+  const zoekt = term.length >= MIN_TEKENS;
+  const fout = zoekt && foutBij === term;
+  const bezig = zoekt && !fout && resultaat?.term !== term;
+  const data = zoekt && !fout ? resultaat?.data : undefined;
+  const leeg = Boolean(data) && !bezig && data!.products.length + data!.categories.length + data!.pages.length + data!.queries.length === 0;
+  const metZijkolom = Boolean(data) && data!.queries.length + data!.categories.length + data!.pages.length > 0;
+
+  /** Pijltoetsen: van het veld naar de suggesties en ertussen; vanaf de eerste terug naar het veld. */
+  const moveFocus = (dir: 1 | -1) => {
+    const items = Array.from(panel.current?.querySelectorAll<HTMLElement>("[data-suggestie]") ?? []);
+    if (items.length === 0) return;
+    const i = items.indexOf(document.activeElement as HTMLElement);
+    if (i === -1) items[dir === 1 ? 0 : items.length - 1].focus();
+    else if (i + dir < 0) input.current?.focus();
+    else items[Math.min(items.length - 1, i + dir)].focus();
+  };
+
+  // Suggesties ophalen, even na de laatste toetsaanslag. Bij elke nieuwe zoekterm wordt het vorige
+  // verzoek afgebroken; een antwoord dat toch nog binnenkomt, wordt genegeerd. Zo overschrijft een
+  // traag antwoord op een oudere term nooit de suggesties van een nieuwere.
   useEffect(() => {
-    const term = q.trim();
-    if (term.length < 2) {
-      setData(null);
-      return;
-    }
+    const voor = q.trim();
+    if (voor.length < MIN_TEKENS) return;
     const ctrl = new AbortController();
     const t = window.setTimeout(() => {
-      fetch(`/api/zoeken?q=${encodeURIComponent(term)}`, { signal: ctrl.signal })
-        .then((r) => r.json())
-        .then((d: Suggest) => setData(d))
-        .catch(() => {});
-    }, 140);
+      fetch(`/api/zoeken?q=${encodeURIComponent(voor)}`, { signal: ctrl.signal })
+        .then((r) => (r.ok ? (r.json() as Promise<Zoeksuggesties>) : Promise.reject(new Error(`HTTP ${r.status}`))))
+        .then((d) => {
+          if (ctrl.signal.aborted) return;
+          setResultaat({ term: voor, data: d });
+          setFoutBij(null);
+        })
+        .catch(() => {
+          if (!ctrl.signal.aborted) setFoutBij(voor);
+        });
+    }, VERTRAGING);
     return () => {
       ctrl.abort();
       window.clearTimeout(t);
     };
-  }, [q]);
+  }, [q, poging]);
 
   // Sluiten bij klik buiten het veld en bij navigatie.
   useEffect(() => {
@@ -73,13 +96,14 @@ export function SearchBox({ className = "" }: { className?: string }) {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    const term = q.trim();
     setOpen(false);
     input.current?.blur();
     router.push(routes.search(term || undefined));
   };
 
-  const showPanel = open && q.trim().length >= 2 && data !== null;
+  const showPanel = open && zoekt;
+  const melding = !showPanel ? "" : fout ? "De suggesties zijn tijdelijk niet beschikbaar." : bezig ? "Bezig met zoeken." : leeg ? `Geen suggesties voor ${term}.` : "Suggesties beschikbaar. Blader met de pijltjestoetsen.";
+  const rij = "block rounded-lg px-3 py-2.5 text-[15px] hover:bg-mist focus-visible:bg-mist";
 
   return (
     <div ref={wrap} className={`relative ${className}`}>
@@ -93,20 +117,29 @@ export function SearchBox({ className = "" }: { className?: string }) {
           id={`${panelId}-input`}
           type="search"
           value={q}
+          maxLength={120}
           onChange={(e) => {
             setQ(e.target.value);
             setOpen(true);
           }}
-          onFocus={() => setOpen(true)}
+          onFocus={() => {
+            if (focusZonderOpenen.current) focusZonderOpenen.current = false;
+            else setOpen(true);
+          }}
           onKeyDown={(e) => {
             if (e.key === "Escape") {
               e.preventDefault(); // anders wist de browser het zoekveld
               setOpen(false);
             }
-            if (e.key === "ArrowDown") {
+            if (e.key === "ArrowDown" || e.key === "ArrowUp") {
               e.preventDefault();
-              setOpen(true);
-              moveFocus(1);
+              const dir = e.key === "ArrowDown" ? 1 : -1;
+              if (showPanel) moveFocus(dir);
+              else {
+                // Het paneel was dicht (na Escape): eerst openen, dan pas staat er iets om naartoe te gaan.
+                setOpen(true);
+                requestAnimationFrame(() => moveFocus(dir));
+              }
             }
           }}
           role="combobox"
@@ -132,17 +165,24 @@ export function SearchBox({ className = "" }: { className?: string }) {
         )}
       </form>
 
+      {/* Schermlezers horen wat er in het paneel gebeurt, ook terwijl de focus in het veld blijft. */}
+      <p role="status" className="sr-only">
+        {melding}
+      </p>
+
       {showPanel && (
         <div
           ref={panel}
           role="region"
           aria-label="Zoeksuggesties"
+          aria-busy={bezig}
           onKeyDown={(e) => {
             if (e.key === "ArrowDown" || e.key === "ArrowUp") {
               e.preventDefault();
               moveFocus(e.key === "ArrowDown" ? 1 : -1);
             }
             if (e.key === "Escape") {
+              focusZonderOpenen.current = true;
               setOpen(false);
               input.current?.focus();
             }
@@ -150,42 +190,95 @@ export function SearchBox({ className = "" }: { className?: string }) {
           id={`${panelId}-panel`}
           className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 max-h-[70vh] overflow-y-auto rounded-[var(--radius-tile)] bg-white p-4 shadow-[var(--shadow-pop)] ring-1 ring-line lg:-left-[110px] lg:-right-[260px] lg:p-5"
         >
-          {data.total === 0 && data.categories.length === 0 ? (
+          {fout ? (
             <div className="py-6 text-center">
-              <p className="font-medium">Geen resultaten voor “{q.trim()}”</p>
+              <p className="font-medium">De suggesties zijn tijdelijk niet beschikbaar</p>
+              <p className="mt-1 text-ink-60">Probeer het opnieuw, of druk op Enter om te zoeken.</p>
+              <button
+                type="button"
+                data-suggestie
+                onClick={() => {
+                  setFoutBij(null);
+                  setPoging((p) => p + 1);
+                }}
+                className="btn btn-outline btn-sm mt-4"
+              >
+                Opnieuw proberen
+              </button>
+            </div>
+          ) : !data ? (
+            <p className="py-6 text-center text-ink-60">Bezig met zoeken…</p>
+          ) : leeg ? (
+            <div className="py-6 text-center">
+              <p className="font-medium">Geen suggesties voor “{term}”</p>
               <p className="mt-1 text-ink-60">Probeer een ander woord, bv. rolgordijn, behang of tapijt.</p>
             </div>
           ) : (
-            <div className="grid gap-6 lg:grid-cols-[1fr_1.4fr]">
-              <div>
-                <p className="mb-2 text-lg font-medium">Categorieën</p>
-                {data.categories.length === 0 && <p className="text-ink-60">Geen categorieën gevonden.</p>}
-                <ul role="list">
-                  {data.categories.map((c) => (
-                    <li key={c.id}>
-                      <Link href={c.href} data-suggestie className="block rounded-lg px-3 py-2.5 text-[15px] hover:bg-mist focus-visible:bg-mist">
-                        <span className="font-medium">{c.name}</span>
-                        {c.trail && <span className="block text-xs text-ink-60">{c.trail}</span>}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+            // Tijdens het ophalen blijven de vorige suggesties gedimd staan: het paneel verspringt niet bij elke letter.
+            <div className={`grid gap-6 transition-opacity duration-150 motion-reduce:transition-none ${metZijkolom ? "lg:grid-cols-[1fr_1.4fr]" : ""} ${bezig ? "opacity-50" : ""}`}>
+              {metZijkolom && (
+                <div className="space-y-5">
+                  {data.queries.length > 0 && (
+                    <div>
+                      <p className="mb-2 text-lg font-medium">Suggesties</p>
+                      <ul role="list">
+                        {data.queries.map((s) => (
+                          <li key={s}>
+                            <Link href={routes.search(s)} data-suggestie className={`${rij} flex items-center gap-2`}>
+                              <Icon name="search" size={16} className="shrink-0 text-ink-60" />
+                              {s}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {data.categories.length > 0 && (
+                    <div>
+                      <p className="mb-2 text-lg font-medium">Categorieën</p>
+                      <ul role="list">
+                        {data.categories.map((c) => (
+                          <li key={c.id}>
+                            <Link href={c.href} data-suggestie className={rij}>
+                              <span className="font-medium">{c.name}</span>
+                              {c.trail && <span className="block text-xs text-ink-60">{c.trail}</span>}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {data.pages.length > 0 && (
+                    <div>
+                      <p className="mb-2 text-lg font-medium">Pagina’s</p>
+                      <ul role="list">
+                        {data.pages.map((p) => (
+                          <li key={p.href}>
+                            <Link href={p.href} data-suggestie className={`${rij} font-medium`}>
+                              {p.title}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
               <div>
                 <div className="mb-2 flex items-center justify-between gap-3">
                   <p className="text-lg font-medium">Producten</p>
-                  {data.total > 0 && (
-                    <Link href={routes.search(q.trim())} data-suggestie className="btn btn-outline btn-sm">
-                      Alle {data.total} bekijken <Icon name="chevronRight" size={16} />
-                    </Link>
-                  )}
+                  <Link href={routes.search(term)} data-suggestie className="btn btn-outline btn-sm">
+                    Bekijk alle resultaten <Icon name="chevronRight" size={16} />
+                  </Link>
                 </div>
+                {data.products.length === 0 && <p className="text-ink-60">Geen producten gevonden.</p>}
                 <ul role="list" className="space-y-1">
                   {data.products.map((p) => (
                     <li key={p.id}>
                       <Link href={routes.product(p.slug)} data-suggestie className="flex items-center gap-4 rounded-xl p-2 hover:bg-mist focus-visible:bg-mist">
-                        <ImageSlot src={p.image?.src} alt="" className="aspect-[4/3] w-24 shrink-0 rounded-xl" />
+                        <ImageSlot src={p.image?.src} alt="" sizes="96px" className="aspect-[4/3] w-24 shrink-0 rounded-xl" />
                         <span className="min-w-0">
+                          <span className="block truncate text-xs font-medium text-ink-60">{[p.brand ?? "Brunic", p.type].filter(Boolean).join(" · ")}</span>
                           <span className="line-clamp-2 text-sm">{p.title}</span>
                           <Price card={p} size="sm" className="mt-1" />
                         </span>

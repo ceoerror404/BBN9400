@@ -21,7 +21,6 @@ const N = await imp("lib/catalog/facet-normalisatie.ts");
 const { filterProfiel, FILTERPROFIEL_GEMENGD } = await imp("data/filterprofielen.ts");
 const { imagesForVariant, standaardVariant, fotoTrede, toonHeleFoto } = await imp("lib/catalog/product.ts");
 const { compactSrc } = await imp("lib/catalog/cdn.ts");
-const { searchProducts } = await imp("lib/catalog/search.ts");
 const { productJsonLd } = await imp("lib/site/seo.ts");
 
 let ok = 0;
@@ -567,12 +566,11 @@ check("Breedte is geen kleur: geen kleurbeelden, wel een rolbreedte", () => {
     assert.ok(p.facets.rolbreedte?.length > 0, `${p.slug}: geen rolbreedte`);
   }
 });
-check("Desso staat onder Tarkett en blijft vindbaar", () => {
+// Of "desso" de Desso-producten vindt, beslist Shopify Search: scripts/test-zoeken.mjs.
+check("Desso staat onder Tarkett", () => {
   assert.equal(products.filter((p) => p.brand === "Desso" || p.facets.merk?.includes("Desso")).length, 0);
   const desso = products.filter((p) => p.merkBron === "Desso");
   assert.ok(desso.length > 0 && desso.every((p) => p.brand === "Tarkett" && p.specs.find((s) => s.label === "Merk")?.value === "Tarkett"));
-  const gevonden = new Set(searchProducts(products, tree, "desso").map((p) => p.id));
-  assert.ok(desso.every((p) => gevonden.has(p.id)), "niet elk Desso-product is vindbaar op 'desso'");
   assert.deepEqual(F.parseListState(new URLSearchParams("merk=desso,tarkett")).selection, { merk: ["tarkett"] });
   assert.equal(products.filter((p) => /^fuse b755/i.test(p.title)).length, 2, "Fuse B755: de twee ontwerpen moeten apart blijven");
 });

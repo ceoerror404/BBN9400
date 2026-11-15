@@ -15,7 +15,7 @@
  */
 import { ZELFDE_NAAM_ANDER_ONTWERP } from "@/data/shopify-bron";
 import { fotoRang } from "./product";
-import { normalize } from "./search";
+import { normalize } from "./tekst";
 import type { Category, CategoryId, Product } from "./types";
 
 const sleutel = (merk: string | undefined, titel: string) => `${normalize(merk ?? "")}|${normalize(titel).replace(/\s+/g, " ").trim()}`;

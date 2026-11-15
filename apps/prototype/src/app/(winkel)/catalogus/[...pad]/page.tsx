@@ -10,7 +10,7 @@ import { buildListing } from "@/lib/catalog/listing";
 import { filterProfiel } from "@/data/filterprofielen";
 import type { CategoryNode } from "@/lib/catalog/types";
 import { routes } from "@/lib/routes";
-import { normalize } from "@/lib/catalog/search";
+import { normalize } from "@/lib/catalog/tekst";
 import { breadcrumbJsonLd, categoryCrumbs, metaDescription } from "@/lib/site/seo";
 import { isOpMaat, maatwerkVoor } from "@/lib/site/maatwerk";
 import { ARTICLES } from "@/data/content";

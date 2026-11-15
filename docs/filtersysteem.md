@@ -27,12 +27,14 @@ components/catalog/product-listing.tsx  desktop: filterknoppen + "Alle filters" 
 |---|---|
 | `src/lib/catalog/filters.ts` | **Register** `FACETS`: sleutel (= URL-parameter), label, weergave (`swatch`/`list`/`bucket`), volgorde van de waarden, logica (`of`/`en`). Filterlogica, tellingen, sortering, URL ⇄ toestand. |
 | `src/lib/catalog/facet-normalisatie.ts` | **Normalisatielaag**: Shopify-waarden → één schrijfwijze per waarde, Nederlandse termen, eenheden, klassen. Puur, raakt de Shopify-data niet. |
-| `src/data/filterprofielen.ts` | **Configuratie per afdeling**: welke filters, in welke volgorde. Subcategorieën volgen hun hoofdcategorie. Gemengde lijsten (zoeken, aanbiedingen, nieuw binnen, merken) krijgen het gemengde profiel, of het profiel van de afdeling als de hele lijst in één afdeling zit. |
+| `src/data/filterprofielen.ts` | **Configuratie per afdeling**: welke filters, in welke volgorde. Subcategorieën volgen hun hoofdcategorie. Gemengde lijsten (aanbiedingen, nieuw binnen, merken) krijgen het gemengde profiel, of het profiel van de afdeling als de hele lijst in één afdeling zit. |
 | `src/lib/catalog/listing.ts` | `buildListing`: past het profiel toe. Filters buiten het profiel worden genegeerd, ook als ze in de URL staan. De browser krijgt alleen de kaarten, zonder filterdata. |
 | `src/components/catalog/product-listing.tsx` | De enige filter-UI, gebruikt door elke lijstpagina. |
 | `scripts/test-filters/` | `pnpm --filter @brunic/prototype test:filters`: test op de echte catalogus en drukt de dekkingsmatrix af. |
 
-Filteren gebeurt **op de server, op de volledige catalogus** (niet op de geladen pagina), op de momentopname die bij elke Shopify-wijziging herbouwd wordt (webhook, `herbouw.ts`). Search & Discovery wordt door de front niet gebruikt; zie §Shopify.
+Filteren gebeurt **op de server, op de volledige catalogus** (niet op de geladen pagina), op de momentopname die bij elke Shopify-wijziging herbouwd wordt (webhook, `herbouw.ts`). Search & Discovery wordt door deze lijsten niet gebruikt; zie §Shopify.
+
+**Uitzondering: de zoekpagina** (sinds 15/11/2026). Zoeken loopt via Shopify Search en toont de filters uit Search & Discovery, niet het register hierboven. Ze gebruikt wel dezelfde UI (`product-listing.tsx`), met drie verschillen: geen aantal per filterwaarde, niet altijd een totaal, en de prijs als één keuze. Zie [zoeken.md](zoeken.md).
 
 ## Gedrag — overal identiek
 
@@ -72,7 +74,7 @@ Beeld, hoverbeeld, prijs, stalen en link van een kaart komen uit één variant, 
 
 **Voorraad**: de site belooft geen voorraad, want er is geen ERP gekoppeld en Shopify volgt ze niet. De kaart zegt "Online te bestellen", de productpagina, de optielade en de winkelmand zeggen niets. Ook de structured data laat `availability` weg (niet verplicht voor Google). Enkel "Tijdelijk uitverkocht" blijft, want dan kan bestellen echt niet. Komt er een ERP-koppeling, dan kan dit terug (TODO B01).
 
-**Submerken**: Desso valt onder Tarkett (`MERK_ONDER` in `src/data/merken.ts`). Merk, filter en kenmerken tonen Tarkett. Zoeken op "Desso" blijft werken en `?merk=desso` wordt `tarkett`. De URL's veranderen niet.
+**Submerken**: Desso valt onder Tarkett (`MERK_ONDER` in `src/data/merken.ts`). Merk, filter en kenmerken tonen Tarkett. Zoeken op "Desso" blijft werken (Shopify Search doorzoekt de vendor, die in Shopify Desso blijft) en `?merk=desso` wordt `tarkett`. De URL's veranderen niet.
 
 ## Filtermatrix
 

@@ -20,6 +20,7 @@ import {
   type FacetLabelMap,
   type ListState,
   type Selection,
+  type SortOption,
 } from "./filters";
 import { BIJZONDERE_VORM } from "./product";
 import { goedkoopste, liefstVerkoopbaar, staalPrijs, type CardProduct, type ListingItem, type VariantKaart } from "./view";
@@ -27,13 +28,22 @@ import { goedkoopste, liefstVerkoopbaar, staalPrijs, type CardProduct, type List
 export type ListingData = {
   /** De getoonde producten: de eerste `state.page × PAGE_SIZE` na filter + sortering. */
   items: CardProduct[];
-  /** Aantal producten na filters (vóór paginering). */
-  total: number;
+  /**
+   * Aantal producten na filters (vóór paginering). `null` = niet gekend: bij zoeken geeft Shopify
+   * geen aantal dat met de kaarten klopt (lib/zoeken/zoeken.ts). De lijst toont dan geen totaal.
+   */
+  total: number | null;
+  /** Komen er na de getoonde producten nog meer? */
+  hasMore: boolean;
+  /** De lijst stopt aan de grens van de bron (Shopify Search geeft hoogstens 1000 resultaten), niet aan het einde van de resultaten. */
+  afgekapt?: boolean;
   groups: FacetGroup[];
   /** Enkel filters van het profiel: een filter die niet getoond wordt, filtert ook niet. */
   state: ListState;
   /** Zijn er producten met een actieprijs in de (ongefilterde) lijst? */
   hasOffers: boolean;
+  /** De sorteringen van deze lijst, de standaard eerst. Zonder: SORTS (lib/catalog/filters.ts). */
+  sorts?: SortOption[];
 };
 
 export type SearchParamsRecord = Record<string, string | string[] | undefined>;
@@ -151,9 +161,11 @@ export function buildListing(all: ListingItem[], searchParams: SearchParamsRecor
   const state: ListState = { ...parsed, selection };
   // Eerst de toonvariant, dan sorteren: "prijs oplopend" volgt de prijs die op de kaart staat.
   const filtered = sortItems(applyFilters(all, selection, state.offersOnly).map((i) => metToonvariant(i, selection, vorm)), state.sort);
+  const items = filtered.slice(0, state.page * PAGE_SIZE).map(voorBrowser);
   return {
-    items: filtered.slice(0, state.page * PAGE_SIZE).map(voorBrowser),
+    items,
     total: filtered.length,
+    hasMore: items.length < filtered.length,
     groups: facetGroups(all, selection, state.offersOnly, labels, keys),
     state,
     hasOffers: all.some((i) => i.badges.includes("aanbieding")),

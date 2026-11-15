@@ -35,6 +35,8 @@ export type FacetDef = {
   sortering?: "alfabet" | "aantal" | "getal";
   /** "en": elke gekozen waarde moet kloppen (eigenschappen). Standaard "of": één gekozen waarde volstaat. */
   logica?: "of" | "en";
+  /** Eén waarde tegelijk: een nieuwe keuze vervangt de vorige (de prijs bij zoeken, Shopify kent één prijsbereik). */
+  enkel?: boolean;
 };
 
 export const PRICE_BUCKETS: Bucket[] = [
@@ -253,7 +255,11 @@ export const SORTS = [
 ] as const;
 export type SortKey = (typeof SORTS)[number]["value"];
 
-export type ListState = { selection: Selection; sort: SortKey; offersOnly: boolean; page: number };
+/** Een sortering in de keuzelijst. De eerste van een lijst is de standaard en staat niet in de URL. */
+export type SortOption = { value: string; label: string };
+
+/** `sort` is een waarde uit de sorteringen van de lijst: SORTS, of bij zoeken ZOEK_SORTERINGEN (lib/zoeken). */
+export type ListState = { selection: Selection; sort: string; offersOnly: boolean; page: number };
 
 /** Producten per "pagina" (meer laden). */
 export const PAGE_SIZE = 48;
@@ -284,7 +290,7 @@ function waardenVoorTelling(p: Filterable, key: string, selection: Selection): s
 
 const priceOf = (p: Filterable) => (p.pricing === "fixed" && p.price ? p.price.amount.amount : null);
 
-export function sortItems<T extends Filterable>(items: T[], sort: SortKey): T[] {
+export function sortItems<T extends Filterable>(items: T[], sort: string): T[] {
   const list = [...items];
   // Producten zonder prijs (op aanvraag) altijd achteraan bij prijssortering.
   const byPrice = (dir: 1 | -1) => (a: T, b: T) => {
@@ -309,8 +315,11 @@ export function sortItems<T extends Filterable>(items: T[], sort: SortKey): T[] 
   }
 }
 
-/** `value` = waarde-ID (in de URL), `label` = wat de klant leest. */
-export type FacetOption = { value: string; label: string; count: number; swatch?: string };
+/**
+ * `value` = waarde-ID (in de URL), `label` = wat de klant leest. `count` ontbreekt als er geen
+ * aantal is dat met de kaarten in de lijst klopt (zoeken): dan toont de filter er geen.
+ */
+export type FacetOption = { value: string; label: string; count?: number; swatch?: string };
 export type FacetGroup = { def: FacetDef; options: FacetOption[] };
 
 const getal = (s: string) => Number(s.match(/\d+(?:[.,]\d+)?/)?.[0].replace(",", ".") ?? NaN);
@@ -410,16 +419,23 @@ export function parseListState(params: URLSearchParams): ListState {
   return { selection, sort, offersOnly: params.get("aanbieding") === "1", page };
 }
 
-/** Bouwt de querystring; parameters die niet van de lijst zijn (bv. ?q=) blijven staan. */
-export function serializeListState(state: ListState, current?: URLSearchParams): string {
+/**
+ * Bouwt de querystring; parameters die niet van de lijst zijn (bv. ?q=) blijven staan.
+ * `eigen`: voor een lijst met andere filters of sorteringen dan het register (zoeken): haar
+ * filtersleutels, en de sortering die niet in de URL hoeft.
+ */
+export function serializeListState(state: ListState, current?: URLSearchParams, eigen: { keys?: readonly string[]; standaardSort?: string } = {}): string {
   const params = new URLSearchParams();
-  if (current) for (const [k, v] of current.entries()) if (!LIST_PARAMS.has(k)) params.set(k, v);
-  for (const def of FACETS) {
-    const vals = state.selection[def.key];
-    if (vals && vals.length) params.set(def.key, vals.join(","));
+  const vanLijst = new Set([...LIST_PARAMS, ...(eigen.keys ?? [])]);
+  if (current) for (const [k, v] of current.entries()) if (!vanLijst.has(k)) params.set(k, v);
+  // Vaste volgorde, zodat dezelfde keuze altijd dezelfde URL geeft: eerst het register, dan de eigen sleutels.
+  const sleutels = [...FACETS.map((f) => f.key), ...(eigen.keys ?? []).filter((k) => !FACET_BY_KEY.has(k)).sort()];
+  for (const key of sleutels) {
+    const vals = state.selection[key];
+    if (vals && vals.length) params.set(key, vals.join(","));
   }
   if (state.offersOnly) params.set("aanbieding", "1");
-  if (state.sort !== "aanbevolen") params.set("sorteer", state.sort);
+  if (state.sort !== (eigen.standaardSort ?? "aanbevolen")) params.set("sorteer", state.sort);
   if (state.page > 1) params.set("pagina", String(state.page));
   const s = params.toString();
   return s ? `?${s}` : "";

@@ -354,7 +354,7 @@ function mapProduct(p: RawProduct, collectieNaarCategorie: Map<string, CategoryI
     };
   });
 
-  // Desso is een merk van Tarkett: overal Tarkett, maar zoeken op "Desso" blijft werken.
+  // Desso is een merk van Tarkett: overal Tarkett. Zoeken op "Desso" werkt via Shopify Search (de vendor blijft daar Desso).
   const merk = MERK_ONDER[p.vendor] ?? p.vendor;
 
   const alleSpecs = specsUit(p.specificaties).filter((s) => !IS_LEVERBELOFTE.test(s.label.trim()));

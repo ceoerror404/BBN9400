@@ -3,8 +3,8 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useLayoutEffect, useOptimistic, useRef, useState, useTransition, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
 import type { ListingData } from "@/lib/catalog/listing";
-import { activeFilterCount, labelFor, PAGE_SIZE, serializeListState, SORTS, VARIANT_FACETS, type FacetGroup, type FacetLabelMap, type ListState, type SortKey } from "@/lib/catalog/filters";
-import { normalize } from "@/lib/catalog/search";
+import { activeFilterCount, labelFor, PAGE_SIZE, serializeListState, SORTS, VARIANT_FACETS, type FacetGroup, type FacetLabelMap, type ListState, type SortOption } from "@/lib/catalog/filters";
+import { normalize } from "@/lib/catalog/tekst";
 import { useWielBinnen } from "@/lib/site/scroll";
 import { Drawer } from "@/components/ui/drawer";
 import { Icon } from "@/components/ui/icon";
@@ -50,6 +50,10 @@ function leesVertrekpositie(): number | null {
  * getoonde producten en de filtergroepen, en vraagt bij elke keuze een nieuwe serverrender.
  * Keuzes verschijnen meteen (optimistisch); het raster dimt tot de nieuwe lijst er is.
  * Desktop (filterknoppen) en mobiel (lade) gebruiken dezelfde groepen en dezelfde logica.
+ *
+ * De zoekresultaten gebruiken dezelfde component met de filters en sorteringen van Shopify Search
+ * (lib/zoeken/zoeken.ts): daar is het totaal niet altijd gekend (`data.total === null`) en tonen
+ * de filterwaarden geen aantal.
  */
 export function ProductListing({
   data,
@@ -77,6 +81,7 @@ export function ProductListing({
   // Na een filter of sortering: naar het begin van de lijst zodra de nieuwe producten er zijn.
   const naarBegin = useRef(false);
 
+  const sorts: readonly SortOption[] = data.sorts ?? SORTS;
   const update = useCallback(
     (next: Partial<ListState>, resetPage = true) => {
       if (resetPage) focusVanaf.current = null;
@@ -84,7 +89,9 @@ export function ProductListing({
       const merged: ListState = { ...state, ...next, page: resetPage ? 1 : (next.page ?? state.page) };
       // Andere parameters (?q=, ?weergave=) blijven staan. Gelezen bij de klik en niet via
       // useSearchParams: zo blijft de lijst in de server-HTML (geen client-side bailout).
-      const url = `${pathname}${serializeListState(merged, new URLSearchParams(window.location.search))}`;
+      // De filters van deze lijst: haar groepen en wat er gekozen is (bij zoeken staan ze niet in het register).
+      const keys = [...new Set([...data.groups.map((g) => g.def.key), ...Object.keys(state.selection)])];
+      const url = `${pathname}${serializeListState(merged, new URLSearchParams(window.location.search), { keys, standaardSort: sorts[0].value })}`;
       startTransition(() => {
         setOptimisticState(merged);
         // Een filter of sortering is een stap in de geschiedenis (de terugknop maakt hem ongedaan);
@@ -93,18 +100,21 @@ export function ProductListing({
         else router.replace(url, { scroll: false });
       });
     },
-    [state, router, pathname, setOptimisticState],
+    [state, router, pathname, setOptimisticState, data.groups, sorts],
   );
 
   const toggleValue = (key: string, value: string) => {
     const cur = state.selection[key] ?? [];
-    const nextVals = cur.includes(value) ? cur.filter((v) => v !== value) : [...cur, value];
+    // Een filter met één keuze tegelijk: de nieuwe waarde vervangt de vorige.
+    const enkel = groupOf(key)?.def.enkel;
+    const nextVals = cur.includes(value) ? cur.filter((v) => v !== value) : enkel ? [value] : [...cur, value];
     update({ selection: { ...state.selection, [key]: nextVals } });
   };
   const clearKey = (key: string) => update({ selection: { ...state.selection, [key]: [] } });
   const clearAll = () => update({ selection: {}, offersOnly: false });
 
-  const { items: shown, total, groups, hasOffers } = data;
+  const { items: shown, total, hasMore, groups, hasOffers } = data;
+  const producten = (n: number) => `${n} ${n === 1 ? "product" : "producten"}`;
   const activeCount = activeFilterCount(state);
   const groupOf = (key: string) => groups.find((g) => g.def.key === key);
   const chipLabel = (key: string, value: string) => groupOf(key)?.options.find((o) => o.value === value)?.label ?? labelFor(key, value, facetLabels);
@@ -252,12 +262,12 @@ export function ProductListing({
               <Icon name="filter" size={22} />
             )}
           </button>
-          <SortSelect value={state.sort} onChange={(sort) => update({ sort })} />
+          <SortSelect value={state.sort} sorts={sorts} onChange={(sort) => update({ sort })} />
         </div>
 
         <div className="mt-3 flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
           <p className="text-[14px] text-ink-80" role="status" aria-live="polite">
-            {pending ? "Bezig met filteren…" : `${total} ${total === 1 ? "product" : "producten"}`}
+            {pending ? "Bezig met filteren…" : total === null ? `${producten(shown.length)} getoond` : producten(total)}
           </p>
           {showOffersToggle && hasOffers && (
             <label className="flex cursor-pointer items-center gap-3 text-[14px] font-medium">
@@ -315,7 +325,7 @@ export function ProductListing({
 
       {/* Raster */}
       <div aria-busy={pending} className={`transition-opacity duration-150 ${pending ? "opacity-50" : ""}`}>
-        {total === 0 ? (
+        {shown.length === 0 ? (
           (emptyState ?? (
             <div className="my-10 rounded-[var(--radius-tile)] bg-cloud px-6 py-14 text-center">
               <Icon name="search" size={36} className="mx-auto text-ink-60" />
@@ -352,7 +362,7 @@ export function ProductListing({
 
       {/* Mobiel kleeft de filterbalk niet. Bij omhoog scrollen komt de filterknop onderaan in beeld;
           aan het einde van de lijst rust hij in de witruimte onder het raster. Hoogte 0: schuift niets op. */}
-      {total > 0 && (
+      {shown.length > 0 && (
         <div className={`sticky bottom-[60px] z-20 h-0 lg:hidden ${vast ? "" : "invisible"}`}>
           <div className="verberg-bij-inklap pointer-events-none absolute inset-x-0 top-0 flex justify-center transition-[opacity,visibility] duration-150 motion-reduce:transition-none">
             <button type="button" onClick={() => setDrawerOpen(true)} className="btn btn-primary btn-sm pointer-events-auto gap-2 shadow-[var(--shadow-pop)]" aria-haspopup="dialog">
@@ -370,15 +380,17 @@ export function ProductListing({
       )}
 
       {/* Meer laden (referentie: "Vous avez vu 49 produits sur 49") */}
-      {total > 0 && (
+      {shown.length > 0 && (
         <div className="mx-auto mt-10 flex max-w-sm flex-col items-center gap-3 text-center">
-          <p className="text-[14px] text-ink-80">
-            U hebt {shown.length} van {total} producten bekeken
-          </p>
-          <div className="h-1 w-full overflow-hidden rounded-full bg-mist" aria-hidden="true">
-            <div className="h-full rounded-full bg-ink" style={{ width: `${(shown.length / total) * 100}%` }} />
-          </div>
-          {shown.length < total && (
+          <p className="text-[14px] text-ink-80">{total === null ? `U hebt ${producten(shown.length)} bekeken` : `U hebt ${shown.length} van ${producten(total)} bekeken`}</p>
+          {/* Zonder gekend totaal geen voortgangsbalk: die zou een einde tonen dat we niet kennen. */}
+          {total !== null && (
+            <div className="h-1 w-full overflow-hidden rounded-full bg-mist" aria-hidden="true">
+              <div className="h-full rounded-full bg-ink" style={{ width: `${(shown.length / total) * 100}%` }} />
+            </div>
+          )}
+          {data.afgekapt && !hasMore && <p className="text-[14px] text-ink-80">Dit zijn de best passende resultaten. Verfijn uw zoekopdracht of gebruik de filters om gerichter te zoeken.</p>}
+          {hasMore && (
             <button
               type="button"
               disabled={pending}
@@ -388,7 +400,7 @@ export function ProductListing({
               }}
               className="btn btn-outline mt-2"
             >
-              {pending ? "Bezig met laden…" : `${Math.min(PAGE_SIZE, total - shown.length)} meer tonen`}
+              {pending ? "Bezig met laden…" : total === null ? "Meer tonen" : `${Math.min(PAGE_SIZE, total - shown.length)} meer tonen`}
             </button>
           )}
         </div>
@@ -404,7 +416,7 @@ export function ProductListing({
               Alles wissen
             </button>
             <button type="button" onClick={() => setDrawerOpen(false)} className="btn btn-primary flex-[1.4]">
-              {pending ? "Bezig…" : `Toon ${total} ${total === 1 ? "product" : "producten"}`}
+              {pending ? "Bezig…" : total === null ? "Toon resultaten" : `Toon ${producten(total)}`}
             </button>
           </div>
         }
@@ -473,7 +485,7 @@ function FacetOptions({ group, selected, onToggle }: { group: FacetGroup; select
   const [alles, setAlles] = useState(false);
   const zoekId = useId();
   // Enkel vrije lijsten (merk, motief…): een vaste reeks (kleur, klassen) staat altijd volledig, anders valt bv. Grijs weg.
-  const lang = group.options.length > LANGE_LIJST && !group.def.volgorde && !group.def.buckets;
+  const lang = group.options.length > LANGE_LIJST && !group.def.volgorde && !group.def.buckets && group.def.kind !== "swatch";
   const q = normalize(zoek.trim());
   const gevonden = q ? group.options.filter((o) => normalize(o.label).includes(q)) : group.options;
   // Ingeklapt: de eerste waarden en alles wat gekozen is (een keuze verdwijnt nooit uit beeld).
@@ -513,10 +525,12 @@ function FacetOptions({ group, selected, onToggle }: { group: FacetGroup; select
                 />
                 {o.swatch && <span className="size-5 shrink-0 rounded-full ring-1 ring-line-strong/40" style={{ background: o.swatch }} aria-hidden="true" />}
                 <span className="flex-1">{o.label}</span>
-                <span className="text-ink-60">
-                  {o.count}
-                  <span className="sr-only"> {o.count === 1 ? "product" : "producten"}</span>
-                </span>
+                {o.count !== undefined && (
+                  <span className="text-ink-60">
+                    {o.count}
+                    <span className="sr-only"> {o.count === 1 ? "product" : "producten"}</span>
+                  </span>
+                )}
               </label>
             </li>
           );
@@ -614,7 +628,7 @@ function FacetDropdown({
   );
 }
 
-function SortSelect({ value, onChange }: { value: SortKey; onChange: (s: SortKey) => void }) {
+function SortSelect({ value, sorts, onChange }: { value: string; sorts: readonly SortOption[]; onChange: (s: string) => void }) {
   const id = useId();
   return (
     <div className="relative ml-auto">
@@ -629,10 +643,10 @@ function SortSelect({ value, onChange }: { value: SortKey; onChange: (s: SortKey
       <select
         id={id}
         value={value}
-        onChange={(e) => onChange(e.target.value as SortKey)}
+        onChange={(e) => onChange(e.target.value)}
         className="h-12 max-w-[200px] appearance-none truncate rounded-[var(--radius-field)] border border-line-strong bg-white pl-10 pr-10 text-[15px] font-medium hover:border-ink sm:max-w-none sm:pl-[112px]"
       >
-        {SORTS.map((s) => (
+        {sorts.map((s) => (
           <option key={s.value} value={s.value}>
             {s.label}
           </option>

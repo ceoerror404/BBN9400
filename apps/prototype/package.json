@@ -11,7 +11,8 @@
     "sync": "node scripts/sync-shopify.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "test:filters": "node --no-warnings --import ./scripts/test-filters/register.mjs scripts/test-filters/test-filters.mjs"
+    "test:filters": "node --no-warnings --import ./scripts/test-filters/register.mjs scripts/test-filters/test-filters.mjs",
+    "test:zoeken": "node --no-warnings --import ./scripts/test-filters/register.mjs scripts/test-zoeken.mjs"
   },
   "dependencies": {
     "next": "^16.0.0",
