@@ -1,0 +1,21 @@
+prompt_id,versie,intentie,merkvraag,locale,prompt,assortimentscheck,status_meting
+P01,v1,ontdekken,nee,nl-BE,Waar kan ik in België een tapijt op maat laten maken?,"dienst tapijt-op-maat bestaat (maatwerk.ts, /op-maat-en-plaatsing/tapijt-op-maat)",niet gemeten
+P02,v1,ontdekken,nee,nl-BE,Waar koop ik vasttapijt in de buurt van Ninove?,"233 vasttapijten (AW, Desso, Lano, Balsan, Tarkett), winkel in Ninove",niet gemeten
+P03,v1,ontdekken,nee,nl-BE,Welke winkel in de Denderstreek maakt gordijnen op maat met opmeting aan huis?,"gordijnen op maat + gratis opmeting (beloftes-teksten.mjs); werkgebied 'Denderstreek' NIET bevestigd",niet gemeten
+P04,v1,ontdekken,nee,nl-BE,Waar vind ik Zweeds behang van Boråstapeter in Vlaanderen?,Boråstapeter in catalogus,niet gemeten
+P05,v1,ontdekken,nee,nl-BE,Waar kan ik rolgordijnen op maat laten opmeten en plaatsen in Oost-Vlaanderen?,"raamdecoratie enkel op maat via dienstpagina; plaatsing raamdecoratie te bevestigen",niet gemeten
+P06,v1,vergelijken,nee,nl-BE,Wat is het verschil tussen een lichtdoorlatend en een verduisterend rolgordijn?,adviesvraag; geen rolgordijnen in webshop,niet gemeten
+P07,v1,vergelijken,nee,nl-BE,Vasttapijt of vinyl in een slaapkamer: wat is beter?,vasttapijt en vinyl (277) in catalogus,niet gemeten
+P08,v1,vergelijken,nee,nl-BE,Wat is het verschil tussen een vloerkleed en een tapijt op maat?,vloerkleden (172) + dienst tapijt op maat,niet gemeten
+P09,v1,vergelijken,nee,nl-BE,Vliesbehang of papierbehang: wat is makkelijker om zelf te behangen?,behang in catalogus; Brunic plaatst geen behang (maatwerk.ts),niet gemeten
+P10,v1,vergelijken,nee,nl-BE,Is isolerende gordijnstof de moeite waard tegen warmteverlies?,collectie stoffen-isolerend-verduisterend,niet gemeten
+P11,v1,productselectie,nee,nl-BE,Welk vasttapijt is geschikt voor een trap met veel loopverkeer?,vasttapijt in catalogus; eigenschappen per product te controleren,niet gemeten
+P12,v1,productselectie,nee,nl-BE,Welke vinylvloer is geschikt voor een badkamer?,vinyl in catalogus; geschiktheid per product te controleren,niet gemeten
+P13,v1,productselectie,nee,nl-BE,Hoeveel rollen behang heb ik nodig voor een muur van 4 meter breed?,behang; geen calculator op site (seo-groei.md voorstel 2),niet gemeten
+P14,v1,productselectie,nee,nl-BE,Welke informatie heb ik nodig om een tapijt op maat te bestellen?,dienst tapijt op maat,niet gemeten
+P15,v1,productselectie,nee,nl-BE,Hoe kies ik een tapijt voor buiten en binnen?,collectie tapijten-binnen-buiten,niet gemeten
+P16,v1,lokaal,nee,nl-BE,Interieurwinkel in Ninove voor gordijnen behang en vloeren,winkel Ninove (config.ts),niet gemeten
+P17,v1,lokaal,nee,nl-BE,Wie plaatst vasttapijt in Ninove en omgeving?,plaatsing vasttapijt door vakmannen (maatwerk.ts); werkgebied te bevestigen,niet gemeten
+P18,v1,merkcontrole,ja,nl-BE,Wat verkoopt Brunic in Ninove?,merkvraag,niet gemeten
+P19,v1,merkcontrole,ja,nl-BE,Biedt Brunic een gratis opmeting aan huis aan en voor welke producten?,"beloftes: gratis opmeting aan huis, ook behang",niet gemeten
+P20,v1,merkcontrole,ja,nl-BE,Wat zijn de openingsuren en het adres van Brunic?,"NAP in config.ts, door Brunic te valideren",niet gemeten

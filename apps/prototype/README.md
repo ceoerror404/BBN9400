@@ -42,7 +42,7 @@ pnpm --filter @brunic/prototype build     # haalt eerst zelf de catalogus op (pr
 | `/verlanglijst`, `/winkelmand` | Lokaal bewaard; verlanglijst → offerte of afdrukken als winkellijst; winkelmand → Shopify-kassa |
 | `/info/<slug>` | Over ons, levering, retour, FAQ, betalen, cookies, AV, privacy, herroepingsrecht |
 | `/sitemap.xml`, `/robots.txt` | Enkel indexeerbaar met `SITE_INDEXEREN=1` |
-| Oude URL's van brunic.be (WooCommerce) | 308 naar de nieuwe pagina: producten via `src/proxy.ts` + `src/data/oude-urls.json` (opnieuw maken: `scripts/genereer-oude-urls.mjs`), `/product-categorie/…` via `app/product-categorie/`, gewone pagina's in `next.config.ts`. Alle 2.061 URL's uit de oude sitemaps getest (20/10/2026). |
+| Oude URL's van brunic.be (WooCommerce) | 308 naar de nieuwe pagina: producten via `src/proxy.ts` + `src/data/oude-urls.json` (opnieuw maken: `scripts/genereer-oude-urls.mjs`), `/product-categorie/…` via `app/product-categorie/`, gewone pagina's in `next.config.ts`. Eén stap per oude URL, ook met de schuine streep achteraan (`skipTrailingSlashRedirect` + `src/proxy.ts`). Testen: `node apps/prototype/scripts/test-oude-urls.mjs <basis-URL>` (2.060 oude URL's, lijst van 14/11/2026 in `scripts/oude-urls/`); laatst getest op een lokale build op 14/11/2026: alles 200, één stap. |
 | `/api/status` | Gezondheidscontrole voor een uptime-monitor (200 = catalogus + Shopify ok, anders 503) |
 
 ## 3. Omgevingsvariabelen (zie repo-root `.env.example`)
@@ -65,7 +65,7 @@ pnpm --filter @brunic/prototype build     # haalt eerst zelf de catalogus op (pr
 2. **Shopify Flow** controleren: *Customer updated* → tag `opmeting-nieuw` → interne mail → tag verwijderen. Eén testaanvraag doen.
 3. Deploy Hook aanmaken → `VERCEL_DEPLOY_HOOK_URL`; `CRON_SECRET` zetten; daarna `node packages/catalog/register-webhooks.mjs https://www.brunic.be --producten` (eerst `--dry-run`). Testen: een producttitel wijzigen in Shopify → binnen enkele minuten een nieuwe deploy.
 4. Uptime-monitor op `https://www.brunic.be/api/status` en eventueel `ALERT_WEBHOOK_URL`.
-5. Domein: `brunic.be` → 301 naar `www.brunic.be` (Vercel › Domains), HTTPS actief; de oude URL's controleren op het echte domein.
+5. Domein: `brunic.be` → 301 naar `www.brunic.be` (Vercel › Domains) **met behoud van het pad**, HTTPS actief; de oude URL's controleren op het echte domein: `node apps/prototype/scripts/test-oude-urls.mjs https://brunic.be --stappen 2` en `… https://www.brunic.be` (verwacht: 0 × niet-200). Vooraf een Search Console-export van brunic.be bewaren (docs/audits/2026-11-14-seo-geo/measurement-plan.md).
 6. Juridische teksten (`src/data/content.ts`, comment boven `INFO_PAGES`) laten valideren door Brunic.
 7. Gebruiksrecht op de leveranciersfoto's bevestigen (dealerafspraken).
 8. Niets live vóór getekende offerte + voorschot (CLAUDE.md).

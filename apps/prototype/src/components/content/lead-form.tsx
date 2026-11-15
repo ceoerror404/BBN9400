@@ -114,7 +114,7 @@ export function LeadForm({
             <Icon name="check" size={28} /> Bedankt, uw aanvraag is goed ontvangen
           </p>
           <p className="mt-3 text-[15px] text-ink-80">
-            {bevestiging ?? "Wij nemen binnen 1 à 2 werkdagen contact met u op."} Dringend? Bel ons op{" "}
+            {bevestiging ?? "Wij nemen nog dezelfde dag contact met u op."} Dringend? Bel ons op{" "}
             <a href={SITE.phone.href} className="font-medium underline">
               {SITE.phone.display}
             </a>{" "}

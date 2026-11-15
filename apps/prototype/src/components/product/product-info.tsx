@@ -85,7 +85,9 @@ export function ProductInfo({ product, category, maatwerk }: { product: Product;
                     ? "Zie de gekozen uitvoering."
                     : isOpMaat(maatwerk)
                       ? "Op maat: wij bepalen de afmetingen samen met u, bij een opmeting aan huis of in de winkel."
-                      : "De afmetingen en de hoeveelheid die u nodig hebt, bekijken we graag samen met u in onze winkel."}
+                      : maatwerk === "behang"
+                        ? "De afmetingen en de hoeveelheid die u nodig hebt, bekijken we graag samen met u: in onze winkel of bij een gratis opmeting aan huis."
+                        : "De afmetingen en de hoeveelheid die u nodig hebt, bekijken we graag samen met u in onze winkel."}
                 </p>
               )}
             </div>
@@ -101,7 +103,7 @@ export function ProductInfo({ product, category, maatwerk }: { product: Product;
               {isOpMaat(maatwerk) ? (
                 <>
                   U vraagt vrijblijvend een offerte aan via de knop bovenaan of in onze winkel in {SITE.address.city}. Wij bekijken samen uw wensen en maten —
-                  waar nodig met een gratis opmeting aan huis — en bezorgen u een duidelijke prijs, met maakwerk en plaatsing als u dat wenst.{" "}
+                  waar nodig met een gratis opmeting aan huis — en bezorgen u een duidelijke offerte: de prijs, de mogelijkheden voor plaatsing en waar nodig de termijn.{" "}
                   <Link href={routes.service("opmeting-aan-huis")} className="underline underline-offset-2">
                     Meer over de opmeting aan huis
                   </Link>
@@ -110,6 +112,7 @@ export function ProductInfo({ product, category, maatwerk }: { product: Product;
                 <>
                   U vraagt vrijblijvend een offerte aan via de knop bovenaan of in onze winkel in {SITE.address.city}, waar u ook de stalenboeken kunt bekijken.
                   Wij bezorgen u een duidelijke prijs voor de hoeveelheid die u nodig hebt.
+                  {maatwerk === "behang" && " Wilt u dat we uw wanden opmeten? Dat doen we gratis bij u thuis."}
                 </>
               )}
             </p>
@@ -118,7 +121,9 @@ export function ProductInfo({ product, category, maatwerk }: { product: Product;
         <Accordion title={isOpMaat(maatwerk) ? "Levering, plaatsing & afhalen" : "Levering & afhalen"}>
           <p>
             U haalt uw bestelling af in onze winkel ({SITE.address.street}, {SITE.address.city}) of wij leveren ze bij u thuis
-            {isOpMaat(maatwerk) ? "; plaatsen doen onze eigen mensen." : "."}{" "}
+            {isOpMaat(maatwerk) ? "; de plaatsing gebeurt door vakmannen." : "."}{" "}
+            {/* Levertermijn van Brunic zelf (13/11/2026), enkel bij wat online te bestellen is. Nooit die van de leverancier. */}
+            {product.pricing === "fixed" && "Online bestellingen leveren wij binnen de week; u krijgt meteen een bevestiging van wanneer we kunnen leveren. "}
             <Link href={routes.info("levering")} className="underline underline-offset-2">
               Alles over levering & afhalen
             </Link>

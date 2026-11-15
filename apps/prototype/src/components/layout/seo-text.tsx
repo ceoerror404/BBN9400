@@ -9,13 +9,13 @@ export function SeoText() {
   return (
     <div className="text-[14px] leading-relaxed text-ink-80">
       <p>
-        Brunic is een familiebedrijf uit Ninove en al 40 jaar uw adres voor interieurdecoratie. In onze winkel aan de Ring-West vindt u gordijnstoffen en
+        Brunic is een familiebedrijf uit Ninove en sinds 1982 uw adres voor interieurdecoratie. In onze winkel aan de Ring-West vindt u gordijnstoffen en
         vitrages, behang en wandbekleding, vasttapijt en tapijttegels, vloerkleden en raamdecoratie — met persoonlijk advies van mensen die het vak kennen.
       </p>
       <div id="seo-meer" hidden={!open}>
         <p className="mt-3">
-          Gordijnen op maat maken we in ons eigen atelier, door onze eigen stiksters. Wij komen gratis opmeten bij u thuis, adviseren over stof, plooi en
-          afwerking, en plaatsen alles met onze eigen mensen — in Ninove en de ruime Denderstreek.
+          Gordijnen brengen we op maat in ons eigen atelier. Wij komen gratis opmeten bij u thuis, adviseren over stof, plooi en afwerking, en laten alles
+          plaatsen door vakmannen — in Ninove en de ruime Denderstreek.
         </p>
         <p className="mt-3">
           In de webshop ontdekt u het assortiment van merken als ADO, Artelux, Loft79, ESTAhome, Boråstapeter, Associated Weavers, Balsan, Desso en Louis De Poortere.

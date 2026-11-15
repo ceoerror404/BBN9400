@@ -54,7 +54,7 @@ async function standaard(): Promise<HomeInhoud> {
     nieuw: { title: "Nieuw binnen", cta: "Alle nieuwigheden" },
     trends: { title: "De trends van het moment", kaarten: await standaardTegels(TRENDS) },
     winkel: {
-      label: "Familiebedrijf sinds 1992",
+      label: "Familiebedrijf sinds 1982",
       title: `Kom langs in onze winkel in ${SITE.address.city}`,
       text: "Voel de stoffen, bekijk de stalenboeken en krijg persoonlijk advies. Bewaar vooraf uw favorieten op uw verlanglijst en neem ze mee — zo vinden we samen snel wat bij uw interieur past.",
       knopRoute: "Route plannen",

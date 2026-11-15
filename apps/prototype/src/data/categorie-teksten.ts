@@ -2,9 +2,9 @@
 export const CATEGORIE_TEKST: Record<string, { subtitle: string; intro: string }> = {
   /* ── Hoofdcategorieën ─────────────────────────────────────────────── */
   "gordijnen-stoffen": {
-    subtitle: "Gordijnstoffen en maakwerk uit ons eigen atelier",
+    subtitle: "Gordijnstoffen, op maat gebracht in ons eigen atelier",
     intro:
-      "Een gordijn bepaalt hoe het licht binnenvalt en hoe een ruimte aanvoelt. Bij Brunic vindt u gordijnstoffen van onder meer ADO, Artelux en Loft79: effen stoffen, stoffen met tekening, isolerende en verduisterende kwaliteiten en brandvrije stoffen voor projecten, samen met passementen en benodigdheden. Veel stoffen zijn kamerhoog geweven, tot 300 cm breed, en worden per lopende meter verkocht. Kiest u voor gordijnen op maat, dan meten wij gratis bij u thuis op, maken onze eigen stiksters uw gordijnen in ons atelier en hangen onze eigen mensen ze bij u op. Kom de stoffen gerust voelen in onze winkel in Ninove.",
+      "Een gordijn bepaalt hoe het licht binnenvalt en hoe een ruimte aanvoelt. Bij Brunic vindt u gordijnstoffen van onder meer ADO, Artelux en Loft79: effen stoffen, stoffen met tekening, isolerende en verduisterende kwaliteiten en brandvrije stoffen voor projecten, samen met passementen en benodigdheden. Veel stoffen zijn kamerhoog geweven, tot 300 cm breed, en worden per lopende meter verkocht. Kiest u voor gordijnen op maat, dan meten wij gratis bij u thuis op, brengen we uw gordijnen op maat in ons eigen atelier en hangen vakmannen ze bij u op. Kom de stoffen gerust voelen in onze winkel in Ninove.",
   },
   behang: {
     subtitle: "Behang en fotobehang van ESTAhome, Boråstapeter, Origin en meer",
@@ -14,7 +14,7 @@ export const CATEGORIE_TEKST: Record<string, { subtitle: string; intro: string }
   vloerbekleding: {
     subtitle: "Vasttapijt, tapijttegels en lopers, vakkundig gelegd",
     intro:
-      "Vasttapijt maakt een ruimte warm, stil en comfortabel. Bij Brunic kiest u uit vasttapijt van Associated Weavers, Desso, Lano, Balsan en Tarkett, in polyamide, polypropyleen, polyester, wol of sisal. Voor kantoren en projecten zijn er tapijttegels van Desso en Balsan, en voor gangen en trappen vindt u ook tapijtlopers. Vloerbekleding wordt per vierkante meter verkocht. In onze winkel in Ninove voelt en vergelijkt u de stalen; daarna meten wij gratis bij u thuis op en leggen onze eigen mensen het tapijt.",
+      "Vasttapijt maakt een ruimte warm, stil en comfortabel. Bij Brunic kiest u uit vasttapijt van Associated Weavers, Desso, Lano, Balsan en Tarkett, in polyamide, polypropyleen, polyester, wol of sisal. Voor kantoren en projecten zijn er tapijttegels van Desso en Balsan, en voor gangen en trappen vindt u ook tapijtlopers. Vloerbekleding wordt per vierkante meter verkocht. In onze winkel in Ninove voelt en vergelijkt u de stalen; daarna meten wij gratis bij u thuis op en leggen vakmannen het tapijt.",
   },
   tapijten: {
     subtitle: "Vloerkleden en tapijten op maat voor elke ruimte",
@@ -24,18 +24,10 @@ export const CATEGORIE_TEKST: Record<string, { subtitle: string; intro: string }
   raamdecoratie: {
     subtitle: "Rolgordijnen, plissés, jaloezieën en vouwgordijnen op maat",
     intro:
-      "Raamdecoratie regelt licht en privacy met weinig plaats en een strakke afwerking. Bij Brunic kunt u terecht voor rolgordijnen, plissés, jaloezieën en vouwgordijnen, telkens op maat van uw ramen. Omdat elke bestelling vertrekt van uw eigen maten en keuzes, vindt u raamdecoratie niet in onze webshop. U bekijkt en kiest ze in onze winkel in Ninove of bij u thuis. Wij meten gratis op, bespreken de montage en de bediening, en onze eigen mensen plaatsen alles vakkundig. Combineert u raamdecoratie met gordijnen, dan stemmen we beide op elkaar af.",
+      "Raamdecoratie regelt licht en privacy met weinig plaats en een strakke afwerking. Bij Brunic kunt u terecht voor rolgordijnen, plissés, jaloezieën en vouwgordijnen, telkens op maat van uw ramen. Omdat elke bestelling vertrekt van uw eigen maten en keuzes, vindt u raamdecoratie niet in onze webshop. U bekijkt en kiest ze in onze winkel in Ninove of bij u thuis. Wij meten gratis op, bespreken de montage en de bediening, en vakmannen plaatsen alles vakkundig. Combineert u raamdecoratie met gordijnen, dan stemmen we beide op elkaar af.",
   },
-  verf: {
-    subtitle: "Verf en kleuradvies in onze winkel in Ninove",
-    intro:
-      "Een nieuwe kleur op de muur verandert een ruimte helemaal. Verf maakt deel uit van ons assortiment in de winkel, maar is niet online te koop. Zo kunnen wij u persoonlijk adviseren over de kleur, de afwerking en de hoeveelheid die u nodig hebt. Omdat u bij ons ook gordijnstoffen, behang, tapijten en vasttapijt vindt, stemt u de verf meteen af op de rest van uw interieur. Breng gerust een staal van uw stof, een foto van uw ruimte of de maten van uw muren mee naar onze winkel in Ninove.",
-  },
-  "slapen-wonen": {
-    subtitle: "Slaapcomfort met persoonlijk advies in de winkel",
-    intro:
-      "Goed slapen begint bij een slaapomgeving die bij u past. Slaapcomfort maakt deel uit van ons assortiment in de winkel in Ninove, maar is niet online te koop. Zo kunnen wij u persoonlijk adviseren en kunt u zelf voelen en vergelijken wat u het meest aanspreekt. Denk ook aan de rest van de slaapkamer: verduisterende gordijnen uit ons eigen atelier, een zacht vasttapijt of een vloerkleed naast het bed dragen evengoed bij aan een goede nachtrust. Kom gerust langs; wij nemen de tijd voor u.",
-  },
+  // Verf en slaapcomfort: bewust geen tekst. Brunic toont die afdelingen niet op de site
+  // (beslist 13/11/2026, docs/teksten-en-beloftes.md B7).
 
   /* ── Gordijnen & stoffen ──────────────────────────────────────────── */
   "stoffen-effen": {
@@ -130,7 +122,7 @@ export const CATEGORIE_TEKST: Record<string, { subtitle: string; intro: string }
   "vloerbekleding-vasttapijt": {
     subtitle: "Vasttapijt van Associated Weavers, Desso, Lano en meer",
     intro:
-      "Vasttapijt is warm, stil en comfortabel. U kiest bij Brunic uit kwaliteiten van Associated Weavers, Desso, Lano, Balsan en Tarkett, van zachte velours tot stevige lussen, in synthetische vezels, wol of sisal. Wij meten gratis bij u thuis op en onze eigen mensen leggen het tapijt.",
+      "Vasttapijt is warm, stil en comfortabel. U kiest bij Brunic uit kwaliteiten van Associated Weavers, Desso, Lano, Balsan en Tarkett, van zachte velours tot stevige lussen, in synthetische vezels, wol of sisal. Wij meten gratis bij u thuis op en vakmannen leggen het tapijt.",
   },
   "vloerbekleding-grastapijt": {
     subtitle: "Grastapijt voor terras, balkon en tuin",

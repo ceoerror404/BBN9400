@@ -139,10 +139,14 @@ function vormVanMaat(maat: string): string | undefined {
 }
 
 /**
- * Levertermijnen uit de leveranciersdata tonen we niet: er is geen ERP gekoppeld, dus niets maakt
- * die belofte waar. Ze staan als kenmerk (brunic.specificaties) en als tabelrij in de beschrijving.
+ * Beloftes van de leverancier tonen we niet als kenmerk (beslist 13/11/2026, docs/teksten-en-beloftes.md):
+ * - levertermijn, levertijd en "Leverbaar tot (volgens leverancier)": Brunic heeft eigen
+ *   levertermijnen (/info/levering), die van de leverancier gelden niet voor de klant van Brunic;
+ * - garantie: enkel in de beschrijving, als garantie van de fabrikant
+ *   (packages/catalog/set-leveranciersteksten.mjs schrijft die zin in Shopify).
+ * Ze blijven in brunic.specificaties staan, en als tabelrij in de beschrijving (die tonen we niet).
  */
-const IS_LEVERBELOFTE = /^lever(tijd|termijn)$/i;
+const IS_LEVERBELOFTE = /^(lever(tijd|termijn)|leverbaar tot\b.*|garantie)$/i;
 /**
  * Een tabel in de beschrijving herhaalt de kenmerken (ook de levertermijn) en zou als platte
  * tekst één lopende zin worden. Alle rijen staan letterlijk in brunic.specificaties.

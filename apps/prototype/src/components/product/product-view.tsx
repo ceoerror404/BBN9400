@@ -285,9 +285,20 @@ export function ProductView({
                   </>
                 ) : isOpMaat(maatwerk) ? (
                   <>
-                    {maatwerk === "vloer" ? "Gelegd door onze eigen mensen?" : "Op maat gemaakt en geplaatst?"}{" "}
+                    {maatwerk === "vloer" ? "Gelegd door vakmannen?" : "Op maat gemaakt en geplaatst?"}{" "}
                     <Link href={routes.measurement()} className="font-medium underline underline-offset-2">
                       Vraag een gratis opmeting aan huis aan
+                    </Link>
+                  </>
+                ) : maatwerk === "behang" ? (
+                  <>
+                    Liever eerst in het echt zien?{" "}
+                    <Link href={routes.store()} className="font-medium underline underline-offset-2">
+                      Bekijk de stalenboeken in onze winkel
+                    </Link>{" "}
+                    of{" "}
+                    <Link href={routes.measurement()} className="font-medium underline underline-offset-2">
+                      vraag een gratis opmeting aan huis aan
                     </Link>
                   </>
                 ) : (

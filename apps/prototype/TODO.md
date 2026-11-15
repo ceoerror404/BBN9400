@@ -75,7 +75,9 @@ Bronnen, geraadpleegd via een onderzoeksagent: WER op Justel (geconsolideerd tot
 ## 5. Lanceringschecklist (bewust uitgeschakeld in de testfase)
 
 - [ ] `SITE_INDEXEREN=1` en `SITE_URL` zetten (nu overal noindex + `Disallow: /`)
-- [x] 301-map van WooCommerce naar de nieuwe URL's — 20/10: alle 2.061 URL's uit de oude sitemaps → 308 naar een bestaande pagina (README §2). Na de domeinoverdracht opnieuw testen op www.brunic.be.
+- [x] 301-map van WooCommerce naar de nieuwe URL's — 20/10: alle 2.061 URL's uit de oude sitemaps → 308 naar een bestaande pagina (README §2). 14/11: één stap in plaats van twee, getest op een lokale build (2.060 URL's, alles 200).
+- [ ] Na de domeinoverdracht opnieuw testen: `node apps/prototype/scripts/test-oude-urls.mjs https://brunic.be --stappen 2` en op `https://www.brunic.be` (README §4 punt 5).
+- [ ] Vóór de domeinoverdracht: Search Console-export van brunic.be (16 maanden, query × pagina) bewaren als nulmeting — docs/audits/2026-11-14-seo-geo/measurement-plan.md.
 - [ ] Cookie-consent (Consent Mode v2) zodra GA4 wordt toegevoegd; de cookieverklaring zegt nu terecht "geen tracking"
 - [ ] Shopify: verzendtarieven, betalingen (Bancontact), btw en checkout-branding instellen. Niet gecontroleerd: de app mist de leesrechten daarvoor.
 - [ ] Vectorlogo (staat al open in de README)

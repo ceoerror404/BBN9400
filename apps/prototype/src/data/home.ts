@@ -14,7 +14,7 @@ import { BEELD } from "./beelden";
 export type Doel = { categoryId: CategoryId } | { product: string } | { article: string } | { href: string };
 
 export const HERO = {
-  ticket: "Al 40 jaar in Ninove",
+  ticket: "Sinds 1982 in Ninove",
   title: "Gordijnen op maat, uit eigen atelier",
   subtitle: "Advies in de winkel, opmeting en plaatsing bij u thuis",
   cta: { label: "Ontdek gordijnen & stoffen", doel: { categoryId: "c05" } as Doel },
@@ -33,7 +33,7 @@ export const SMALL_TILES: { label: string; doel: Doel; image: ImageRef }[] = [
 export const CAMPAIGNS: { title: string; subtitle: string; cta: string; doel: Doel; image: ImageRef }[] = [
   {
     title: "Stoffen die het verschil maken",
-    subtitle: "Van ADO, Artelux en Loft79 — gemaakt in ons atelier",
+    subtitle: "Stoffen van ADO, Artelux en Loft79, op maat gebracht in ons atelier",
     cta: "Bekijk de stoffen",
     doel: { categoryId: "c05" },
     image: BEELD.campagneStoffen,

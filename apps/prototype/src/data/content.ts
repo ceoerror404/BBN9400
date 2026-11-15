@@ -2,9 +2,11 @@
  * Redactionele inhoud: diensten (Op maat & plaatsing), inspiratie-artikels,
  * infopagina's en veelgestelde vragen. Vlaams, u-vorm.
  *
- * Enkel feiten die Brunic bevestigde: familiebedrijf, al 40 jaar in Ninove, nv sinds 1992,
- * eigen atelier met eigen stiksters, gratis opmeting aan huis, levering en plaatsing door
- * eigen mensen. Geen prijzen, levertermijnen of kosten: die staan in de offerte of bij het afrekenen.
+ * Enkel feiten die Brunic bevestigde (docs/teksten-en-beloftes.md, 13/11/2026): familiebedrijf
+ * sinds 1982 in Ninove, nv sinds 1992; service, kwaliteit en een eigen atelier waar gordijnen op
+ * maat gebracht worden; gratis opmeting aan huis (ook behang); plaatsing door vakmannen (derden);
+ * reactie nog dezelfde dag; online bestellingen binnen de week. Woordkeuze en wat niet mag:
+ * packages/catalog/beloftes-teksten.mjs. Geen prijzen of kosten: die staan in de offerte of bij het afrekenen.
  * Beelden komen uit `BEELD` (src/data/beelden.ts).
  */
 import type { CategoryId, ImageRef } from "@/lib/catalog/types";
@@ -17,6 +19,16 @@ const ADRES = `${SITE.address.street}, ${SITE.address.postalCode} ${SITE.address
 /* Diensten                                                             */
 /* ------------------------------------------------------------------ */
 
+/** Extra blok op een dienstpagina, met een eigen anker. */
+export type ServiceSection = {
+  /** Anker (#id). Oude URL's van brunic.be landen hier (next.config.ts, lib/site/oude-urls.ts): niet hernoemen zonder die mee aan te passen. */
+  id: string;
+  title: string;
+  paragraphs: string[];
+  /** Kleine vergelijkingstabel onder de alinea's; de eerste kolom is het kenmerk. */
+  table?: { head: string[]; rows: string[][] };
+};
+
 export type Service = {
   slug: string;
   title: string;
@@ -25,6 +37,12 @@ export type Service = {
   steps: { title: string; text: string }[];
   body: string[];
   relatedCategoryIds: CategoryId[];
+  /** Paginatitel (<title>) als die moet afwijken van de h1, zonder " · Brunic Ninove"; samen hoogstens 60 tekens. */
+  seoTitle?: string;
+  /** Meta description (hoogstens 155 tekens); anders de samenvatting, ingekort op een woordgrens. */
+  seoDescription?: string;
+  /** Blokken onder de lopende tekst, elk met een anker. */
+  sections?: ServiceSection[];
 };
 
 /**
@@ -42,11 +60,11 @@ export const WERKWIJZE: { title: string; text: string }[] = [
   },
   {
     title: "Op maat gemaakt",
-    text: "Onze eigen stiksters maken uw gordijnen in ons atelier; raamdecoratie en vasttapijt voorzien we op uw exacte maten.",
+    text: "In ons eigen atelier brengen we uw gordijnen op maat; raamdecoratie en vasttapijt voorzien we op uw exacte maten.",
   },
   {
     title: "Plaatsing",
-    text: "Onze eigen mensen hangen gordijnen en raamdecoratie op en leggen het vasttapijt, netjes afgewerkt.",
+    text: "Vakmannen hangen gordijnen en raamdecoratie op en leggen het vasttapijt, netjes afgewerkt.",
   },
 ];
 
@@ -55,7 +73,7 @@ export const SERVICES: Service[] = [
     slug: "gordijnen-op-maat",
     title: "Gordijnen op maat uit eigen atelier",
     summary:
-      "Wij adviseren u in de winkel of bij u thuis, meten gratis op en laten uw gordijnen maken door onze eigen stiksters in ons eigen atelier. Nadien hangen onze eigen mensen ze bij u op.",
+      "Wij adviseren u in de winkel of bij u thuis, meten gratis op en brengen uw gordijnen op maat in ons eigen atelier. Nadien hangen vakmannen ze bij u op.",
     image: BEELD.dienstGordijnen,
     steps: [
       {
@@ -67,19 +85,19 @@ export const SERVICES: Service[] = [
         text: "Wij komen gratis bij u thuis opmeten en bespreken ter plaatse de ophanging, de plooi en de gewenste lengte.",
       },
       {
-        title: "Maakwerk",
-        text: "Onze eigen stiksters werken uw gordijnen af in ons atelier, op de exacte maten van uw ramen.",
+        title: "Atelier",
+        text: "In ons eigen atelier brengen we uw gordijnen op maat, op de exacte maten van uw ramen.",
       },
       {
         title: "Plaatsing",
-        text: "Onze eigen mensen brengen de gordijnen bij u thuis en hangen ze op, zodat ze meteen mooi vallen.",
+        text: "Vakmannen brengen de gordijnen bij u thuis en hangen ze op, zodat ze meteen mooi vallen.",
       },
     ],
     body: [
       "Gordijnen op maat zijn meer dan een stof aan een rail. De plooi, de voering en de juiste lengte bepalen hoe een gordijn valt en hoe lang het mooi blijft. Daarom begint alles bij ons met een goed gesprek. In de winkel in Ninove toont u ons foto’s of maten van uw ramen, en samen bekijken we welke stof past bij de ruimte, het licht en het gebruik. Een slaapkamer vraagt nu eenmaal iets anders dan een living op het zuiden.",
       "In ons assortiment vindt u gordijnstoffen van onder meer ADO, Artelux en Loft79: effen stoffen met een mooie structuur, stoffen met tekening, en isolerende en verduisterende kwaliteiten. Veel stoffen zijn kamerhoog geweven, tot 300 cm breed. Zo loopt een gordijn zonder naden over de volledige breedte van een raam, ook bij grote ramen of schuiframen. Wij rekenen voor u uit hoeveel stof er nodig is, rekening houdend met de plooi en met de herhaling van het patroon.",
-      "Wat Brunic onderscheidt, is ons eigen atelier. Uw gordijnen worden gemaakt door onze eigen stiksters, op de maten die wij bij u thuis hebben opgemeten. Dat geeft korte lijnen: wie opmeet, weet wat er in het atelier gebeurt, en wie plaatst, weet hoe het gordijn gemaakt is. Een bijzondere wens of een raam dat net iets anders is, bespreken we rechtstreeks met het atelier. Zo krijgt u gordijnen die echt voor uw woning gemaakt zijn.",
-      "Na het maakwerk komen onze eigen mensen de gordijnen bij u ophangen. Zij controleren de lengte, verdelen de plooien en zorgen dat alles netjes hangt voor ze vertrekken. Wilt u weten wat uw project kost? Beschrijf het kort in het aanvraagformulier en voeg eventueel een foto van uw ramen toe. Wij nemen binnen 1 à 2 werkdagen contact met u op om een gratis opmeting af te spreken.",
+      "Wat Brunic onderscheidt, zijn service, kwaliteit en ons eigen atelier. In dat atelier brengen we uw gordijnen op maat, op de maten die wij bij u thuis hebben opgemeten. Dat geeft korte lijnen: wie opmeet, weet wat er in het atelier gebeurt. Een bijzondere wens of een raam dat net iets anders is, bespreken we rechtstreeks met het atelier. Zo krijgt u gordijnen die echt bij uw woning passen.",
+      "Zijn uw gordijnen klaar, dan komen vakmannen ze bij u ophangen. Zij controleren de lengte, verdelen de plooien en zorgen dat alles netjes hangt voor ze vertrekken. Wilt u weten wat uw project kost? Beschrijf het kort in het aanvraagformulier en voeg eventueel een foto van uw ramen toe. Wij nemen nog dezelfde dag contact met u op om een gratis opmeting af te spreken.",
     ],
     relatedCategoryIds: ["c05", "s-stoffen-isolerend-verduisterend"],
   },
@@ -87,7 +105,7 @@ export const SERVICES: Service[] = [
     slug: "raamdecoratie-op-maat",
     title: "Raamdecoratie op maat",
     summary:
-      "Rolgordijnen, plissés, jaloezieën en vouwgordijnen, telkens op maat van uw ramen. U bekijkt en kiest ze in onze winkel of bij u thuis; wij meten op en plaatsen.",
+      "Rolgordijnen, plissés, jaloezieën en vouwgordijnen, telkens op maat van uw ramen. U bekijkt en kiest ze in onze winkel of bij u thuis; wij meten op en laten ze plaatsen door vakmannen.",
     image: BEELD.dienstRaamdecoratie,
     steps: [
       {
@@ -104,27 +122,82 @@ export const SERVICES: Service[] = [
       },
       {
         title: "Plaatsing",
-        text: "Onze eigen mensen plaatsen alles netjes en tonen u hoe de bediening werkt.",
+        text: "Vakmannen plaatsen alles netjes en tonen u hoe de bediening werkt.",
       },
     ],
     body: [
       "Niet elk raam vraagt om een gordijn. In een badkamer, een keuken of een bureau is raamdecoratie vaak praktischer: ze neemt weinig plaats in, laat zich precies regelen en is eenvoudig te onderhouden. Bij Brunic kunt u terecht voor rolgordijnen, plissés, jaloezieën en vouwgordijnen, telkens op maat van uw ramen. U vindt ze niet in onze webshop, omdat elke bestelling vertrekt van uw eigen maten en keuzes. U bekijkt ze in onze winkel in Ninove of, na afspraak, bij u thuis.",
-      "Elk type heeft zijn eigen sterke punten. Een rolgordijn is strak en eenvoudig, en bestaat in lichtdoorlatende en verduisterende uitvoeringen. Een plissé bestaat ook voor schuine of bijzondere raamvormen en kan, afhankelijk van het model, zowel van boven als van onder geopend worden. Met jaloezieën richt u het licht nauwkeurig met de lamellen. Een vouwgordijn heeft de zachtheid van stof, maar vouwt compact op wanneer u het optrekt. Wij helpen u kiezen op basis van de ruimte, de lichtinval en het gebruik.",
+      "Elk type heeft zijn eigen sterke punten: een rolgordijn is strak en eenvoudig, een plissé past ook op schuine of bijzondere raamvormen, met jaloezieën richt u het licht met de lamellen en een vouwgordijn heeft de zachtheid van stof. Verderop op deze pagina zetten we ze naast elkaar. Wij helpen u kiezen op basis van de ruimte, de lichtinval en het gebruik.",
       "Een goede opmeting maakt het verschil tussen raamdecoratie die bijna past en raamdecoratie die mooi aansluit. Daarom meten wij elk raam zelf op, gratis en bij u thuis. Wij kijken of de montage het best in de dagopening, op het raam zelf of op de muur erboven gebeurt, of er klinken of een vensterbank in de weg zitten en aan welke kant de bediening het handigst uitkomt. Die gegevens vormen de basis van uw offerte.",
-      "Na de bestelling plaatsen onze eigen mensen de raamdecoratie bij u thuis. Zij zorgen voor een stevige, rechte montage en tonen u hoe alles werkt. Combineert u raamdecoratie met gordijnen, bijvoorbeeld een plissé voor de privacy en een gordijn voor de sfeer, dan stemmen we beide op elkaar af. Laat ons via het aanvraagformulier weten om welke ramen het gaat; wij nemen binnen 1 à 2 werkdagen contact met u op.",
+      "Na de bestelling plaatsen vakmannen de raamdecoratie bij u thuis. Zij zorgen voor een stevige, rechte montage en tonen u hoe alles werkt. Combineert u raamdecoratie met gordijnen, bijvoorbeeld een plissé voor de privacy en een gordijn voor de sfeer, dan stemmen we beide op elkaar af. Laat ons via het aanvraagformulier weten om welke ramen het gaat; wij nemen nog dezelfde dag contact met u op.",
     ],
     relatedCategoryIds: ["c05", "s-stoffen-isolerend-verduisterend"],
+    seoTitle: "Rolgordijnen, plissés & jaloezieën op maat",
+    seoDescription:
+      "Rolgordijnen, plissés, jaloezieën en vouwgordijnen op maat van uw ramen, lichtdoorlatend of verduisterend. Wij meten gratis op en vakmannen plaatsen ze.",
+    // Enkel de types die Brunic bevestigde. De oude site had ook kant-en-klare rolgordijnen,
+    // duo-rolgordijnen, shutters, Velux … : pas toevoegen na bevestiging (docs/vragen-aan-brunic.md, vraag 19).
+    sections: [
+      {
+        id: "rolgordijnen",
+        title: "Rolgordijnen op maat",
+        paragraphs: [
+          "Een rolgordijn is één strak doek dat u oprolt tot de hoogte die u wilt. Het neemt weinig plaats in en bestaat in lichtdoorlatende en verduisterende uitvoeringen. Daardoor past het in bijna elke ruimte, alleen of achter een gordijn.",
+        ],
+      },
+      {
+        id: "lichtdoorlatend-of-verduisterend",
+        title: "Lichtdoorlatend of verduisterend rolgordijn?",
+        paragraphs: [
+          "Een lichtdoorlatend rolgordijn filtert het daglicht. De kamer blijft helder, terwijl u overdag uit het zicht zit. Dat maakt het geschikt voor een living, een keuken of een bureau. Houd er rekening mee dat ’s avonds, met het licht aan, silhouetten van buitenaf zichtbaar blijven.",
+          "Een verduisterend rolgordijn houdt het licht tegen. Dat is prettig in een slaapkamer of kinderkamer, of in een ruimte waar u naar een scherm kijkt. Langs de randen van het doek kan altijd wat licht binnenvallen; daarom bekijken wij bij de opmeting of het rolgordijn het best in de dagopening of ervoor komt.",
+        ],
+        table: {
+          head: ["", "Lichtdoorlatend", "Verduisterend"],
+          rows: [
+            ["Daglicht", "Gefilterd: de kamer blijft helder", "Tegengehouden"],
+            ["Privacy overdag", "Ja", "Ja"],
+            ["Privacy ’s avonds, met het licht aan", "Silhouetten blijven zichtbaar", "Ja"],
+            ["Vaak gekozen voor", "Living, keuken, bureau", "Slaapkamer, kinderkamer"],
+          ],
+        },
+      },
+      {
+        id: "kleur",
+        title: "Wit, ecru of een donkere tint?",
+        paragraphs: [
+          "Ook de kleur speelt mee. Een lichte tint, zoals wit of ecru, houdt de kamer helder; een donkere tint tempert het licht sterker. Twijfelt u, dan combineert u een lichtdoorlatend rolgordijn voor overdag met een gordijn voor de avond. De kleuren en stoffen bekijkt u in onze winkel in Ninove of bij u thuis.",
+        ],
+      },
+      {
+        id: "plisses",
+        title: "Plissés",
+        paragraphs: [
+          "Een plissé is een geplooid doek dat compact opvouwt. Het bestaat ook voor schuine of bijzondere raamvormen en kan, afhankelijk van het model, zowel van boven als van onder geopend worden. Zo laat u bovenaan licht binnen terwijl u onderaan uit het zicht blijft.",
+        ],
+      },
+      {
+        id: "jaloezieen",
+        title: "Jaloezieën",
+        paragraphs: ["Met jaloezieën richt u het licht nauwkeurig met de lamellen: open voor licht en uitzicht, gekanteld voor privacy, dicht om het licht te temperen."],
+      },
+      {
+        id: "vouwgordijnen",
+        title: "Vouwgordijnen",
+        paragraphs: ["Een vouwgordijn heeft de zachtheid van stof, maar vouwt compact op wanneer u het optrekt. Het sluit mooi aan bij gordijnen in dezelfde ruimte."],
+      },
+    ],
   },
   {
     slug: "opmeting-aan-huis",
     title: "Gratis opmeting aan huis",
     summary:
-      "Wij komen gratis bij u thuis opmeten en bekijken ter plaatse wat uw ramen of vloeren nodig hebben. Zo krijgt u advies in uw eigen interieur en een offerte die vertrekt van de juiste maten, zonder enige verplichting.",
+      "Wij komen gratis bij u thuis opmeten en bekijken ter plaatse wat uw ramen, wanden of vloeren nodig hebben. Zo krijgt u advies in uw eigen interieur en een offerte die vertrekt van de juiste maten, zonder enige verplichting.",
     image: BEELD.dienstOpmeting,
     steps: [
       {
         title: "Aanvraag",
-        text: "Beschrijf kort uw project in het formulier en voeg gerust foto’s toe. Wij nemen binnen 1 à 2 werkdagen contact met u op.",
+        text: "Beschrijf kort uw project in het formulier en voeg gerust foto’s toe. Wij nemen nog dezelfde dag contact met u op.",
       },
       {
         title: "Afspraak",
@@ -142,16 +215,17 @@ export const SERVICES: Service[] = [
     body: [
       "Maatwerk staat of valt met de juiste maten. Een gordijn dat een paar centimeter te kort is, of vasttapijt dat net niet aansluit tegen de plint, ziet u elke dag. Daarom komen wij gratis bij u thuis opmeten. U hoeft zelf niets te meten of uit te rekenen: wij nemen de maten, noteren de details die ertoe doen en bespreken meteen wat mogelijk is. Zo vertrekt uw offerte van de werkelijke situatie in uw woning, en niet van een schatting.",
       "Een opmeting bij u thuis is meer dan een meetlint uitrollen. Ter plaatse zien we hoe het licht binnenvalt, hoe hoog het plafond is, waar de radiatoren hangen en hoe de ramen opendraaien. Dat bepaalt mee welke stof, welke plooi of welke raamdecoratie het best werkt. Voor vasttapijt bekijken we de ondergrond, de dorpels en de overgangen tussen de ruimtes. Waar mogelijk nemen we stalen mee, zodat u kleuren en materialen beoordeelt in uw eigen licht, naast uw eigen meubels.",
-      "Na de opmeting krijgt u een offerte die precies aangeeft wat er gemaakt, geleverd en geplaatst wordt, met een indicatie van de termijn. Omdat de maten vastliggen, kunt u rustig beslissen. De opmeting verplicht u tot niets. Gaat u akkoord, dan blijft uw project in dezelfde handen: onze eigen stiksters maken uw gordijnen in ons atelier, en onze eigen mensen komen ze nadien plaatsen. Wie bij u opmeet, kent dus ook het vervolg.",
-      `Een opmeting aanvragen is eenvoudig. Vul het formulier op deze pagina in, vertel kort om welke ruimtes en welke ramen of vloeren het gaat, en voeg eventueel een paar foto’s toe. Wij nemen binnen 1 à 2 werkdagen contact met u op om een afspraak te maken. Liever eerst even praten? Bel ons op ${SITE.phone.display} of kom langs in onze winkel aan de ${SITE.address.street} in ${SITE.address.city}. Wij nemen graag de tijd voor uw vragen.`,
+      "Na de opmeting krijgt u een offerte die precies aangeeft wat de prijs is en welke mogelijkheden er zijn voor de plaatsing, met waar nodig de termijn. Omdat de maten vastliggen, kunt u rustig beslissen. De opmeting verplicht u tot niets. Gaat u akkoord, dan volgen wij uw project verder op: uw gordijnen brengen we op maat in ons eigen atelier, en vakmannen komen ze nadien plaatsen.",
+      `Een opmeting aanvragen is eenvoudig. Vul het formulier op deze pagina in, vertel kort om welke ruimtes en welke ramen, wanden of vloeren het gaat, en voeg eventueel een paar foto’s toe. Wij nemen nog dezelfde dag contact met u op om een afspraak te maken. Liever eerst even praten? Bel ons op ${SITE.phone.display} of kom langs in onze winkel aan de ${SITE.address.street} in ${SITE.address.city}. Wij nemen graag de tijd voor uw vragen.`,
     ],
-    relatedCategoryIds: ["c05", "c04"],
+    // Behang hoort erbij: opmeting aan huis kan ook voor behang (beslist 13/11/2026).
+    relatedCategoryIds: ["c05", "c04", "c02"],
   },
   {
     slug: "plaatsing",
-    title: "Plaatsing door onze eigen mensen",
+    title: "Plaatsing door vakmannen",
     summary:
-      "Wat wij verkopen, plaatsen we ook zelf. Gordijnen, raamdecoratie en vasttapijt worden bij u thuis geleverd en geplaatst door onze eigen mensen.",
+      "Gordijnen, raamdecoratie en vasttapijt worden bij u thuis geleverd en geplaatst door vakmannen. Wij plannen alles met u en blijven uw aanspreekpunt.",
     image: BEELD.dienstPlaatsing,
     steps: [
       {
@@ -164,7 +238,7 @@ export const SERVICES: Service[] = [
       },
       {
         title: "Plaatsing",
-        text: "Onze eigen mensen leveren en plaatsen alles vakkundig, met oog voor detail en respect voor uw woning.",
+        text: "Vakmannen leveren en plaatsen alles, met oog voor detail en respect voor uw woning.",
       },
       {
         title: "Controle",
@@ -172,10 +246,10 @@ export const SERVICES: Service[] = [
       },
     ],
     body: [
-      "Een mooi gordijn of een kwaliteitsvol vasttapijt komt pas tot zijn recht als het goed geplaatst is. Daarom gebeuren de levering en de plaatsing bij Brunic door onze eigen mensen. Zij kennen onze producten, weten hoe de stukken in het atelier gemaakt zijn en werken met de maten die we bij de opmeting genomen hebben. Dat geeft u één aanspreekpunt, van het eerste advies tot de laatste afwerking.",
-      "Bij gordijnen betekent plaatsing meer dan ophangen. Waar nodig bevestigen onze mensen de rails of roeden, hangen ze de gordijnen op, verdelen ze de plooien en controleren ze of de lengte klopt ten opzichte van de vloer. Bij raamdecoratie zorgen ze voor een rechte, stevige montage en een vlotte bediening. Bij vasttapijt maken ze de ruimte klaar, leggen ze het tapijt strak en werken ze de randen en overgangen netjes af.",
+      "Een mooi gordijn of een kwaliteitsvol vasttapijt komt pas tot zijn recht als het goed geplaatst is. Daarom laat Brunic de levering en de plaatsing over aan vakmannen. Zij werken met de maten die we bij de opmeting genomen hebben. Voor u blijft Brunic het aanspreekpunt, van het eerste advies tot de laatste afwerking.",
+      "Bij gordijnen betekent plaatsing meer dan ophangen. Waar nodig bevestigen de plaatsers de rails of roeden, hangen ze de gordijnen op, verdelen ze de plooien en controleren ze of de lengte klopt ten opzichte van de vloer. Bij raamdecoratie zorgen ze voor een rechte, stevige montage en een vlotte bediening. Bij vasttapijt maken ze de ruimte klaar, leggen ze het tapijt strak en werken ze de randen en overgangen netjes af.",
       "Wij spreken de plaatsing altijd vooraf met u af, op een moment dat u thuis bent. U hoort van ons wat u zelf kunt voorbereiden: een vrije doorgang, ramen die goed bereikbaar zijn, een ruimte zonder losse spullen op de vloer. Wat er precies in de plaatsing inbegrepen is, staat duidelijk in uw offerte. Zo weet u vooraf waar u aan toe bent, en verloopt de dag van de plaatsing rustig.",
-      "Na de plaatsing overlopen we samen het resultaat. Is er iets dat u anders wenst of dat niet klopt, dan horen we dat liever meteen. En hebt u achteraf een vraag over onderhoud of bediening, dan belt of mailt u ons gewoon: u krijgt dezelfde winkel aan de lijn waar uw project begon. Wilt u weten wat plaatsing voor uw project inhoudt? Vraag het ons via het formulier; wij nemen binnen 1 à 2 werkdagen contact met u op.",
+      "Na de plaatsing overlopen we samen het resultaat. Is er iets dat u anders wenst of dat niet klopt, dan horen we dat liever meteen. En hebt u achteraf een vraag over onderhoud of bediening, dan belt of mailt u ons gewoon: u krijgt dezelfde winkel aan de lijn waar uw project begon. Wilt u weten wat plaatsing voor uw project inhoudt? Vraag het ons via het formulier; wij nemen nog dezelfde dag contact met u op.",
     ],
     relatedCategoryIds: ["c05", "c04"],
   },
@@ -183,7 +257,7 @@ export const SERVICES: Service[] = [
     slug: "vasttapijt-en-vloeren",
     title: "Vasttapijt & vloeren, vakkundig gelegd",
     summary:
-      "Vasttapijt, tapijttegels en lopers van onder meer Associated Weavers, Desso, Lano, Balsan en Tarkett, met eerlijk advies over materiaal en gebruik. Wij meten gratis op en onze eigen mensen leggen het tapijt bij u thuis.",
+      "Vasttapijt, tapijttegels en lopers van onder meer Associated Weavers, Desso, Lano, Balsan en Tarkett, met eerlijk advies over materiaal en gebruik. Wij meten gratis op en vakmannen leggen het tapijt bij u thuis.",
     image: BEELD.dienstVloeren,
     steps: [
       {
@@ -200,16 +274,18 @@ export const SERVICES: Service[] = [
       },
       {
         title: "Leggen",
-        text: "Onze eigen mensen leggen het tapijt strak en werken randen, naden en overgangen netjes af.",
+        text: "Vakmannen leggen het tapijt strak en werken randen, naden en overgangen netjes af.",
       },
     ],
     body: [
       "Vasttapijt voelt warm aan de voeten, dempt geluid en maakt een slaapkamer of living meteen rustiger. De keuze is wel groot: van korte, stevige lussen tot zachte velours, in polyamide, polypropyleen, polyester, wol of sisal. Bij Brunic vindt u vasttapijt van onder meer Associated Weavers, Desso, Lano, Balsan en Tarkett, naast tapijttegels en tapijtlopers. In onze winkel in Ninove kunt u de stalen voelen en naast elkaar vergelijken, zodat u niet op een foto hoeft te kiezen.",
       "Het juiste materiaal hangt af van de ruimte. Polyamide is sterk en veerkrachtig, en daardoor geschikt voor plaatsen waar veel gelopen wordt, zoals een gang of een trap. Polypropyleen is kleurvast en eenvoudig te onderhouden; polyester voelt vaak zacht aan en bestaat in levendige kleuren. Wol is een natuurlijke, veerkrachtige vezel met een warme uitstraling, en sisal geeft een stevige, natuurlijke structuur, al is het minder geschikt voor vochtige ruimtes. Wij helpen u afwegen wat voor u het belangrijkst is.",
       "Een vasttapijt wordt gelegd op maat van uw ruimte. Daarom meten wij gratis bij u thuis op. We bekijken de ondergrond, de deuren, de dorpels en de overgangen naar andere vloeren, en we bepalen hoe de banen het best liggen, met zo weinig mogelijk naden op zichtbare plaatsen. Zo weet u vooraf hoeveel vierkante meter u nodig hebt en wat er bij het leggen komt kijken. Dat alles staat duidelijk in uw offerte.",
-      "Het leggen zelf gebeurt door onze eigen mensen. Zij maken de ruimte klaar, leggen het tapijt strak en werken randen en overgangen verzorgd af. Voor kantoren, horeca en zorg bekijken we ook tapijttegels van Desso en Balsan, die u per tegel kunt vervangen. Beschrijf uw ruimte kort in het aanvraagformulier, eventueel met een foto, en wij nemen binnen 1 à 2 werkdagen contact met u op om de opmeting af te spreken.",
+      "Het leggen zelf gebeurt door vakmannen. Zij maken de ruimte klaar, leggen het tapijt strak en werken randen en overgangen verzorgd af. Voor kantoren, horeca en zorg bekijken we ook tapijttegels van Desso en Balsan, die u per tegel kunt vervangen. Beschrijf uw ruimte kort in het aanvraagformulier, eventueel met een foto, en wij nemen nog dezelfde dag contact met u op om de opmeting af te spreken.",
     ],
     relatedCategoryIds: ["c04", "s-vloerbekleding-vasttapijt"],
+    // De samenvatting telt meer dan 200 tekens; "tapis plein" is in Vlaanderen de gangbare naam voor vasttapijt.
+    seoDescription: "Vasttapijt (tapis plein), tapijttegels en lopers van onder meer Associated Weavers, Desso en Lano. Wij meten gratis op en vakmannen leggen het tapijt.",
   },
   {
     slug: "tapijt-op-maat",
@@ -232,16 +308,20 @@ export const SERVICES: Service[] = [
       },
       {
         title: "Levering",
-        text: "Uw tapijt wordt op maat gemaakt en door onze eigen mensen bij u thuis geleverd.",
+        text: "Uw tapijt wordt op maat gemaakt en bij u thuis geleverd.",
       },
     ],
     body: [
       "Een standaardmaat past niet altijd. Een living met een grote hoekzetel, een eetkamer met een lange tafel of een slaapkamer met een ruim bed vraagt soms om een tapijt dat net iets groter, smaller of anders van vorm is. Met een tapijt op maat bepaalt u zelf de afmetingen, zodat het vloerkleed de ruimte samenbrengt in plaats van erin te verdwijnen. Voor tapijten op maat werken wij met kwaliteiten van onder meer Desso en Tarkett.",
       "De juiste maat vertrekt van de meubels. Als vuistregel staan ofwel alle meubels van de zithoek volledig op het tapijt, ofwel enkel de voorpoten van de zetel en de fauteuils. Rond het tapijt laat u best 20 tot 40 cm vrije vloer tot aan de muur, zodat de ruimte ademt. Onder een eettafel rekent u op ongeveer 60 à 70 cm extra rondom, zodat de stoelen niet van de rand glijden. Een handige tip: baken de gewenste maat af met afplakband op de vloer.",
       "Naast de maat kiest u het materiaal en de afwerking. Een dichte, korte pool is gemakkelijk te onderhouden en geschikt voor een eethoek; een hoger, zachter tapijt voelt warmer aan in een living of slaapkamer. Bij de afwerking van de randen houden we rekening met het gebruik en met de uitstraling die u zoekt. Zoekt u eerder een kant-en-klaar vloerkleed in een ronde of bijzondere vorm, bekijk dan ook onze vloerkleden van Louis De Poortere.",
-      "U kunt stalen en kwaliteiten bekijken in onze winkel in Ninove. Wij noteren de gewenste maat en vorm, en u krijgt vooraf een offerte. Wanneer uw tapijt klaar is, leveren onze eigen mensen het bij u thuis af. Omdat een tapijt op maat speciaal voor u wordt gemaakt, kan het niet worden teruggenomen zoals een standaardartikel. Daarom nemen we de tijd om de maat en de kwaliteit samen met u goed te bepalen.",
+      "U kunt stalen en kwaliteiten bekijken in onze winkel in Ninove. Wij noteren de gewenste maat en vorm, en u krijgt vooraf een offerte. Wanneer uw tapijt klaar is, leveren we het bij u thuis af. Omdat een tapijt op maat speciaal voor u wordt gemaakt, kan het niet worden teruggenomen zoals een standaardartikel. Daarom nemen we de tijd om de maat en de kwaliteit samen met u goed te bepalen.",
     ],
     relatedCategoryIds: ["s-tapijten-op-maat", "c03"],
+    // Deze pagina legt uit hoe het werkt; de lijst /catalogus/tapijten/op-maat toont de kwaliteiten
+    // (eigen titel in data/categorie-seo.ts), zodat de twee niet om dezelfde zoekvraag strijden.
+    seoTitle: "Tapijt op maat laten maken",
+    seoDescription: "Een tapijt op maat laten maken: u kiest de afmeting, de kwaliteit en de afwerking van de randen. Advies in onze winkel in Ninove, met vooraf een offerte.",
   },
   {
     slug: "behang-en-fotobehang",
@@ -260,7 +340,7 @@ export const SERVICES: Service[] = [
       },
       {
         title: "Berekening",
-        text: "Op basis van de afmetingen van uw wanden berekenen we hoeveel rollen u nodig hebt.",
+        text: "Op basis van de afmetingen van uw wanden, die we ook gratis bij u thuis kunnen opmeten, berekenen we hoeveel rollen u nodig hebt.",
       },
       {
         title: "Bestelling",
@@ -271,7 +351,7 @@ export const SERVICES: Service[] = [
       "Behang geeft een ruimte in één keer karakter. Een effen behang met een subtiele structuur brengt rust, een streep geeft ritme en hoogte, een bloemenmotief zorgt voor warmte en beweging. Bij Brunic vindt u behang en fotobehang van onder meer ESTAhome, Origin Wallcoverings en Boråstapeter. Boråstapeter is een Zweeds behangmerk dat ook fotobehang op maat maakt.",
       "Kiezen is vaak het moeilijkste. Een klein staal zegt weinig over hoe een motief op een volledige wand werkt. Daarom kijken we samen naar de ruimte: hoe groot is ze, hoeveel daglicht valt er binnen, welke kleuren hebben uw vloer, uw gordijnen en uw meubels? Wij tonen u hoe een motief zich herhaalt en adviseren over de schaal. In een kleine ruimte werkt een fijn patroon anders dan een groot dessin, en een streep anders in een lage dan in een hoge kamer.",
       "Voor één blikvangerwand is fotobehang of panoramisch behang een sterke keuze. Een panoramisch behang loopt als één groot beeld over de wand, zonder dat het motief zich herhaalt. Bij ESTAhome en Origin Wallcoverings vindt u fotobehang in vaste afmetingen, en bij Boråstapeter kunt u fotobehang op maat laten maken, afgestemd op de afmetingen van uw wand. Zo bepaalt u zelf welk deel van het beeld waar komt, en valt er geen belangrijk stuk van het motief weg achter een kast of in een hoek.",
-      "Wij berekenen voor u hoeveel rollen u nodig hebt, rekening houdend met de patroonherhaling en een kleine reserve. Behang wordt per rol verkocht, fotobehang per stuk of op maat van uw wand. Breng de maten van uw wanden mee naar de winkel, of beschrijf uw project in het aanvraagformulier. Wij nemen binnen 1 à 2 werkdagen contact met u op en helpen u met de keuze en de bestelling.",
+      "Wij berekenen voor u hoeveel rollen u nodig hebt, rekening houdend met de patroonherhaling en een kleine reserve. Behang wordt per rol verkocht, fotobehang per stuk of op maat van uw wand. Breng de maten van uw wanden mee naar de winkel, vraag een gratis opmeting aan huis aan of beschrijf uw project in het aanvraagformulier. Wij nemen nog dezelfde dag contact met u op en helpen u met de keuze en de bestelling.",
     ],
     relatedCategoryIds: ["c02"],
   },
@@ -296,14 +376,14 @@ export const SERVICES: Service[] = [
       },
       {
         title: "Uitvoering",
-        text: "Onze stiksters maken de gordijnen in ons atelier en onze eigen mensen plaatsen alles volgens de afgesproken planning.",
+        text: "In ons eigen atelier brengen we de gordijnen op maat, en vakmannen plaatsen alles volgens de afgesproken planning.",
       },
     ],
     body: [
-      "In een hotelkamer, een restaurant, een woonzorgcentrum of een vergaderzaal gelden andere eisen dan thuis. Textiel moet er intensief gebruik aankunnen, vaak gereinigd worden en voldoen aan de brandveiligheidsvoorschriften die voor het gebouw gelden. Naast particulieren werkt Brunic daarom ook voor horeca en zorg. Wij combineren het advies van een interieurzaak met een eigen atelier en eigen plaatsers, zodat u één partner hebt voor stoffen, gordijnen en vloerbekleding.",
+      "In een hotelkamer, een restaurant, een woonzorgcentrum of een vergaderzaal gelden andere eisen dan thuis. Textiel moet er intensief gebruik aankunnen, vaak gereinigd worden en voldoen aan de brandveiligheidsvoorschriften die voor het gebouw gelden. Naast particulieren werkt Brunic daarom ook voor horeca en zorg. Wij combineren het advies van een interieurzaak met een eigen atelier en vakmannen voor de plaatsing, zodat u één aanspreekpunt hebt voor stoffen, gordijnen en vloerbekleding.",
       "In onze collectie gordijnstoffen vindt u een aparte reeks brandvrije stoffen voor projecten, naast brandvertragende kwaliteiten. Bij sommige stoffen zit de brandvertragende eigenschap in de vezel zelf en blijft ze ook na het wassen behouden; bij andere gaat het om een behandeling van de stof. Welke norm of brandklasse vereist is, hangt af van het gebouw en de regelgeving. Wij bekijken dat per stof met u en bezorgen u op vraag de technische gegevens die de fabrikant ter beschikking stelt.",
       "Ook voor de vloer denken we mee. Voor projecten bekijken we vasttapijt en tapijttegels in kwaliteiten die bestemd zijn voor intensief gebruik, onder meer van Desso en Balsan. Tapijt helpt het geluid in drukke ruimtes te dempen. Tapijttegels hebben bovendien het voordeel dat u een beschadigde of vervuilde tegel afzonderlijk kunt vervangen, wat in gangen, kantoren en ontvangstruimtes handig is. Wij adviseren u over de kwaliteit, het patroon en de legrichting.",
-      `Een project vraagt een duidelijke planning. Wij meten ter plaatse op, stemmen de uitvoering af met u, uw architect of uw aannemer, en werken met een offerte op maat. Onze eigen stiksters maken de gordijnen in ons atelier en onze eigen mensen zorgen voor de plaatsing. Beschrijf uw project kort in het aanvraagformulier of bel ons op ${SITE.phone.display}. Wij nemen binnen 1 à 2 werkdagen contact met u op om uw project te bespreken.`,
+      `Een project vraagt een duidelijke planning. Wij meten ter plaatse op, stemmen de uitvoering af met u, uw architect of uw aannemer, en werken met een offerte op maat. De gordijnen brengen we op maat in ons eigen atelier, en vakmannen zorgen voor de plaatsing. Beschrijf uw project kort in het aanvraagformulier of bel ons op ${SITE.phone.display}. Wij nemen nog dezelfde dag contact met u op om uw project te bespreken.`,
     ],
     relatedCategoryIds: ["s-stoffen-brandvrij", "c04"],
   },
@@ -505,7 +585,7 @@ export const ARTICLES: Article[] = [
       {
         heading: "Voelen en vergelijken",
         paragraphs: [
-          "Vasttapijt kiest u het best met uw handen en uw voeten. In onze winkel in Ninove vindt u stalen van onder meer Associated Weavers, Desso, Lano, Balsan en Tarkett, van zachte velours tot stevige lussen en natuurlijke materialen als wol en sisal. Hebt u een keuze gemaakt, dan meten wij gratis bij u thuis op en leggen onze eigen mensen het tapijt.",
+          "Vasttapijt kiest u het best met uw handen en uw voeten. In onze winkel in Ninove vindt u stalen van onder meer Associated Weavers, Desso, Lano, Balsan en Tarkett, van zachte velours tot stevige lussen en natuurlijke materialen als wol en sisal. Hebt u een keuze gemaakt, dan meten wij gratis bij u thuis op en leggen vakmannen het tapijt.",
         ],
       },
     ],
@@ -550,7 +630,7 @@ export const ARTICLES: Article[] = [
       {
         heading: "Laat u adviseren",
         paragraphs: [
-          "In onze winkel in Ninove ziet u gordijnstoffen, behang, tapijten en verf naast elkaar, wat combineren een stuk eenvoudiger maakt. Wij helpen u graag een kleurenpalet samen te stellen dat bij uw interieur past. Wilt u alles in uw eigen woning bekijken, vraag dan een gratis opmeting aan.",
+          "In onze winkel in Ninove ziet u gordijnstoffen, behang en tapijten naast elkaar, wat combineren een stuk eenvoudiger maakt. Wij helpen u graag een kleurenpalet samen te stellen dat bij uw interieur past. Wilt u alles in uw eigen woning bekijken, vraag dan een gratis opmeting aan.",
         ],
       },
     ],
@@ -595,7 +675,7 @@ export const ARTICLES: Article[] = [
       {
         heading: "Kleuren in het echt bekijken",
         paragraphs: [
-          "Warme tinten beoordeelt u het best in het echt, naast elkaar en in wisselend licht. In onze winkel in Ninove kunt u gordijnstoffen, behang, tapijten en verf samen bekijken. Wij denken graag met u mee over een palet dat past bij uw interieur, en bij een opmeting aan huis bekijken we het ook in uw eigen ruimte.",
+          "Warme tinten beoordeelt u het best in het echt, naast elkaar en in wisselend licht. In onze winkel in Ninove kunt u gordijnstoffen, behang en tapijten samen bekijken. Wij denken graag met u mee over een palet dat past bij uw interieur, en bij een opmeting aan huis bekijken we het ook in uw eigen ruimte.",
         ],
       },
     ],
@@ -744,7 +824,7 @@ export const ARTICLES: Article[] = [
     title: "Van stofkeuze tot plaatsing: zo werkt ons atelier",
     topic: "Advies",
     excerpt:
-      "Hoe worden gordijnen op maat bij Brunic gemaakt? Een blik achter de schermen, van het eerste gesprek in de winkel tot de plaatsing bij u thuis.",
+      "Hoe brengt Brunic gordijnen op maat? Een blik achter de schermen, van het eerste gesprek in de winkel tot de plaatsing bij u thuis.",
     image: BEELD.artAtelier,
     date: "2026-05-15",
     readingMinutes: 2,
@@ -758,26 +838,26 @@ export const ARTICLES: Article[] = [
       {
         heading: "Opmeten bij u thuis",
         paragraphs: [
-          "Daarna komen we gratis bij u thuis opmeten. Dat doen we zelf, omdat de maten het fundament zijn van alles wat volgt. We noteren niet alleen de breedte en de hoogte van de ramen, maar ook de plaats van de rail of roede, de afstand tot het plafond en de vloer, en de gewenste lengte: net boven de vloer, er net op of met een lichte val. Op basis daarvan maken we uw offerte, met een indicatie van de termijn.",
+          "Daarna komen we gratis bij u thuis opmeten. Dat doen we zelf, omdat de maten het fundament zijn van alles wat volgt. We noteren niet alleen de breedte en de hoogte van de ramen, maar ook de plaats van de rail of roede, de afstand tot het plafond en de vloer, en de gewenste lengte: net boven de vloer, er net op of met een lichte val. Op basis daarvan maken we uw offerte, met de prijs, de mogelijkheden voor plaatsing en waar nodig de termijn.",
         ],
       },
       {
-        heading: "Maakwerk in ons atelier",
+        heading: "Op maat in ons atelier",
         paragraphs: [
-          "Na uw akkoord gaat de bestelling naar ons eigen atelier. Onze stiksters snijden de stof op maat, werken de zomen af en brengen de plooien aan, precies zoals afgesproken. Omdat het atelier deel uitmaakt van ons eigen bedrijf, zijn de lijnen kort: een vraag over een detail wordt meteen opgelost tussen winkel en atelier.",
+          "Na uw akkoord gaat de bestelling naar ons eigen atelier. Daar brengen we uw gordijnen op maat: de lengte, de zomen en de plooien, precies zoals afgesproken. Omdat het atelier deel uitmaakt van ons eigen bedrijf, zijn de lijnen kort: een vraag over een detail wordt meteen opgelost tussen winkel en atelier.",
           "Vakmanschap zit in de details: een zoom die recht valt, plooien die gelijkmatig verdeeld zijn, een patroon dat mooi doorloopt over de banen. Het zijn dingen die u misschien niet bewust opmerkt, maar wel elke dag ziet.",
         ],
       },
       {
-        heading: "Plaatsing door onze eigen mensen",
+        heading: "Plaatsing door vakmannen",
         paragraphs: [
-          "Wanneer uw gordijnen klaar zijn, spreken we een moment af voor de plaatsing. Onze eigen mensen brengen de gordijnen bij u thuis, hangen ze op en verdelen de plooien, zodat ze meteen mooi hangen. Ze controleren de lengte en overlopen alles samen met u. Zo weet u zeker dat alles hangt zoals afgesproken.",
+          "Wanneer uw gordijnen klaar zijn, spreken we een moment af voor de plaatsing. Vakmannen brengen de gordijnen bij u thuis, hangen ze op en verdelen de plooien, zodat ze meteen mooi hangen. Ze controleren de lengte en overlopen alles samen met u. Zo weet u zeker dat alles hangt zoals afgesproken.",
         ],
       },
       {
         heading: "Waarom een eigen atelier?",
         paragraphs: [
-          "Een eigen atelier betekent voor u één aanspreekpunt, van het eerste advies tot de laatste plooi. Wie opmeet, weet wat het atelier nodig heeft, en wie plaatst, weet hoe de gordijnen gemaakt zijn. Als familiebedrijf dat al 40 jaar in Ninove gevestigd is, geloven we in die korte lijnen. Benieuwd wat dat voor uw ramen kan betekenen? Vraag een gratis opmeting aan of kom langs in de winkel.",
+          "Een eigen atelier betekent voor u één aanspreekpunt, van het eerste advies tot de laatste plooi. Wie opmeet, weet wat het atelier nodig heeft. Als familiebedrijf dat sinds 1982 in Ninove gevestigd is, geloven we in die korte lijnen. Benieuwd wat dat voor uw ramen kan betekenen? Vraag een gratis opmeting aan of kom langs in de winkel.",
         ],
       },
     ],
@@ -792,15 +872,15 @@ export const ARTICLES: Article[] = [
 export const FAQ: { q: string; a: string }[] = [
   {
     q: "Is de opmeting aan huis echt gratis?",
-    a: "Ja. Wij komen gratis bij u thuis opmeten en geven ter plaatse advies over stoffen, raamdecoratie of vloerbekleding. Nadien ontvangt u een offerte op basis van de exacte maten. De opmeting verplicht u tot niets.",
+    a: "Ja. Wij komen gratis bij u thuis opmeten en geven ter plaatse advies over stoffen, raamdecoratie, behang of vloerbekleding. Nadien ontvangt u een offerte op basis van de exacte maten. De opmeting verplicht u tot niets.",
   },
   {
-    q: "Hoe lang duurt het maken van gordijnen op maat?",
+    q: "Hoe lang duurt het voor uw gordijnen op maat klaar zijn?",
     a: "Dat hangt af van de gekozen stof en van de omvang van uw project. U krijgt een indicatie van de termijn bij uw offerte. Zodra uw gordijnen klaar zijn, plannen we de plaatsing samen met u in.",
   },
   {
     q: "Waarom staat er bij de producten ‘prijs op aanvraag’?",
-    a: "De prijs van gordijnen, behang en vloerbekleding hangt af van uw maten, het stofverbruik, de afwerking en een eventuele plaatsing. Een vaste prijs per stuk zou daarom weinig zeggen. Beschrijf uw project via het aanvraagformulier; wij nemen binnen 1 à 2 werkdagen contact met u op om het te bespreken.",
+    a: "De prijs van gordijnen, behang en vloerbekleding hangt af van uw maten, het stofverbruik, de afwerking en een eventuele plaatsing. Een vaste prijs per stuk zou daarom weinig zeggen. Beschrijf uw project via het aanvraagformulier; wij nemen nog dezelfde dag contact met u op om het te bespreken.",
   },
   {
     q: "Kan ik stoffen en stalen in de winkel bekijken?",
@@ -811,8 +891,13 @@ export const FAQ: { q: string; a: string }[] = [
     a: "Bewaar de producten die u interesseren op uw verlanglijst terwijl u door de website bladert. U kunt die lijst afdrukken, met de artikelnummers erbij, en meenemen naar de winkel. Zo vinden we samen snel de juiste stalen terug.",
   },
   {
-    q: "Plaatst Brunic ook zelf?",
-    a: "Ja. Gordijnen, raamdecoratie en vasttapijt worden bij u thuis geleverd en geplaatst door onze eigen mensen. Wat de plaatsing inhoudt en kost, staat vooraf in uw offerte.",
+    q: "Zorgt Brunic ook voor de plaatsing?",
+    a: "Ja. Gordijnen, raamdecoratie en vasttapijt worden bij u thuis geleverd en geplaatst door vakmannen. Wat de plaatsing inhoudt en kost, staat vooraf in uw offerte.",
+  },
+  {
+    // Levertermijn van Brunic zelf (beslist 13/11/2026). Levertermijnen van leveranciers tonen we nooit.
+    q: "Hoe snel wordt mijn online bestelling geleverd?",
+    a: "Bestelt u een product rechtstreeks online, dan leveren wij binnen de week. U krijgt meteen een bevestiging van wanneer we kunnen leveren. Moet het product nog bij de leverancier besteld worden, dan kan het langer duren; ook dat laten we u dan meteen weten. Voor maatwerk staat de termijn in uw offerte.",
   },
   {
     q: "Kan ik mijn bestelling afhalen in de winkel?",
@@ -832,7 +917,7 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Verkoopt u raamdecoratie ook online?",
-    a: "Rolgordijnen, plissés, jaloezieën en vouwgordijnen worden altijd op maat gemaakt en zijn daarom niet online te koop. U bekijkt en kiest ze in onze winkel of bij u thuis, waarna wij opmeten en plaatsen.",
+    a: "Rolgordijnen, plissés, jaloezieën en vouwgordijnen worden altijd op maat gemaakt en zijn daarom niet online te koop. U bekijkt en kiest ze in onze winkel of bij u thuis, waarna wij opmeten en vakmannen ze plaatsen.",
   },
   {
     q: "Wanneer bent u open en hoe bereik ik u?",
@@ -881,24 +966,24 @@ export const INFO_PAGES: InfoPage[] = [
     slug: "over-ons",
     title: "Over Brunic",
     intro:
-      "Brunic is een familiebedrijf dat al 40 jaar in Ninove klaarstaat voor wie zijn interieur wil verfraaien. Van gordijnen op maat uit ons eigen atelier tot behang, tapijt en vasttapijt: wij adviseren, meten op, maken en plaatsen.",
+      "Brunic is een familiebedrijf dat sinds 1982 in Ninove klaarstaat voor wie zijn interieur wil verfraaien. Van gordijnen op maat uit ons eigen atelier tot behang, tapijt en vasttapijt: wij adviseren, meten op en zorgen dat alles vakkundig geplaatst wordt.",
     sections: [
       {
         heading: "Een familiebedrijf in Ninove",
         paragraphs: [
-          "Brunic is al 40 jaar een vertrouwd adres in Ninove en de Denderstreek. Als familiebedrijf helpen wij u met alles wat een woning warm en persoonlijk maakt: gordijnen en stoffen, raamdecoratie, behang, vasttapijt, tapijten, verf en slaapcomfort. Sinds 1992 is Brunic een nv. Onze aanpak is dezelfde gebleven: persoonlijk advies, vakmanschap en betrokkenheid tot uw project af is.",
+          "Brunic is sinds 1982 een vertrouwd adres in Ninove en de Denderstreek. Als familiebedrijf helpen wij u met alles wat een woning warm en persoonlijk maakt: gordijnen en stoffen, raamdecoratie, behang, vasttapijt en tapijten. Sinds 1992 is Brunic een nv. Onze aanpak is dezelfde gebleven: persoonlijk advies, vakmanschap en betrokkenheid tot uw project af is.",
         ],
       },
       {
-        heading: "Ons eigen atelier",
+        heading: "Wat ons onderscheidt",
         paragraphs: [
-          "Wat ons onderscheidt, is ons eigen atelier. Gordijnen op maat worden bij ons gemaakt door onze eigen stiksters, op de maten die wij bij u thuis opmeten. Dat geeft korte lijnen tussen winkel, atelier en plaatsing, en het laat ons toe om ook bijzondere wensen of moeilijke ramen met zorg aan te pakken.",
+          "Wat ons onderscheidt, zijn service, kwaliteit en ons eigen atelier. Daar brengen we gordijnen op maat, op de maten die wij bij u thuis opmeten. Dat geeft korte lijnen tussen winkel en atelier, en het laat ons toe om ook bijzondere wensen of moeilijke ramen met zorg aan te pakken.",
         ],
       },
       {
         heading: "Van advies tot plaatsing",
         paragraphs: [
-          "Bij Brunic hoeft u niet zelf alles te regelen. U krijgt advies in de winkel, wij komen gratis bij u thuis opmeten, het maakwerk gebeurt in ons eigen atelier en onze eigen mensen zorgen voor de levering en de plaatsing. Zo hebt u van begin tot einde één aanspreekpunt dat uw project kent.",
+          "Bij Brunic hoeft u niet zelf alles te regelen. U krijgt advies in de winkel, wij komen gratis bij u thuis opmeten, gordijnen brengen we op maat in ons eigen atelier en vakmannen zorgen voor de levering en de plaatsing. Zo hebt u van begin tot einde één aanspreekpunt dat uw project kent.",
         ],
       },
       {
@@ -919,19 +1004,19 @@ export const INFO_PAGES: InfoPage[] = [
     slug: "levering",
     title: "Levering & afhalen",
     intro:
-      "Maatwerk leveren en plaatsen wij met onze eigen mensen. Andere bestellingen laat u leveren of haalt u af in onze winkel in Ninove.",
+      "Online bestellingen leveren wij binnen de week, of u haalt ze af in onze winkel in Ninove. Maatwerk wordt geleverd en geplaatst door vakmannen.",
     sections: [
       {
-        heading: "Maatwerk: levering en plaatsing door onze eigen mensen",
+        heading: "Maatwerk: levering en plaatsing door vakmannen",
         paragraphs: [
-          "Gordijnen op maat, raamdecoratie, vasttapijt en tapijten op maat leveren wij bij u thuis met onze eigen mensen. Hoort plaatsing bij de opdracht, dan gebeurt die meteen bij de levering. Wij spreken de datum en het tijdstip vooraf met u af.",
+          "Gordijnen op maat, raamdecoratie, vasttapijt en tapijten op maat worden bij u thuis geleverd door vakmannen. Hoort plaatsing bij de opdracht, dan gebeurt die meteen bij de levering. Wij spreken de datum en het tijdstip vooraf met u af.",
           "De termijn hangt af van de gekozen stof of kwaliteit en van de omvang van het project. U krijgt een indicatie in uw offerte, samen met wat de levering en de plaatsing kosten. Zo weet u waar u aan toe bent voor u beslist.",
         ],
       },
       {
         heading: "Bestellingen via de webshop",
         paragraphs: [
-          "Voor producten met ‘prijs op aanvraag’ maken wij een offerte op; daarin staan ook de levering en een eventuele plaatsing. Bestelt u een product rechtstreeks online, dan ziet u bij het afrekenen welke leveringsmogelijkheden er zijn, wat ze eventueel kosten en wanneer u uw bestelling mag verwachten, nog voor u de bestelling bevestigt.",
+          "Voor producten met ‘prijs op aanvraag’ maken wij een offerte op; daarin staan ook de levering en een eventuele plaatsing. Bestelt u een product rechtstreeks online, dan leveren wij binnen de week. U krijgt meteen een bevestiging van wanneer we kunnen leveren. Moet het product nog bij de leverancier besteld worden, dan kan het langer duren; ook dat laten we u dan meteen weten. Bij het afrekenen ziet u welke leveringsmogelijkheden er zijn en wat ze eventueel kosten, nog voor u de bestelling bevestigt.",
           "Tenzij anders afgesproken, leveren wij uiterlijk 30 dagen na het sluiten van de overeenkomst, zoals de wet voorschrijft. Lukt dat onverwacht niet, dan brengen wij u zo snel mogelijk op de hoogte.",
         ],
       },
@@ -1299,7 +1384,7 @@ export const INFO_PAGES: InfoPage[] = [
         heading: "Uitzonderingen",
         paragraphs: [
           "Het herroepingsrecht geldt onder meer niet voor:",
-          "• goederen die volgens uw specificaties vervaardigd zijn of duidelijk voor u gepersonaliseerd zijn (art. VI.53, 3° WER), zoals gordijnen op maat, raamdecoratie op maat, fotobehang op maat, tapijten op maat, verf die in een door u gekozen kleur aangemaakt wordt, en stof, wandbekleding of vasttapijt die op de door u gevraagde lengte of maat gesneden wordt;",
+          "• goederen die volgens uw specificaties vervaardigd zijn of duidelijk voor u gepersonaliseerd zijn (art. VI.53, 3° WER), zoals gordijnen op maat, raamdecoratie op maat, fotobehang op maat, tapijten op maat, en stof, wandbekleding of vasttapijt die op de door u gevraagde lengte of maat gesneden wordt;",
           "• diensten die volledig uitgevoerd zijn met uw uitdrukkelijke voorafgaande toestemming, nadat u erkende dat u uw herroepingsrecht verliest zodra de dienst volledig uitgevoerd is;",
           "• verzegelde goederen die om redenen van gezondheidsbescherming of hygiëne niet geschikt zijn om te worden teruggezonden en waarvan de verzegeling na de levering verbroken is.",
         ],

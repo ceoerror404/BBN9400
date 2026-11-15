@@ -47,6 +47,9 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   devIndicators: false,
   poweredByHeader: false,
+  // De schuine streep achteraan handelt src/proxy.ts af: een oude URL van brunic.be (altijd met
+  // streep) gaat dan in één 308 naar haar bestemming, al de rest zoals voorheen naar de URL zonder streep.
+  skipTrailingSlashRedirect: true,
   // De catalogus-momentopname (Shopify, zie scripts/voor-build.mjs) wordt at runtime met fs
   // gelezen; zonder deze regel zit ze niet in de serverless-functies op Vercel.
   outputFileTracingIncludes: { "/**": ["./.data/shopify-catalogus.json"] },
@@ -60,23 +63,25 @@ const nextConfig: NextConfig = {
   async redirects() {
     // Gewone pagina's van de oude WooCommerce-site (brunic.be, page-sitemap 20/10/2026).
     // Producten en categorieën: src/lib/site/oude-urls.ts.
-    const raamdecoratie = [
-      "raamdecoratie",
-      "plisse-gordijnen",
-      "dubbele-plissegordijnen",
-      "velux-zonnewering",
-      "shutters",
-      "paneelgordijnen",
-      "geweven-hout",
-      "verticale-jaloezieen",
-      "horizontale-houten-jaloezieen",
-      "horizontale-aluminium-jaloezieen",
-      "duorolgordijnen",
-      "rolgordijnen",
-      "vouwgordijnen",
-      "smart-blinds",
-      "sheerlight",
-    ];
+    // Oude typepagina → het blok van dat type op de dienstpagina (ankers: SERVICES › sections in
+    // src/data/content.ts). Types die Brunic nog niet bevestigde, landen bovenaan de pagina.
+    const raamdecoratie: Record<string, string> = {
+      raamdecoratie: "",
+      rolgordijnen: "#rolgordijnen",
+      duorolgordijnen: "#rolgordijnen",
+      "plisse-gordijnen": "#plisses",
+      "dubbele-plissegordijnen": "#plisses",
+      "verticale-jaloezieen": "#jaloezieen",
+      "horizontale-houten-jaloezieen": "#jaloezieen",
+      "horizontale-aluminium-jaloezieen": "#jaloezieen",
+      vouwgordijnen: "#vouwgordijnen",
+      "velux-zonnewering": "",
+      shutters: "",
+      paneelgordijnen: "",
+      "geweven-hout": "",
+      "smart-blinds": "",
+      sheerlight: "",
+    };
     const oudeSite: [string, string][] = [
       ["/webshop", "/catalogus"],
       ["/shop", "/catalogus"],
@@ -98,15 +103,21 @@ const nextConfig: NextConfig = {
       ["/afrekenen", "/winkelmand"],
       ["/mijn-account/:pad*", "/verlanglijst"],
       ["/approval-rejection", "/"],
-      ...raamdecoratie.map((p): [string, string] => [`/${p}`, "/op-maat-en-plaatsing/raamdecoratie-op-maat"]),
+      ...Object.entries(raamdecoratie).map(([p, anker]): [string, string] => [`/${p}`, `/op-maat-en-plaatsing/raamdecoratie-op-maat${anker}`]),
     ];
+    // De oude site schreef elke URL met een schuine streep achteraan (/contact/). Met de variant
+    // erbij gaat zo'n URL in één stap naar haar bestemming, niet eerst naar /contact.
+    const metSlash = oudeSite.flatMap(([source, destination]): [string, string][] => [
+      [source, destination],
+      [`${source}/`, destination],
+    ]);
     return [
       // Geen klantaccounts: offertes en de verlanglijst werken zonder login.
       { source: "/account", destination: "/verlanglijst", permanent: true },
       { source: "/info/over-dit-prototype", destination: "/info/over-ons", permanent: true },
       // Desso is een merk van Tarkett en heeft geen eigen merkpagina (src/data/merken.ts → MERK_ONDER).
       { source: "/merken/desso", destination: "/merken/tarkett", permanent: true },
-      ...oudeSite.map(([source, destination]) => ({ source, destination, permanent: true })),
+      ...metSlash.map(([source, destination]) => ({ source, destination, permanent: true })),
       // Zoeken op de oude site: /?s=behang → /zoeken?q=behang
       { source: "/", has: [{ type: "query" as const, key: "s", value: "(?<zoek>.+)" }], destination: "/zoeken?q=:zoek", permanent: true },
     ];

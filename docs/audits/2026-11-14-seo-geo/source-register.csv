@@ -1,0 +1,16 @@
+bron,status,periode_of_moment,filters,gebruikt_voor,beperking
+Prospectiemail (cijfers in draaiboek §1),beschikbaar als claim,onbekend,"land, apparaat en tool onbekend",te toetsen claims,EXTERNE SCHATTING zonder bron; ranking-URL niet vermeld
+Google Search Console brunic.be,ontbreekt,-,-,klikken/vertoningen/positie,geen toegang of export; alle eigen zoekprestaties ONBEKEND
+GA4 / analytics,ontbreekt,-,-,conversies,nieuwe site heeft geen tracking (TODO.md); oude site niet onderzocht
+SEO-database (Ahrefs/Semrush),ontbreekt,-,-,volumes,geen toegang; volumes ONBEKEND
+Merchant Center,niet van toepassing (nog),-,-,feeds,geen feed; 3.698 producten zonder prijs (seo-groei.md)
+Business Profile,ontbreekt,-,-,lokale gegevens,niet gecontroleerd
+Server-/CDN-logs,ontbreekt,-,-,crawlergedrag,geen toegang
+Eigen crawl brunic.be (sitemap_index + metadata),beschikbaar,2026-11-14 ±16:55 (Brussel),"alle 2.062 sitemap-URL's; metadata van 28 pagina's, 51 categorieën en 142 productsteekproef + 25 kernpagina's",nulmeting oude site,"momentopname; bewijst geen Google-indexatie; h1-extractie onbetrouwbaar (JS-string in HTML)"
+Migratietest oude URL's op brunic.vercel.app,beschikbaar,2026-11-14 16:58–17:05 (Brussel),"2.062 URL's, 3 tegelijk, redirects gevolgd",migratiecontrole,"getest op vercel.app, niet op www.brunic.be; hostwissel apex→www nog niet testbaar"
+Templatematrix nieuwe site (ruwe HTML),beschikbaar,2026-11-14 ±16:57 (Brussel),"41 URL's, GET zonder JavaScript",technische SEO,pre-launch: noindex is bewust; geen rendering in browser
+Sitemap nieuwe site,beschikbaar,2026-11-14,4.146 URL's,ontdekking,host www.brunic.be; 4.080 met lastmod
+Crawler-UA-test,beschikbaar,2026-11-14,"8 user-agents × 4 URL's",GEO technische toegang,"enkel UA-string vanaf één IP; bewijst niets over echte bot-IP's of WAF-regels per IP"
+Lokale Shopify-momentopname,beschikbaar,2026-11-02 20:35 (lokaal); productie 2026-11-12 22:40,"4.113 producten",assortimentsfit,lokaal 10 dagen ouder dan productie
+WebSearch (deze omgeving),beperkt bruikbaar,2026-11-14,"3 zoekopdrachten",verkenning,"US-resultaten; geen Belgische SERP; niet gebruikt als bewijs"
+AI-platformen (ChatGPT/Perplexity/Gemini/Copilot),ontbreekt,-,-,GEO-nulmeting,geen rechtmatige toegang vanuit deze omgeving; panel opgesteld maar niet gemeten

@@ -16,9 +16,10 @@ import { SITE } from "@/lib/site/config";
 import { maatwerkVoor, type Maatwerk } from "@/lib/site/maatwerk";
 
 const DIENST: Record<Maatwerk, NonNullable<MenuNode["dienst"]>> = {
-  stoffen: { titel: "Gratis opmeting aan huis", tekst: "Wij meten op, maken in ons atelier en plaatsen met onze eigen mensen.", href: routes.measurement(), icon: "ruler" },
+  stoffen: { titel: "Gratis opmeting aan huis", tekst: "Wij meten op, brengen op maat in ons atelier en laten plaatsen door vakmannen.", href: routes.measurement(), icon: "ruler" },
   tapijten: { titel: "Tapijt op maat", tekst: "Past geen standaardmaat? U kiest afmeting, kwaliteit en kleur.", href: routes.service("tapijt-op-maat"), icon: "ruler" },
-  vloer: { titel: "Vasttapijt, vakkundig gelegd", tekst: "Gratis opmeting en plaatsing door onze eigen mensen.", href: routes.service("vasttapijt-en-vloeren"), icon: "home" },
+  vloer: { titel: "Vasttapijt, vakkundig gelegd", tekst: "Gratis opmeting en plaatsing door vakmannen.", href: routes.service("vasttapijt-en-vloeren"), icon: "home" },
+  behang: { titel: "Stalenboeken en opmeting", tekst: `Bekijk de collecties in ${SITE.address.city} of vraag een gratis opmeting aan huis aan.`, href: routes.service("behang-en-fotobehang"), icon: "grid" },
   winkel: { titel: "Stalenboeken in de winkel", tekst: `Bekijk de collecties in het echt in ${SITE.address.city}, ${SITE.hoursShort}.`, href: routes.store(), icon: "grid" },
 };
 

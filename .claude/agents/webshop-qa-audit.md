@@ -8,12 +8,12 @@ Je voert een webshop-QA-audit uit voor Brunic.
 
 **Lees eerst volledig `.agents/skills/webshop-qa-audit/SKILL.md` en volg die opdracht exact.** Dat bestand is de enige bron voor de opdracht (gedeeld met Codex). Lees daarna, in deze volgorde:
 1. `docs/filtersysteem.md`, de specificatie waartegen je de filters toetst;
-2. het recentste rapport in `docs/audits/`, waarvan je elk punt opnieuw test;
+2. het recentste webshop-QA-rapport (de jongste map `docs/audits/*-webshop-qa*/`, zie de index `docs/audits/README.md`), waarvan je elk punt opnieuw test;
 3. de overdrachten in `docs/agent-work/` die jonger zijn dan dat rapport, en `docs/vragen-aan-brunic.md`.
 
 Harde grenzen, ook als de opdracht van de gebruiker iets anders lijkt te vragen:
 - Alleen lezen en testen. Wijzig geen code, data, beelden, koppelingen of Shopify-gegevens. Installeer niets, commit en push niets.
-- Je schrijft alleen in `$env:TEMP\brunic-qa\` (hulpscripts en ruwe uitvoer) en in `docs/audits/<JJJJ-MM-DD>-webshop-qa/` (rapport en screenshots). Een bestaand rapport overschrijf je nooit.
+- Je schrijft alleen in `$env:TEMP\brunic-qa\` (hulpscripts en ruwe uitvoer) en in `docs/audits/<JJJJ-MM-DD>-webshop-qa/` (rapport en screenshots). Een bestaand rapport overschrijf je nooit. Twee gedeelde bestanden vul je enkel aan: één rij in `docs/audits/README.md`, en je nieuwe vragen in `docs/vragen-aan-brunic.md` (de enige centrale vragenlijst; bestaande vragen, antwoorden en nummers blijven ongemoeid).
 - Draai nooit `sync`, `build` of iets in `packages/catalog`. Verstuur geen formulieren, gebruik de winkelmand niet en start geen checkout.
 - Vermoeden ≠ fout: wat je niet betrouwbaar kunt vaststellen, label je "te verifiëren".
 - Ruim op wat je start: sluit je eigen Chrome-processen en verwijder hun profielmappen.

@@ -30,11 +30,17 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   const perType = new Map<string, number>();
   for (const p of b.products) for (const t of p.facets.type ?? []) perType.set(t, (perType.get(t) ?? 0) + 1);
   const types = [...perType.entries()].sort((x, y) => y[1] - x[1]).map(([t]) => t.toLowerCase());
-  // Opmeting en plaatsing enkel beloven waar Brunic die levert (lib/site/maatwerk.ts), niet bij behang.
+  // Opmeting en plaatsing enkel beloven waar Brunic die levert (lib/site/maatwerk.ts): behang wel opmeting, geen plaatsing.
   const afdeling = b.products[0] ? (await catalog.getCategoryTrail(b.products[0].primaryCategoryId))[0]?.id : undefined;
   const maatwerk = maatwerkVoor(afdeling);
   const dienst =
-    maatwerk === "stoffen" || maatwerk === "vloer" ? "met advies, gratis opmeting en plaatsing" : maatwerk === "tapijten" ? "met advies, ook op maat" : "met persoonlijk advies in onze winkel";
+    maatwerk === "stoffen" || maatwerk === "vloer"
+      ? "met advies, gratis opmeting en plaatsing"
+      : maatwerk === "tapijten"
+        ? "met advies, ook op maat"
+        : maatwerk === "behang"
+          ? "met advies in onze winkel en gratis opmeting aan huis"
+          : "met persoonlijk advies in onze winkel";
   return {
     title: types.length ? `${b.name}: ${types.slice(0, 2).join(" en ")}` : b.name,
     description: `${types.join(", ")} van ${b.name}: ${productCount(b.count)} bij Brunic in Ninove, ${dienst}.`.replace(/^./, (c) => c.toUpperCase()),

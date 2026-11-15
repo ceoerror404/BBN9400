@@ -15,6 +15,8 @@ import { breadcrumbJsonLd, categoryCrumbs, metaDescription } from "@/lib/site/se
 import { isOpMaat, maatwerkVoor } from "@/lib/site/maatwerk";
 import { ARTICLES } from "@/data/content";
 import { BEELD } from "@/data/beelden";
+import { CATEGORIE_TITEL, CATEGORIE_VRAGEN } from "@/data/categorie-seo";
+import { CategoryFaq } from "@/components/catalog/category-faq";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { CategoryHeader } from "@/components/catalog/category-header";
 import { CategoryLanding } from "@/components/catalog/category-landing";
@@ -43,7 +45,8 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   const ouder = trail.at(-2);
   const zegtOuder = ouder && normalize(ouder.name).split(/\W+/).some((w) => w.length >= 4 && normalize(node.name).includes(w));
   return {
-    title: zegtOuder ? node.name : trail.map((t) => t.name).reverse().join(" · "),
+    // Eigen zoektitel waar de naam de zoekvraag niet dekt (bv. "tapis plein"), zie data/categorie-seo.ts.
+    title: CATEGORIE_TITEL[node.id] ?? (zegtOuder ? node.name : trail.map((t) => t.name).reverse().join(" · ")),
     description: metaDescription(intro),
     alternates: { canonical: routes.category(node) },
     openGraph: image ? { images: [{ url: image.src, alt: image.alt }] } : undefined,
@@ -93,6 +96,9 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   const promo = <PromoBanner soort={maatwerk} />;
   // Eén filtersysteem; de filters en hun volgorde komen uit het profiel van de hoofdcategorie.
   const listing = buildListing(inCategory.map((p) => toListingItem(p)), sp, {}, VORM_VAN_CATEGORIE[node.id], filterProfiel(trail[0].id));
+  // Koopvragen van deze categorie; niet op de kale lijstweergave (?weergave=producten) van een afdeling.
+  const vragen = weergave === "producten" ? [] : (CATEGORIE_VRAGEN[node.id] ?? []);
+  const faq = vragen.length > 0 ? <CategoryFaq naam={node.name} vragen={vragen} /> : null;
 
   if (display === "overview" && weergave !== "producten") {
     const banner = await categoryImage(node);
@@ -129,7 +135,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
               : isOpMaat(maatwerk)
                 ? {
                     title: "Gratis opmeting aan huis",
-                    subtitle: "Wij meten op, adviseren en plaatsen met onze eigen mensen",
+                    subtitle: "Wij meten op, adviseren en laten plaatsen door vakmannen",
                     cta: "Opmeting aanvragen",
                     href: routes.measurement(),
                     image: beeldAdvies ?? BEELD.dienstOpmeting,
@@ -138,6 +144,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             { title: "Nieuw binnen", subtitle: `Het nieuwste in ${node.name.toLowerCase()}`, cta: "Ontdek", href: routes.newArrivals(node.slug), image: beeldNieuw ?? BEELD.tegelNieuw },
           ]}
           articles={artikels}
+          faq={faq}
         />
       </>
     );
@@ -168,6 +175,8 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           <ProductListing data={listing} promo={promo} />
         </Suspense>
       </section>
+
+      {faq}
     </div>
   );
 }

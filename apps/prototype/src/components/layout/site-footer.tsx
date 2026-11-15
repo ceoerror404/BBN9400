@@ -10,7 +10,7 @@ const TRUST: { icon: IconName; title: string; text: string }[] = [
   { icon: "store", title: "Winkel in Ninove", text: `${SITE.address.street}, ${SITE.address.postalCode} ${SITE.address.city}` },
   { icon: "chat", title: "Persoonlijk advies", text: `In de winkel · ${SITE.hoursShort}` },
   { icon: "ruler", title: "Gratis opmeting", text: "Wij komen bij u thuis opmeten" },
-  { icon: "scissors", title: "Eigen atelier", text: "Gordijnen op maat, door eigen stiksters" },
+  { icon: "scissors", title: "Eigen atelier", text: "Gordijnen op maat gebracht in ons atelier" },
 ];
 
 /** Footer met dezelfde opbouw als de referentie. */

@@ -28,6 +28,7 @@ export function CategoryLanding({
   total,
   campaigns,
   articles,
+  faq,
 }: {
   crumbs: Crumb[];
   title: string;
@@ -40,6 +41,8 @@ export function CategoryLanding({
   total: number;
   campaigns: { title: string; subtitle: string; cta: string; href: string; image: ImageRef }[];
   articles: Article[];
+  /** Koopvragen van de afdeling (CategoryFaq), onderaan de pagina. */
+  faq?: ReactNode;
 }) {
   const cols = subCards.length === 3 ? "lg:grid-cols-3" : subCards.length === 2 ? "lg:grid-cols-2" : subCards.length === 5 ? "lg:grid-cols-5" : "lg:grid-cols-4";
   return (
@@ -112,6 +115,8 @@ export function CategoryLanding({
           </ul>
         </section>
       )}
+
+      {faq}
     </div>
   );
 }

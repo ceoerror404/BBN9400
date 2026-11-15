@@ -57,7 +57,8 @@ const OUDE_CATEGORIE: Record<string, string[]> = {
   schapenvacht: ["/catalogus/tapijten"],
   tapijtloper: ["/catalogus/tapijten"],
   // Raamdecoratie
-  "kant-en-klare-rolgordijnen": ["/catalogus/raamdecoratie", "/op-maat-en-plaatsing/raamdecoratie-op-maat"],
+  // Kant-en-klare rolgordijnen verkoopt de webshop niet meer: het blok "Rolgordijnen op maat" op de dienstpagina.
+  "kant-en-klare-rolgordijnen": ["/catalogus/raamdecoratie", "/op-maat-en-plaatsing/raamdecoratie-op-maat#rolgordijnen"],
   raamdecoratie: ["/catalogus/raamdecoratie", "/op-maat-en-plaatsing/raamdecoratie-op-maat"],
   // Verf
   verf: ["/catalogus/verf"],

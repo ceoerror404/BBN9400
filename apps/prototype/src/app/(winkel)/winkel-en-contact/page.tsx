@@ -145,10 +145,10 @@ export default function StorePage() {
             <LeadForm
               title="Stel uw vraag"
               titelMetProducten="Vraag uw offerte aan"
-              intro="Stuur ons een bericht; we antwoorden doorgaans binnen 1 à 2 werkdagen."
+              intro="Stuur ons een bericht; we antwoorden nog dezelfde dag."
               soort="contact"
               productContext
-              bevestiging="We antwoorden doorgaans binnen 1 à 2 werkdagen."
+              bevestiging="We antwoorden nog dezelfde dag."
               allowPhotos
               fields={[
                 { name: "voornaam", label: "Voornaam", required: true, autoComplete: "given-name", half: true },

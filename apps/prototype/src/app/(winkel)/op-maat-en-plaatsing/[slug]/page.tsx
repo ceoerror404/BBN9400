@@ -14,7 +14,7 @@ import { ProductCard } from "@/components/catalog/product-card";
 import { Suspense } from "react";
 import { LeadForm } from "@/components/content/lead-form";
 import { JsonLd } from "@/components/seo/json-ld";
-import { breadcrumbJsonLd } from "@/lib/site/seo";
+import { breadcrumbJsonLd, metaDescription } from "@/lib/site/seo";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -25,7 +25,9 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const s = SERVICES.find((x) => x.slug === slug);
-  return s ? { title: s.title, description: s.summary, alternates: { canonical: routes.service(s.slug) } } : { title: "Dienst niet gevonden" };
+  return s
+    ? { title: s.seoTitle ?? s.title, description: s.seoDescription ?? metaDescription(s.summary), alternates: { canonical: routes.service(s.slug) } }
+    : { title: "Dienst niet gevonden" };
 }
 
 export default async function ServicePage({ params }: Props) {
@@ -89,6 +91,41 @@ export default async function ServicePage({ params }: Props) {
           {service.body.map((p, i) => (
             <p key={i}>{p}</p>
           ))}
+          {/* Blokken met een eigen anker (bv. #rolgordijnen): oude URL's van brunic.be landen hier. */}
+          {service.sections?.map((sec) => (
+            <div key={sec.id} id={sec.id}>
+              <h3 className="mb-2 mt-8 text-xl font-medium text-ink">{sec.title}</h3>
+              {sec.paragraphs.map((p, i) => (
+                <p key={i}>{p}</p>
+              ))}
+              {sec.table && (
+                <div className="mb-4 overflow-x-auto">
+                  {/* Vaste kolombreedtes: drie kolommen passen zo ook op een scherm van 320 px. */}
+                  <table className="w-full table-fixed border-collapse text-left text-[13px] leading-snug sm:text-[14px]">
+                    <thead>
+                      <tr className="border-b border-line-strong">
+                        {sec.table.head.map((h, i) => (h ? <th key={i} scope="col" className="hyphens-auto break-words py-2 pr-3 font-medium text-ink">{h}</th> : <td key={i} />))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sec.table.rows.map(([kenmerk, ...cellen]) => (
+                        <tr key={kenmerk} className="border-b border-line align-top">
+                          <th scope="row" className="hyphens-auto break-words py-2 pr-3 font-medium text-ink">
+                            {kenmerk}
+                          </th>
+                          {cellen.map((c, i) => (
+                            <td key={i} className="hyphens-auto break-words py-2 pr-3 text-ink-80">
+                              {c}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          ))}
           <h2>Welke producten?</h2>
           <p>
             Bekijk onder meer{" "}
@@ -111,7 +148,7 @@ export default async function ServicePage({ params }: Props) {
           <Suspense>
             <LeadForm
               title={isOpmeting ? "Vraag uw gratis opmeting of offerte aan" : "Vraag uw afspraak aan"}
-              intro="Beschrijf kort uw project. Wij nemen binnen 1 à 2 werkdagen contact met u op om een afspraak te plannen."
+              intro="Beschrijf kort uw project. Wij nemen nog dezelfde dag contact met u op om een afspraak te plannen."
               soort={isOpmeting ? "opmeting" : "aanvraag"}
               productContext={isOpmeting}
               submitLabel="Aanvraag versturen"

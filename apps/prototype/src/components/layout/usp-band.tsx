@@ -5,9 +5,9 @@ export const USPS: { icon: IconName; text: string }[] = [
   { icon: "chat", text: "Persoonlijk advies in onze winkel" },
   { icon: "ruler", text: "Gratis opmeting aan huis" },
   { icon: "scissors", text: "Maatwerk uit eigen atelier" },
-  { icon: "home", text: "Plaatsing door onze eigen mensen" },
+  { icon: "home", text: "Plaatsing door vakmannen" },
   { icon: "store", text: "Afhalen in Ninove of levering aan huis" },
-  { icon: "heart", text: "Familiebedrijf, al 40 jaar in Ninove" },
+  { icon: "heart", text: "Familiebedrijf sinds 1982 in Ninove" },
 ];
 
 export function UspBand({ variant = "plain", count = 6 }: { variant?: "plain" | "card"; count?: number }) {

@@ -27,7 +27,7 @@ export default async function CatalogPage() {
       <Breadcrumbs items={[{ label: "Catalogus" }]} />
       <CategoryHeader
         title="Catalogus"
-        intro="Ontdek het assortiment van Brunic: gordijnstoffen en vitrages, behang en wandbekleding, vasttapijt en tapijten van merken die wij al jaren vertrouwen. Veel producten maken of plaatsen we op maat — vraag vrijblijvend een offerte of kom langs in onze winkel in Ninove."
+        intro="Ontdek het assortiment van Brunic: gordijnstoffen en vitrages, behang en wandbekleding, vasttapijt en tapijten van merken die wij al jaren vertrouwen. Veel producten krijgt u op maat, met plaatsing als u dat wenst — vraag vrijblijvend een offerte of kom langs in onze winkel in Ninove."
       />
 
       <div className="mt-6 grid grid-cols-2 gap-1 lg:grid-cols-3">

@@ -10,7 +10,7 @@ import { Icon } from "@/components/ui/icon";
 
 export const metadata: Metadata = {
   title: "Op maat & plaatsing",
-  description: "Gordijnen op maat uit eigen atelier, raamdecoratie, vasttapijt en behang: Brunic adviseert, meet gratis op en plaatst met eigen mensen.",
+  description: "Gordijnen op maat uit eigen atelier, raamdecoratie, vasttapijt en behang: Brunic adviseert, meet gratis op en laat plaatsen door vakmannen.",
   alternates: { canonical: "/op-maat-en-plaatsing" },
 };
 
@@ -21,7 +21,7 @@ export default function ServicesPage() {
       <Breadcrumbs items={[{ label: "Op maat & plaatsing" }]} />
       <CategoryHeader
         title="Op maat & plaatsing"
-        intro="Van advies in de winkel tot opmeting, maakwerk en plaatsing bij u thuis. Gordijnen maken we in ons eigen atelier, door onze eigen stiksters; opmeten en plaatsen doen onze eigen mensen. Zo heeft u één aanspreekpunt, van eerste idee tot het laatste detail."
+        intro="Van advies in de winkel tot opmeting en plaatsing bij u thuis. Gordijnen brengen we op maat in ons eigen atelier; wij meten op en vakmannen plaatsen. Zo heeft u één aanspreekpunt, van eerste idee tot het laatste detail."
       />
 
       <div className="mt-6 grid gap-2 md:grid-cols-2">

@@ -8,18 +8,18 @@ type Band = { title: string; text: string; cta: { label: string; href: string };
 
 /**
  * Inhoud per afdeling (lib/site/maatwerk.ts): enkel waar Brunic echt maatwerk levert,
- * spreekt de band van opmeting en plaatsing; bij behang en gemengde lijsten nodigt ze
- * uit in de winkel.
+ * spreekt de band van opmeting en plaatsing; bij behang van de winkel en de gratis opmeting
+ * (geen plaatsing), bij gemengde lijsten enkel van de winkel.
  */
 const BANDEN: Record<Maatwerk, Band> = {
   stoffen: {
     title: "Liever op maat?",
-    text: "Wij meten gratis op bij u thuis, maken uw gordijnen in ons eigen atelier en plaatsen alles met onze eigen mensen.",
+    text: "Wij meten gratis op bij u thuis, brengen uw gordijnen op maat in ons eigen atelier en laten alles plaatsen door vakmannen.",
     cta: { label: "Gordijnen op maat", href: routes.service("gordijnen-op-maat") },
     items: [
       { icon: "chat", t: "Advies in de winkel", d: "Stalen voelen en vergelijken, met iemand die meedenkt." },
       { icon: "ruler", t: "Gratis opmeting", d: "Wij komen langs en meten nauwkeurig op." },
-      { icon: "scissors", t: "Maatwerk & plaatsing", d: "Gemaakt in ons atelier, geplaatst door ons team." },
+      { icon: "scissors", t: "Maatwerk & plaatsing", d: "Op maat gebracht in ons atelier, geplaatst door vakmannen." },
     ],
   },
   tapijten: {
@@ -34,12 +34,22 @@ const BANDEN: Record<Maatwerk, Band> = {
   },
   vloer: {
     title: "Vasttapijt op maat gelegd",
-    text: "Vasttapijt, tapijttegels of een loper: wij meten gratis op bij u thuis en onze eigen mensen leggen het tapijt.",
+    text: "Vasttapijt, tapijttegels of een loper: wij meten gratis op bij u thuis en vakmannen leggen het tapijt.",
     cta: { label: "Meer over plaatsing", href: routes.service("vasttapijt-en-vloeren") },
     items: [
       { icon: "chat", t: "Advies in de winkel", d: "Eerlijk advies over materiaal en gebruik." },
       { icon: "ruler", t: "Gratis opmeting", d: "Wij komen langs en meten nauwkeurig op." },
-      { icon: "home", t: "Gelegd door ons team", d: "Door onze eigen mensen, bij u thuis." },
+      { icon: "home", t: "Gelegd door vakmannen", d: "Vakkundig gelegd, bij u thuis." },
+    ],
+  },
+  behang: {
+    title: "Kom eens langs in onze winkel",
+    text: `Kleuren en motieven ziet u het best in het echt. In onze winkel in ${SITE.address.city} bladert u door de stalenboeken. Liever bij u thuis kiezen? Dan komen wij gratis uw wanden opmeten.`,
+    cta: { label: "Behangadvies", href: routes.service("behang-en-fotobehang") },
+    items: [
+      { icon: "grid", t: "Stalenboeken", d: "Collecties en kleuren bekijken en voelen." },
+      { icon: "ruler", t: "Gratis opmeting", d: "Wij meten uw wanden op en berekenen hoeveel u nodig hebt." },
+      { icon: "pin", t: SITE.hoursShort, d: `${SITE.address.street}, ${SITE.address.postalCode} ${SITE.address.city}` },
     ],
   },
   winkel: {
