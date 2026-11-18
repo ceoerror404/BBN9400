@@ -54,6 +54,19 @@
       --header-h: 171px;
     }
   }
+  /* Desktop: hele site op 90% (vraag Alexander 15/11). Ontwerp staat in vaste px, dus één
+     zoomfactor i.p.v. alle maten aanpassen. Via var(): de CSS-build gooit een kale `zoom` weg. */
+  :root {
+    --site-zoom: 1;
+  }
+  @media (min-width: 1024px) {
+    :root {
+      --site-zoom: 0.9;
+    }
+  }
+  html {
+    zoom: var(--site-zoom);
+  }
   html {
     -webkit-text-size-adjust: 100%;
     /* Bewust geen scroll-behavior: smooth (animeert ook elke paginawissel en de terugknop, zie
@@ -296,13 +309,6 @@
 @layer utilities {
   .on-dark {
     --focus-ring: #fff;
-  }
-  /* Kleverige elementen schuiven mee omhoog wanneer de header inklapt. Via één attribuut op
-     <html>: een CSS-variabele daar zou bij elke omklap de stijl van de hele pagina herberekenen. */
-  @media (min-width: 1024px) {
-    html[data-header-ingeklapt] .mee-met-header {
-      translate: 0 calc(var(--header-inklap-max, 0px) * -1);
-    }
   }
   /* Enkel zichtbaar terwijl de header uitgeklapt is, dus bij omhoog scrollen. */
   html[data-header-ingeklapt] .verberg-bij-inklap {

@@ -19,7 +19,8 @@ import { BIJZONDERE_VORM, FOTO_RANG, fotoTrede } from "./product";
 export const SNAPSHOT_PAD = path.join(process.cwd(), ".data", "shopify-catalogus.json");
 
 type RawImage = { url: string; altText: string | null; width: number | null; height: number | null };
-type RawCollection = { handle: string; title: string; description: string; image: RawImage | null };
+/** `id` (GID) zit pas in momentopnames van na 16/11/2026: nodig voor de collectiemeting. */
+type RawCollection = { id?: string; handle: string; title: string; description: string; image: RawImage | null };
 type RawVariant = {
   id: string;
   sku: string | null;
@@ -225,6 +226,7 @@ function bouwCategorieen(snapshot: Snapshot, telling: Map<string, number>): { ca
       subtitle: tekst?.subtitle,
       intro: c.description || tekst?.intro,
       image: c.image ? { src: c.image.url, alt: c.image.altText ?? c.title } : SUBCATEGORIE_BEELD[c.handle],
+      bron: { handle: c.handle, ...(c.id ? { id: c.id } : {}) },
     });
   }
   // Volgorde onder elke ouder: meeste producten eerst.
@@ -237,8 +239,14 @@ function bouwCategorieen(snapshot: Snapshot, telling: Map<string, number>): { ca
     .map((c) => {
       const handle = SHOPIFY_HOOFDCOLLECTIE[c.id];
       const tekst = CATEGORIE_TEKST[handle];
-      const beschrijving = snapshot.collections.find((x) => x.handle === handle)?.description;
-      return { ...c, subtitle: c.subtitle ?? tekst?.subtitle, intro: c.intro ?? tekst?.intro ?? (beschrijving || undefined) };
+      const collectie = snapshot.collections.find((x) => x.handle === handle);
+      const beschrijving = collectie?.description;
+      return {
+        ...c,
+        subtitle: c.subtitle ?? tekst?.subtitle,
+        intro: c.intro ?? tekst?.intro ?? (beschrijving || undefined),
+        ...(collectie ? { bron: { handle, ...(collectie.id ? { id: collectie.id } : {}) } } : {}),
+      };
     });
   const zichtbaar = new Set(roots.map((r) => r.id));
   return { categories: [...roots, ...subs.filter((s) => s.parentId && zichtbaar.has(s.parentId))], collectieNaarCategorie };

@@ -78,9 +78,43 @@ Bronnen, geraadpleegd via een onderzoeksagent: WER op Justel (geconsolideerd tot
 - [x] 301-map van WooCommerce naar de nieuwe URL's — 20/10: alle 2.061 URL's uit de oude sitemaps → 308 naar een bestaande pagina (README §2). 14/11: één stap in plaats van twee, getest op een lokale build (2.060 URL's, alles 200).
 - [ ] Na de domeinoverdracht opnieuw testen: `node apps/prototype/scripts/test-oude-urls.mjs https://brunic.be --stappen 2` en op `https://www.brunic.be` (README §4 punt 5).
 - [ ] Vóór de domeinoverdracht: Search Console-export van brunic.be (16 maanden, query × pagina) bewaren als nulmeting — docs/audits/2026-11-14-seo-geo/measurement-plan.md.
-- [ ] Cookie-consent (Consent Mode v2) zodra GA4 wordt toegevoegd; de cookieverklaring zegt nu terecht "geen tracking"
+- [ ] Metingen en cookiemelding aanzetten: zie "Vercel bij de livegang (voor Jeroen)" hieronder. Tot dan zegt de cookieverklaring terecht "geen tracking". Google (GA4 of Ads, Consent Mode v2) volgt later, bij de start van de advertenties (`docs/analytics-en-cookies.md` §10).
 - [ ] Shopify: verzendtarieven, betalingen (Bancontact), btw en checkout-branding instellen. Niet gecontroleerd: de app mist de leesrechten daarvoor.
 - [ ] Vectorlogo (staat al open in de README)
+
+### Vercel bij de livegang (voor Jeroen)
+
+Toegevoegd op 18/11/2026. Alles hieronder gebeurt in het Vercel-project `brunic` (team fruitcocktailbe-projects), omgeving Production.
+
+**Metingen, cookiemelding en winkelmand bij Shopify aanzetten**
+
+Gebouwd op 16/11/2026 en lokaal getest, maar uit: zonder de drie variabelen hieronder verandert er niets voor bezoekers. Werking, cookielijst en testoverzicht: `docs/analytics-en-cookies.md`.
+
+Bedoeld voor de livegang, niet eerder. "Production" is vandaag de testsite brunic.vercel.app: wie de variabelen nu al zet, toont daar de melding en stuurt de testbezoeken naar de rapporten van Brunic.
+
+- [ ] Eerst buiten Vercel: de cookie- en privacytekst is nagelezen door Brunic (`COOKIES_MET_SHOPIFY` in `src/data/content.ts`), en de instellingen in de Shopify-admin zijn gedaan (`docs/analytics-en-cookies.md` §7: toestemming vereist voor de hele EER, Nederlands toegevoegd, wachtwoordpagina weg, Shopify's eigen cookiebanner nagekeken).
+- [ ] Settings › Environment Variables, omgeving Production:
+  - `NEXT_PUBLIC_SHOPIFY_WINKELMAND` = `1`
+  - `SHOPIFY_ANALYTICS` = `1`. Nooit `test`: die stand verstuurt ook vanaf previews en lokaal.
+  - `SHOPIFY_SHOP_ID` = `107286626636` (het numerieke ID van `brunic-3.myshopify.com`, geen geheim)
+
+  Zet ze alle drie samen: zonder shop-ID blijven de metingen uit, en zonder de winkelmand ontbreken de mandmetingen. Op Preview mag hetzelfde staan; daar wordt niets verstuurd.
+- [ ] Opnieuw deployen. `NEXT_PUBLIC_SHOPIFY_WINKELMAND` wordt bij het bouwen ingebakken: de variabele wijzigen zonder nieuwe build doet niets.
+- [ ] Nakijken op de site: de melding verschijnt bij een eerste bezoek; na "Alles accepteren" gaat er een verzoek naar `monorail-edge.shopifysvc.com/unstable/produce_batch` met status 200; een product in de winkelmand leggen werkt.
+- [ ] De dag erna: in Shopify › Analytics komen sessies binnen op het Headless-kanaal. Dat is nog nooit nagekeken.
+- [ ] Een testbestelling tot en met de kassa. Ook dat is nog nooit getest: de winkel stond achter de wachtwoordpagina.
+
+Terugdraaien: de drie variabelen weghalen en opnieuw deployen, zonder codewijziging. Een bezoeker met een Shopify-mand begint dan met een lege lokale mand.
+
+**Privé-token voor de Storefront API**
+
+- [ ] `SHOPIFY_STOREFRONT_API_TOKEN` op Production: de privé-token van het Headless-kanaal (`shpat_…`) in plaats van de publieke. Met een publieke token ziet Shopify al het verkeer van de server als één bezoeker en kan het verzoeken weigeren (HTTP 430). Met de winkelmand bij Shopify loopt ook elke mandwijziging via de server. Achtergrond: `docs/zoeken.md`, "Instellen in Shopify" stap 2.
+
+**Na de domeinverhuizing** (Vercel › Domains, README §4 punt 5)
+
+- [ ] De cookies opnieuw nakijken op `www.brunic.be`: staat `_shopify_cmp` er (op `localhost` weigerde de browser hem), en gaat de cookiekeuze mee naar de kassa. Dat is enkel lokaal getest.
+
+Staat elders en hoort ook bij Vercel: `SITE_URL` en `SITE_INDEXEREN=1` (eerste punt van deze checklist), de Deploy Hook, `CRON_SECRET`, het domein en de uptime-monitor (`README.md` §4), en de limiet op formulieren in Vercel Firewall (B03).
 
 ---
 

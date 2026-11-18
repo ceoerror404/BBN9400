@@ -3,7 +3,8 @@
  * catalogus-momentopname (.data/shopify-catalogus.json):
  *
  * 1. de vaste reeks van 55 zoekopdrachten uit de QA-audits
- *    (docs/audits/2026-11-12-webshop-qa/rapport.md §4.12);
+ *    (docs/audits/2026-11-12-webshop-qa/rapport.md §4.12), en ter informatie een reeks woorden
+ *    die in geen enkel product staan (1b);
  * 2. filters, sortering, aantallen en paginering van de zoekpagina;
  * 3. de suggesties van het zoekveld.
  *
@@ -143,6 +144,26 @@ console.log("\n1. De 55 zoekopdrachten\n");
 for (const r of regels) console.log(`${r.ok ? (r.zwak ? "~" : "✓") : "✖"} ${String(r.nr).padStart(2)} ${r.q.padEnd(26)} ${r.soort.padEnd(30)} ${toon(r.verwacht).padEnd(52)} ${r.detail}${r.ok ? "" : `   → ${r.eerste}`}`);
 const goed = regels.filter((r) => r.ok).length;
 console.log(`\n${goed} van ${regels.length} doen wat de klant verwacht (${regels.filter((r) => r.zwak).length} daarvan zwak: minder dan de helft van de eerste tien) · ${((Date.now() - nu) / 1000).toFixed(0)} s`);
+
+/* ---------------- 1b. woorden die in geen enkel product staan ---------------- */
+
+// Shopify zoekt ook op betekenis en geeft dan producten waarin het woord niet voorkomt
+// (docs/zoeken.md § Zoeken op betekenis). Dit deel meet dat en telt niet mee voor de uitslag:
+// het toont of een wijziging in Shopify (winkeltaal, instellingen) er iets aan verandert.
+const BUITEN = ["deurmat", "laminaat", "kunstgras", "rolgordijn", "badmat", "tafelkleed", "stoel", "zwembad", "koffiezet"];
+console.log("\n1b. Woorden die in geen enkel product staan (Shopify zoekt ook op betekenis; telt niet mee)\n");
+let metProducten = 0;
+for (const q of BUITEN) {
+  try {
+    const { listing } = await zoek(q);
+    if (listing.items.length) metProducten++;
+    const eerste = listing.items.slice(0, 3).map((k) => `${k.type}: ${k.title}`).join(" | ");
+    console.log(`${listing.items.length ? "~" : "✓"} ${q.padEnd(12)} ${String(listing.total ?? `${listing.items.length}+`).padStart(4)} producten${eerste ? `   → ${eerste}` : ""}`);
+  } catch (e) {
+    console.log(`✖ ${q.padEnd(12)} FOUT ${e.message.slice(0, 80)}`);
+  }
+}
+console.log(`\n${metProducten} van ${BUITEN.length} geven toch producten`);
 
 /* ---------------- 2. filters, sortering, aantallen, paginering ---------------- */
 

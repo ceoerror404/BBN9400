@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import type { CartLine, WishlistItem } from "@/lib/catalog/types";
 import { createLocalStore } from "./local-store";
+import { useShopifyCart } from "./shopify-cart";
 
 const isObj = (x: unknown): x is Record<string, unknown> => typeof x === "object" && x !== null;
 
@@ -22,7 +23,16 @@ const cartStore = createLocalStore<CartLine[]>("brunic:winkelmand:v1", [], (raw)
 /** Afronden op 2 decimalen — meterware (0,5 m) mag geen 2,4999999 worden. */
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
-export function useCart() {
+/**
+ * Waar leeft de winkelmand? Met NEXT_PUBLIC_SHOPIFY_WINKELMAND=1 in Shopify (lib/store/shopify-cart.ts),
+ * anders lokaal in de browser zoals voorheen. De hook houdt in beide gevallen dezelfde vorm, dus
+ * de schermen merken het verschil niet. Terugdraaien = de variabele weghalen en opnieuw bouwen.
+ */
+export const SHOPIFY_CART = process.env.NEXT_PUBLIC_SHOPIFY_WINKELMAND === "1";
+
+const GEEN_FOUT = () => {};
+
+function useLocalCart() {
   const [lines, hydrated] = cartStore.useStore();
 
   /**
@@ -51,8 +61,12 @@ export function useCart() {
 
   const clear = useCallback(() => cartStore.set([]), []);
 
-  return { lines, hydrated, add, setQuantity, remove, clear, count: lines.length };
+  // `bezig` en `fout` bestaan enkel bij de Shopify-mand; lokaal kan een wijziging niet mislukken.
+  return { lines, hydrated, add, setQuantity, remove, clear, count: lines.length, bezig: false, fout: "", wisFout: GEEN_FOUT };
 }
+
+/** De winkelmand van de bezoeker. Dezelfde hook voor beide opzetten (zie SHOPIFY_CART). */
+export const useCart: () => ReturnType<typeof useLocalCart> = SHOPIFY_CART ? useShopifyCart : useLocalCart;
 
 /* ---------------- Lopende kassa ---------------- */
 

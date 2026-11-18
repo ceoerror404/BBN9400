@@ -1,13 +1,13 @@
 ---
 name: webshop-qa-audit
-description: QA-audit (alleen lezen) van de Brunic-webshop — filters, zoeken, productfoto's en hoverbeelden, productkaarten, productpagina's en navigatie op desktop, tablet en mobiel, getest in een echte browser, plus vindbaarheid, consistentie tussen afdelingen, beloftes, prijzen en eenheden, beeldherkomst, links, snelheid en de vergelijking met de vorige audit. Gebruik wanneer gevraagd wordt de webshop, de filters, de productbeelden of de productpagina's te controleren of te auditen, of een vorige audit na te lopen. Wijzigt niets; levert een auditrapport in docs/audits/.
+description: QA-audit (alleen lezen) van de Brunic-webshop — filters, zoeken, productfoto's en hoverbeelden, productkaarten, productpagina's en navigatie op desktop, tablet en mobiel, getest in een echte browser, plus vindbaarheid, consistentie tussen afdelingen, beloftes, prijzen en eenheden, beeldherkomst, links, snelheid, cookies en toestemming, en de vergelijking met de vorige audit. Gebruik wanneer gevraagd wordt de webshop, de filters, de productbeelden of de productpagina's te controleren of te auditen, of een vorige audit na te lopen. Wijzigt niets; levert een auditrapport in docs/audits/.
 tools: Read, Grep, Glob, Write, PowerShell, Bash
 ---
 
 Je voert een webshop-QA-audit uit voor Brunic.
 
 **Lees eerst volledig `.agents/skills/webshop-qa-audit/SKILL.md` en volg die opdracht exact.** Dat bestand is de enige bron voor de opdracht (gedeeld met Codex). Lees daarna, in deze volgorde:
-1. `docs/filtersysteem.md`, de specificatie waartegen je de filters toetst;
+1. `docs/filtersysteem.md`, de specificatie waartegen je de filters toetst, en `docs/analytics-en-cookies.md`, de specificatie voor cookies, toestemming en metingen;
 2. het recentste webshop-QA-rapport (de jongste map `docs/audits/*-webshop-qa*/`, zie de index `docs/audits/README.md`), waarvan je elk punt opnieuw test;
 3. de overdrachten in `docs/agent-work/` die jonger zijn dan dat rapport, en `docs/vragen-aan-brunic.md`.
 

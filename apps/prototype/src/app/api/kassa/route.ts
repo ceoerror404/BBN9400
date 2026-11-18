@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { storefront } from "@/lib/shopify/storefront";
+import { GELDIG_VARIANT_ID, MAX_AANTAL, MAX_REGELS, nietTeKoop, nietTeKoopMelding, variantGid } from "@/lib/shopify/etalage";
+import { SHOPIFY_WINKELMAND, shopifyContext } from "@/lib/shopify/hydrogen";
+import { mandVoorKassa } from "@/lib/shopify/winkelmand-handlers";
 import { meld } from "@/lib/melding";
 
 /**
@@ -17,19 +20,6 @@ import { meld } from "@/lib/melding";
 
 type Regel = { variantId: string; quantity: number };
 
-const CONTROLE = /* GraphQL */ `
-  query Controle($ids: [ID!]!) {
-    nodes(ids: $ids) {
-      ... on ProductVariant {
-        id
-        availableForSale
-        price { amount }
-        product { title etalage: metafield(namespace: "brunic", key: "etalage") { value } }
-      }
-    }
-  }
-`;
-
 const MAAK_CART = /* GraphQL */ `
   mutation MaakCart($input: CartInput!) {
     cartCreate(input: $input) {
@@ -45,13 +35,40 @@ const CART_STATUS = /* GraphQL */ `
   }
 `;
 
-type Node = { id: string; availableForSale: boolean; price: { amount: string }; product: { title: string; etalage: { value: string } | null } } | null;
+const KASSA_FOUT = "De kassa is even niet bereikbaar. Probeer het zo meteen opnieuw of bel ons.";
 
-/** Variant-ID's komen als kort nummer of als volledige GID van een ProductVariant. */
-const GELDIG_ID = /^(\d+|gid:\/\/shopify\/ProductVariant\/\d+)$/;
-const gid = (id: string) => (id.startsWith("gid://") ? id : `gid://shopify/ProductVariant/${id}`);
+/**
+ * Met de Shopify-winkelmand (lib/store/shopify-cart.ts) bestaat de cart al: ze staat in de
+ * `cart`-cookie van de bezoeker. We lezen ze met de cookies van de bezoeker erbij, zodat de
+ * kassa-URL dezelfde sessie en toestemming draagt, controleren elke regel opnieuw (een product
+ * kan sinds het toevoegen etalage of uitverkocht geworden zijn) en geven dan pas de kassa-URL.
+ */
+async function kassaVanShopifyCart(req: Request) {
+  try {
+    const { requestContext, storefrontClient } = shopifyContext(req);
+    const cart = await mandVoorKassa(req, storefrontClient);
+    const regels = cart?.regels ?? [];
+    if (!cart || regels.length === 0) return NextResponse.json({ error: "Uw winkelmand is leeg." }, { status: 400 });
+    if (regels.length > MAX_REGELS) return NextResponse.json({ error: `Uw winkelmand telt meer dan ${MAX_REGELS} regels. Reken in twee keer af of bel ons.` }, { status: 400 });
+    if (regels.some((l) => l.quantity < 1 || l.quantity > MAX_AANTAL)) {
+      return NextResponse.json({ error: `Eén of meer regels in uw winkelmand hebben een ongeldige hoeveelheid. Pas de hoeveelheid aan (max. ${MAX_AANTAL}) en probeer opnieuw.` }, { status: 400 });
+    }
+    const geweigerd = await nietTeKoop(regels.map((l) => l.variantId));
+    if (geweigerd.length > 0) return NextResponse.json({ error: nietTeKoopMelding(geweigerd) }, { status: 409 });
+    if (!cart.checkoutUrl) throw new Error("Geen kassa-URL");
+
+    const res = NextResponse.json({ checkoutUrl: cart.checkoutUrl, cartId: cart.id }, { headers: { "Cache-Control": "no-store" } });
+    requestContext.applyResponseHeaders(res.headers);
+    return res;
+  } catch (e) {
+    meld("kassa", "Shopify-cart ophalen mislukt — klanten kunnen niet afrekenen", { fout: (e as Error).message });
+    return NextResponse.json({ error: KASSA_FOUT }, { status: 502 });
+  }
+}
 
 export async function POST(req: Request) {
+  if (SHOPIFY_WINKELMAND) return kassaVanShopifyCart(req);
+
   const body = (await req.json().catch(() => null)) as { lines?: unknown } | null;
   const ruw = Array.isArray(body?.lines) ? (body.lines as Partial<Regel>[]) : [];
   if (ruw.length === 0) return NextResponse.json({ error: "Uw winkelmand is leeg." }, { status: 400 });
@@ -59,7 +76,7 @@ export async function POST(req: Request) {
 
   // Een ongeldige regel nooit stil laten vallen: dan zou de klant minder afrekenen dan hij denkt.
   const ongeldig = ruw.filter(
-    (l) => typeof l?.variantId !== "string" || !GELDIG_ID.test(l.variantId) || !Number.isInteger(l.quantity) || l.quantity! < 1 || l.quantity! > 500,
+    (l) => typeof l?.variantId !== "string" || !GELDIG_VARIANT_ID.test(l.variantId) || !Number.isInteger(l.quantity) || l.quantity! < 1 || l.quantity! > MAX_AANTAL,
   );
   if (ongeldig.length > 0) {
     return NextResponse.json(
@@ -70,21 +87,12 @@ export async function POST(req: Request) {
   const lines = ruw as Regel[];
 
   try {
-    const { nodes } = await storefront<{ nodes: Node[] }>(CONTROLE, { ids: lines.map((l) => gid(l.variantId)) });
-    const geweigerd = nodes
-      .map((n, i) => ({ n, regel: lines[i] }))
-      .filter(({ n }) => !n || !n.availableForSale || !(Number(n.price.amount) > 0) || n.product.etalage?.value === "true");
-    if (geweigerd.length > 0) {
-      const namen = geweigerd.map(({ n }) => n?.product.title ?? "een product").join(", ");
-      return NextResponse.json(
-        { error: `Niet online te koop of intussen niet meer beschikbaar: ${namen}. Verwijder het uit uw winkelmand of vraag er een offerte voor aan.` },
-        { status: 409 },
-      );
-    }
+    const geweigerd = await nietTeKoop(lines.map((l) => l.variantId));
+    if (geweigerd.length > 0) return NextResponse.json({ error: nietTeKoopMelding(geweigerd) }, { status: 409 });
 
     const data = await storefront<{ cartCreate: { cart: { id: string; checkoutUrl: string } | null; userErrors: { message: string }[] } }>(MAAK_CART, {
       input: {
-        lines: lines.map((l) => ({ merchandiseId: gid(l.variantId), quantity: l.quantity })),
+        lines: lines.map((l) => ({ merchandiseId: variantGid(l.variantId), quantity: l.quantity })),
         buyerIdentity: { countryCode: "BE" },
       },
     });
@@ -93,7 +101,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ checkoutUrl: cart.checkoutUrl, cartId: cart.id });
   } catch (e) {
     meld("kassa", "Shopify-cart aanmaken mislukt — klanten kunnen niet afrekenen", { regels: lines.length, fout: (e as Error).message });
-    return NextResponse.json({ error: "De kassa is even niet bereikbaar. Probeer het zo meteen opnieuw of bel ons." }, { status: 502 });
+    return NextResponse.json({ error: KASSA_FOUT }, { status: 502 });
   }
 }
 

@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, type RefObject } from "react";
+import { naarCssPx } from "./zoom";
 
 /**
  * Vergrendelt het scrollen van de pagina (lade, lightbox). De verdwijnende scrollbalk wordt
@@ -11,7 +12,7 @@ export function vergrendelPagina(): () => void {
   const paddingRight = body.style.paddingRight;
   const scrollbalk = window.innerWidth - html.clientWidth;
   body.style.overflow = "hidden";
-  if (scrollbalk > 0) body.style.paddingRight = `${scrollbalk}px`;
+  if (scrollbalk > 0) body.style.paddingRight = `${naarCssPx(scrollbalk)}px`;
   return () => {
     body.style.overflow = overflow;
     body.style.paddingRight = paddingRight;

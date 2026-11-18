@@ -1,6 +1,6 @@
 ---
 name: webshop-qa-audit
-description: QA-audit (alleen lezen) van de Brunic-webshop — filters, zoeken, productfoto's en hoverbeelden, productkaarten, productpagina's en navigatie op desktop, tablet en mobiel, plus vindbaarheid, consistentie tussen afdelingen, beloftes, prijzen en eenheden, beeldherkomst, links, snelheid en de vergelijking met de vorige ronde. Levert een auditrapport met bevestigde fouten, te verifiëren punten en verbeterpunten. Wijzigt niets aan code, data, beelden of Shopify.
+description: QA-audit (alleen lezen) van de Brunic-webshop — filters, zoeken, productfoto's en hoverbeelden, productkaarten, productpagina's en navigatie op desktop, tablet en mobiel, plus vindbaarheid, consistentie tussen afdelingen, beloftes, prijzen en eenheden, beeldherkomst, links, snelheid, cookies en toestemming, en de vergelijking met de vorige ronde. Levert een auditrapport met bevestigde fouten, te verifiëren punten en verbeterpunten. Wijzigt niets aan code, data, beelden of Shopify.
 disable-model-invocation: true
 ---
 
@@ -27,6 +27,7 @@ Je bent een ervaren e-commerce QA-specialist. Controleer de webshop op de werkin
 - Een afwijking van die specificatie is een fout. Gedrag dat er als **bekende beperking** of **bewuste keuze** staat, is geen nieuwe fout. Label het als "bekend (filtersysteem.md)" en neem het alleen op als het de klant echt hindert. Voorbeeld: Rolbreedte is een productfilter, geen variantfilter.
 - `apps/prototype/TODO.md` is de lijst met bekende punten (B-nummers), de lanceringschecklist en wat bewust uitstaat in de testfase. Een punt dat daar open staat, label je "bekend (TODO Bxx)".
 - Prijzen: ga niet uit van een vaste regel per afdeling. Op 03/11/2026 hadden 2.229 van de 2.724 behangen een prijs, en 305 producten in Vloerbekleding en 36 tapijten van Louis De Poortere niet. Een product zonder prijs staat op aanvraag ("Advies en offerte in de winkel"). Dat is correct zolang de tekst erbij past. Een prijs heeft altijd een eenheid (per m², per rol, per stuk). Zet in het rapport per type en merk hoeveel producten een prijs hebben, en meld wat verschoof tegenover de vorige ronde.
+- `docs/analytics-en-cookies.md` is de specificatie van de cookiemelding, de metingen (Shopify Analytics) en de winkelmand bij Shopify: wat er vóór en na een keuze gebeurt, welke cookies en opslag er staan en welke verzoeken naar buiten gaan. Alles zit achter drie schakelaars op Vercel (`SHOPIFY_ANALYTICS`, `SHOPIFY_SHOP_ID`, `NEXT_PUBLIC_SHOPIFY_WINKELMAND`). Op 17/11/2026 stonden ze uit op productie. Wat daar onder "Bekende beperkingen" staat, label je "bekend (analytics-en-cookies.md)". Hoe je toetst: §5b.
 
 **Begin bij de vorige ronde**
 - Lees het recentste webshop-QA-rapport volledig: de jongste map `docs/audits/*-webshop-qa*/` (de index `docs/audits/README.md` toont ze op een rij; mappen `*-seo-geo` zijn een andere soort audit). Test elk punt dat daar open staat opnieuw, met de reproductiestappen uit dat rapport. Test ook wat als opgelost gemeld is: een fout kan terugkomen.
@@ -45,6 +46,7 @@ Je bent een ervaren e-commerce QA-specialist. Controleer de webshop op de werkin
 - Desso valt onder Tarkett, en zoeken op "Desso" blijft werken. Teksten die "Desso en Tarkett" naast elkaar noemen en slugs met `-desso` zijn bewust.
 - Een kleurstaal is in elke afdeling de vlakke foto van die kleur. Enkel een kleur zonder vlakke foto krijgt een bolletje.
 - De site belooft een dienst (opmeting, plaatsing, atelier) enkel waar Brunic die levert. `apps/prototype/src/lib/site/maatwerk.ts` zegt waar: stoffen en vloer opmeting en plaatsing, tapijten op maat, behang enkel opmeting aan huis (sinds 13/11/2026: geen atelier, geen plaatsing bij behang). "Vraag een opmeting aan huis aan" bij behang is dus in orde; "geplaatst", "gelegd" of "maakwerk" bij behang is een fout.
+- Zonder uitdrukkelijke keuze van de bezoeker wordt er niets gemeten (beslist door Alexander 16/11/2026, `docs/analytics-en-cookies.md`). Geen meetverzoek, geen analytics-cookie, en geen tracker, pixel of tagmanager van een derde. Scrollen, sluiten of doorklikken is geen keuze, en weigeren is even makkelijk als accepteren. De cookiepagina noemt elke cookie en elke opslag die er echt staat. Dat geldt in elke stand van de schakelaars (§5b).
 - Alles wat de klant leest, is nl-BE in de u-vorm.
 - Een oplossing mag geen nieuw conflict geven. Dat geldt ook voor wat jij voorstelt (§7).
 - `noindex` en `Disallow: /` zijn bewust tot de livegang (`SITE_INDEXEREN`). Vermeld de stand, het is geen bevinding.
@@ -62,7 +64,8 @@ Je bent een ervaren e-commerce QA-specialist. Controleer de webshop op de werkin
 - Kenmerken die de site verbergt (levertermijn, levertijd, "Leverbaar tot", garantie): `IS_LEVERBELOFTE` in `src/lib/catalog/shopify-adapter.ts`.
 - Beloftes van Brunic: de woordkeuze en de lijst `VERBODEN` in `packages/catalog/beloftes-teksten.mjs`. Vaste teksten staan in `src/data/content.ts`, `src/data/home.ts`, `src/data/categorie-teksten.ts`, `src/lib/site/config.ts` en de componenten, en daarnaast in de Shopify-metaobjects (`pagina_home` en `categorie_inhoud` gaan voor op de code; de rest is voorbereid voor later en moet even goed kloppen).
 - Leveranciersteksten: herschreven in Shopify door `packages/catalog/set-leveranciersteksten.mjs` (mapping in `leveranciersteksten.json`). Een nieuwe import of scraping kan de oude tekst terugzetten: daarom meet elke ronde dit opnieuw.
-- Winkelmand, kassa en formulieren (enkel om te lezen, zie §1): `src/components/commerce/cart-view.tsx`, `src/app/api/kassa/route.ts`, `src/lib/leads/`.
+- Winkelmand, kassa en formulieren (enkel om te lezen, zie §1): `src/components/commerce/cart-view.tsx`, `src/app/api/kassa/route.ts`, `src/lib/leads/`. Met de winkelmand bij Shopify aan ook `src/lib/store/shopify-cart.ts`, `src/lib/shopify/winkelmand-handlers.ts` en `src/lib/shopify/etalage.ts` (de etalagebewaking).
+- Cookiemelding en toestemming: `src/lib/consent/regels.ts` (categorieën, `BELEID_VERSIE`, `GELDIG_DAGEN`), `src/lib/consent/toestemming.ts` (koppeling met Shopify's Customer Privacy API) en `src/components/consent/`. Metingen: `src/lib/analytics/` en `src/components/analytics/`. Proxy en CSP: `src/proxy.ts` en `next.config.ts`. De stand van de schakelaars: `analyticsStand()` in `src/lib/shopify/hydrogen.ts`. De cookieteksten: `COOKIES_MET_SHOPIFY` en `COOKIES_ZONDER_METINGEN` in `src/data/content.ts`.
 
 **Data voor controles op de volledige catalogus**
 - `apps/prototype/.data/shopify-catalogus.json` is de lokale momentopname. Lees dit bestand met een eigen script. Wijzig het nooit.
@@ -78,10 +81,10 @@ Je bent een ervaren e-commerce QA-specialist. Controleer de webshop op de werkin
 - Pas geen koppelingen tussen afbeeldingen, producten en varianten aan.
 - Upload geen nieuwe afbeeldingen en genereer geen vervangende beelden.
 - Installeer niets (ook geen npm-pakketten zoals Playwright of Puppeteer), voer geen datamigraties uit en publiceer niets. Commit en push niets.
-- Plaats geen bestellingen en verstuur geen offerte-, opmeting- of contactaanvragen. Zet niets in de winkelmand en start geen checkout.
+- Plaats geen bestellingen en verstuur geen offerte-, opmeting- of contactaanvragen. Zet niets in de winkelmand en start geen checkout. Met de winkelmand bij Shopify aan maakt elke toevoeging een winkelmand aan in Shopify zelf.
 - Verschijnen er tijdens de audit lokale wijzigingen van iemand anders, blijf er dan af en vermeld ze in het rapport.
 
-Je mag de website bezoeken, filters bedienen, productvarianten selecteren, tussen pagina's navigeren en screenshots maken. Het hartje en `/verlanglijst` bewaren enkel in de browser (`localStorage`) en mag je testen. De verlanglijst als offerte versturen mag niet. Je mag beschikbare code en productgegevens lezen om de oorzaak van een probleem te onderzoeken.
+Je mag de website bezoeken, filters bedienen, productvarianten selecteren, tussen pagina's navigeren en screenshots maken. Het hartje en `/verlanglijst` bewaren enkel in de browser (`localStorage`) en mag je testen. De verlanglijst als offerte versturen mag niet. De cookiekeuze mag je maken: weigeren zo vaak als nodig, accepteren enkel voor de controles in §5b, want elke meting daarna komt in de rapporten van Brunic. Je mag beschikbare code en productgegevens lezen om de oorzaak van een probleem te onderzoeken.
 
 **Wat je niet mag aanraken, lees je in de code.** Winkelmand, kassa en formulieren test je niet in de browser. Lees wel hun code en toets ze aan de regels van de opdrachtgever en aan je eigen bevindingen: staat er voorraadtekst, klopt de eenheid, wat gebeurt er met een product waarvan prijs en eenheid niet bij elkaar horen? Label elk resultaat "enkel in de code gelezen". In het rapport van 03/11/2026 stond de winkelmand enkel bij "niet getest", ook voor de regel over voorraad.
 
@@ -248,6 +251,53 @@ Een test op wat de site toont, ziet niet wat ontbreekt. Reken deze punten altijd
 - Of die build automatisch start (webhooks), kun je zelf niet zien, want `packages/catalog` is verboden terrein. Vermeld het als "te verifiëren door iemand met toegang tot Shopify".
 - `/api/producten?slugs=…&live=1` geeft de beschikbaarheid live. Wijkt die in een steekproef af van de momentopname, meld dat dan.
 
+## 5b. Controleer cookies, toestemming en metingen
+
+De specificatie is `docs/analytics-en-cookies.md`. Wat hier telt, ziet de bezoeker niet: welke cookies er staan en welke verzoeken er vertrekken. Meet dat in de browser. De code lezen volstaat niet.
+
+**Stel eerst de stand vast.** De schakelaars staan op Vercel en die kun je niet lezen. Leid de stand af uit de site en zet ze bovenaan in het rapport:
+- Metingen uit: geen script van Shopify in de HTML, `script-src` in de CSP-header zonder `https://cdn.shopify.com`, geen knop "Cookievoorkeuren" in de footer, geen melding.
+- Metingen aan: die vier zijn er wel.
+- Winkelmand bij Shopify aan: `/info/cookies` noemt de cookie `cart`.
+- Passen die tekenen niet bij elkaar, dan is dat een bevinding. Verschilt de stand van de vorige ronde, zeg dat dan in het oordeel.
+
+**Zo meet je**
+- Elk scenario begint in een nieuw browserprofiel (§1), met `Network` aan vóór de eerste aanvraag.
+- Lees cookies met `Network.getAllCookies`. `document.cookie` toont `_shopify_essential` en `_shopify_analytics` niet: ze zijn HttpOnly. Noteer naam, domein, looptijd en HttpOnly, en daarnaast elke sleutel in `localStorage` en `sessionStorage`.
+- Noteer per scenario elke host waar een verzoek naartoe ging.
+- Test op home, één lijst, één productpagina, `/zoeken?q=…`, `/winkelmand` en `/info/cookies`, op desktop en op mobiel.
+
+**Staan de metingen uit**
+- Er staat geen enkele cookie, en er gaat geen verzoek naar een andere host dan de site zelf en `cdn.shopify.com` (productfoto's).
+- De cookiepagina zegt dat er niet gemeten wordt, en noemt wat je in de opslag vond.
+
+**Staan de metingen aan**
+- **Zonder keuze.** De melding verschijnt bij het eerste bezoek, ook via een rechtstreekse link naar een product. Scroll, klik door naar drie pagina's, druk op Escape en herlaad: de melding blijft staan. Al die tijd gaat er geen verzoek naar `monorail-edge.shopifysvc.com` en staat er geen `_shopify_analytics`. Wat vóór een keuze wel mag, staat in §5 van de specificatie: `_shopify_essential`, `_shopify_cmp`, de scripts van `cdn.shopify.com` en het toestemmingsverzoek via het eigen domein (`POST /api/…/graphql.json`).
+- **De melding zelf.** "Alles accepteren" en "Niet-noodzakelijke weigeren" staan naast elkaar en zijn gelijk: meet hun afmetingen en kleuren (`getBoundingClientRect`, `getComputedStyle`). "Voorkeuren instellen" opent een paneel waarin elke schakelaar uit staat. Controleer op 320 en 390 px breed of alles past, en wat de melding bedekt: de bestelbalk op een productpagina, de knoppen van de filterlade, "meer tonen". Met het toetsenbord: bereikbaar met Tab, zichtbare focus, een toegankelijke naam op elke knop en schakelaar, en het paneel sluit met Escape waarna de focus terugkeert. De tekst is nl-BE in de u-vorm en de link naar het cookiebeleid werkt.
+- **Weigeren.** Geen meetverzoek en geen `_shopify_analytics`, ook niet na navigeren, herladen en een nieuw bezoek met hetzelfde profiel. De melding komt niet terug.
+- **Accepteren.** Er gaat een verzoek naar `monorail-edge.shopifysvc.com/unstable/produce_batch` met status 200, en `_shopify_analytics` staat er. Eén navigatie geeft één `page_viewed`; een andere kleur kiezen op een productpagina geeft er geen. Lees de inhoud van de verzoeken: geen naam, e-mailadres, telefoonnummer of token. Zoek één keer op een verzonnen e-mailadres (`/zoeken?q=test@example.com`): het adres verdwijnt uit de adresbalk en zit in geen enkel verzoek.
+- **Enkel statistieken via het paneel.** Zet in het paneel Statistieken aan en bewaar: hetzelfde resultaat als accepteren.
+- **Intrekken.** Klik op "Cookievoorkeuren" onderaan (ook op `/winkelmand`) en weiger alles: `_shopify_analytics` verdwijnt en er vertrekt niets meer.
+- **Scripts van Shopify geblokkeerd.** Blokkeer met `Network.setBlockedURLs` de scripts uit de tabel "Verzoeken naar buiten" van de specificatie, niet de hele host: de productfoto's komen van dezelfde host. De site werkt, er komt geen melding en geen meting, en "Cookievoorkeuren" zegt dat er niets gemeten wordt.
+- **Opnieuw vragen** (na `GELDIG_DAGEN` = 183 dagen, of bij een hogere `BELEID_VERSIE`) lees je in `src/lib/consent/regels.ts`: label "enkel in de code gelezen". `pnpm --filter @brunic/prototype test:analytics` leest alleen en mag je draaien.
+
+**Cookiepagina en privacyverklaring** (`/info/cookies`, `/info/privacy`)
+- Leg elke cookie en elke opslagsleutel die je gemeten hebt naast de lijst op de pagina: naam, doel, looptijd. Staat er iets in de browser dat de pagina niet noemt, of klopt een looptijd niet, dan is dat een fout. Noemt de pagina iets dat je nergens zag, dan is dat "te verifiëren".
+- De tekst bij "metingen aan" is een ontwerp tot Brunic hem heeft laten nalezen (`apps/prototype/README.md` §4 punt 6). Vermeld de stand; het is geen bevinding.
+
+**Derden**
+- Elke host buiten de tabel "Verzoeken naar buiten" van de specificatie is een bevinding: vóór een keuze een fout (P1), na toestemming een fout als de cookiepagina hem niet noemt. Denk aan Google, Meta, een tagmanager, lettertypes of een chatvenster.
+
+**Wat je niet in de browser test**
+- De winkelmand bij Shopify en de kassa (§1). Lees in de code of `/api/cart` elke variant controleert (`src/lib/shopify/etalage.ts`: geen etalageproduct, prijs boven 0, te koop) en of enkel `/api/kassa` een kassa-URL teruggeeft. Label "enkel in de code gelezen".
+- De kant van Shopify: de taal van de kassa, Shopify's eigen cookiebanner daar en de landen met "toestemming vereist" (§7 van de specificatie). Label "te verifiëren door iemand met toegang tot de Shopify-admin".
+- Safari en Firefox. Zet de melding op een iPhone bij "Zelf na te kijken" (§7).
+
+**Je eigen sporen**
+- Na "accepteren" komt elke pagina die je opent in de rapporten van Brunic. Accepteer daarom in één profiel, open daarna hoogstens twintig pagina's, en zet het aantal, de datum en het uur in het rapport.
+- Alle andere controles (§2 tot §5) doe je na "Niet-noodzakelijke weigeren": dan wordt er niets gemeten en ligt de melding niet over je screenshots.
+- Een nieuwe bezoeker ziet de melding wél. Herhaal daarom de controle op bedekte knoppen en de meting van LCP en CLS (§4) één keer met de melding in beeld: home, één lijst en één productpagina, op mobiel en op desktop.
+
 ## 6. Test daadwerkelijk in de browser
 
 Test alle hoofdcategorieën, iedere filtergroep en representatieve combinaties. Neem producten met één afbeelding, meerdere afbeeldingen, kleurvarianten en ontbrekende beelden mee. Zoek die producten vooraf op in de momentopname, zodat je steekproef bewust gekozen is.
@@ -269,7 +319,7 @@ Controleer waar mogelijk de volledige catalogus op ontbrekende beeldverwijzingen
 - Wantrouw je meetinstrument. Bekijk van elke soort afwijking minstens één geval met de hand in de browser, met een screenshot, voor je ze telt. Op 03/11/2026 bleek een eerste melding een fout in het eigen script.
 - Laat scripts hun uitvoer naar een bestand schrijven en druk enkel een samenvatting af. Schrijf elk hoofdstuk van het rapport naar een eigen bestand in je rondemap zodra het klaar is, en voeg ze aan het einde samen. Zo gaat er niets verloren als de sessie afbreekt.
 
-**Raakt je tijd op,** sla dan niets stil over. Deze volgorde gaat voor: de punten van de vorige ronde, de regels van de opdrachtgever, vindbaarheid, prijs en eenheid, beloftes, filters, beelden, en dan de rest. Wat je niet haalde, staat met naam bij de beperkingen.
+**Raakt je tijd op,** sla dan niets stil over. Deze volgorde gaat voor: de punten van de vorige ronde, de regels van de opdrachtgever, cookies en toestemming, vindbaarheid, prijs en eenheid, beloftes, filters, beelden, en dan de rest. Wat je niet haalde, staat met naam bij de beperkingen.
 
 Als toegang ontbreekt, rapporteer dan wat je niet kon controleren. Claim geen succesvolle test zonder die uitgevoerd te hebben.
 
@@ -304,6 +354,7 @@ Neem de tabellen uit §5 op in een eigen hoofdstuk.
 
 Neem ook deze hoofdstukken op:
 - **Regels van de opdrachtgever:** één tabel met per regel de meting en het oordeel.
+- **Cookies en toestemming** (§5b): de stand van de schakelaars, één tabel met per scenario de cookies, de opslag en de hosts (zonder keuze, na weigeren, na accepteren, na intrekken), de vergelijking met de cookiepagina, en hoeveel metingen je zelf verstuurd hebt.
 - **Status per eerdere bevinding:** elk punt van het vorige rapport, met opgelost, open of bekend, en of je het opnieuw testte.
 - **Vragen aan Brunic:** alles wat enkel Brunic kan beantwoorden in één lijst, klaar om door te sturen. Wat al in `docs/vragen-aan-brunic.md` staat, herhaal je niet: verwijs ernaar met het vraagnummer. Dat bestand is de enige centrale lijst. Schrijf elke nieuwe vraag er ook bij: het volgende vrije nummer, een rij in het overzicht bovenaan en de vraag zelf in deel 1 onder de passende urgentie, in dezelfde vorm (wat we zien, de vraag in het vet, "Antwoord:"). Gebruik in je rapport datzelfde nummer, geen eigen letters.
 - **Zelf na te kijken:** hoogstens tien stappen voor iemand met een echte iPhone en een Android-toestel, voor wat je enkel kon emuleren. Per stap de URL, de handeling en wat er hoort te gebeuren.

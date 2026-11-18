@@ -100,7 +100,11 @@ data/             # ruwe exports — GITIGNORED, device-local
 - E-mailcontinuïteit (MX/SPF/DKIM) is deel van het domein-draaiboek (dossier 17 §3).
 
 ## Analytics
-GA4 onder Bruno's account (wij beheerder) + consent mode v2; e-commerce-events zelf implementeren op de headless front + Shopify customer events voor checkout-stappen. Meting vanaf dag 1 — de latere performance-upsell hangt eraan.
+**Stand 16/11/2026 (beslist door Alexander, nog te bevestigen door Jeroen → [analytics-en-cookies.md](analytics-en-cookies.md)):** eerst **Shopify Analytics** met een eigen cookiemelding, gebouwd en lokaal geverifieerd maar nog uit (schakelaars). **Google volgt later**, wanneer de advertenties (Google Ads) starten: de gebeurtenissen lopen via Shopify's analytics-bus waar een Google-bestemming op kan aansluiten, en de melding heeft de categorie "Advertenties" al klaarstaan. De winkelmand verhuist mee naar Shopify (Storefront Cart API), zodat "toegevoegd aan winkelmand" gemeten kan worden.
+
+*Oorspronkelijk plan (07/2026), hiermee gefaseerd:* GA4 onder Bruno's account (wij beheerder) + consent mode v2; e-commerce-events zelf implementeren op de headless front + Shopify customer events voor checkout-stappen. Meting vanaf dag 1 — de latere performance-upsell hangt eraan.
+
+*Bij ADR 0001:* het ADR noemt `@shopify/hydrogen-react` als bibliotheek. Shopify noemt dat package sinds 2026-10 "legacy"; de opvolger is `@shopify/hydrogen` (zelfde idee: de bibliotheek, niet het framework of Oxygen). Dat is wat hier gebruikt wordt.
 
 ## Randvoorwaarden
 - Niets live vóór getekende offerte + voorschot (afspraak 08/07). Dev-store bouwen mag.

@@ -24,6 +24,7 @@ import { SubcategoryStrip } from "@/components/catalog/subcategory-strip";
 import { ProductListing } from "@/components/catalog/product-listing";
 import { PromoBanner } from "@/components/catalog/promo-banner";
 import { JsonLd } from "@/components/seo/json-ld";
+import { CollectieTracker } from "@/components/analytics/trackers";
 
 type Props = { params: Promise<{ pad: string[] }>; searchParams: Promise<Record<string, string | string[] | undefined>> };
 
@@ -89,7 +90,13 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   // Ondertitel en intro: Shopify-admin ("Categorie | Tekst en foto"), anders de standaardtekst.
   const { subtitle, intro } = await categorieInhoud(node);
   const crumbs = [{ label: "Catalogus", href: routes.catalog() }, ...trail.map((t) => ({ label: t.name, href: routes.category(t) }))];
-  const jsonLd = <JsonLd data={breadcrumbJsonLd(categoryCrumbs(trail))} />;
+  // Structured data + de meting "collectie bekeken" (doet niets zolang de metingen uit staan).
+  const jsonLd = (
+    <>
+      <JsonLd data={breadcrumbJsonLd(categoryCrumbs(trail))} />
+      <CollectieTracker bron={node.bron} />
+    </>
+  );
   const artikels = ARTICLES.filter((a) => a.relatedCategoryId === node.id || a.relatedCategoryId === trail[0].id);
   // Op-maatverhaal enkel waar Brunic maatwerk levert (stoffen, tapijten, vasttapijt); elders: kom naar de winkel.
   const maatwerk = maatwerkVoor(trail[0].id);

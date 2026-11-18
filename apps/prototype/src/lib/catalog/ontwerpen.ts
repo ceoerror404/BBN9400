@@ -64,7 +64,8 @@ function voegSamen(hoofd: Product, rest: Product[]): Product {
     // Elk deel is al gesorteerd, de som nog niet: anders staat de rolfoto van deel 1 voor de productfoto van deel 2.
     images: [...images].sort((a, b) => fotoRang(a) - fotoRang(b)),
     options,
-    variants: alle.flatMap((p) => p.variants),
+    // Een variant van een opgegaan product onthoudt bij welk product ze in de winkel hoort (metingen).
+    variants: [...hoofd.variants, ...rest.flatMap((p) => p.variants.map((v) => ({ ...v, bronProductId: v.bronProductId ?? p.id })))],
     description: hoofd.description || rest.find((p) => p.description)?.description || "",
     facets,
     badges: [...new Set(alle.flatMap((p) => p.badges))],

@@ -20,13 +20,21 @@ try {
  * De kassa is een gewone navigatie naar Shopify en valt niet onder deze policy.
  */
 const dev = process.env.NODE_ENV !== "production";
+// Metingen en cookiemelding (docs/analytics-en-cookies.md), enkel met de schakelaar aan:
+// - scripts van Shopify's CDN (cdn.shopify.com);
+// - de metingen zelf naar Shopify's meetserver (monorail-edge), pas na toestemming.
+// De toestemming loopt via ons eigen domein. Shopify's eigen scripttelemetrie
+// (otlp-http-production.shopifysvc.com) laten we bewust geblokkeerd: niet nodig, en ze vertrekt vóór elke keuze.
+const metenAan = process.env.SHOPIFY_ANALYTICS === "1" || process.env.SHOPIFY_ANALYTICS === "test";
+const shopifyScripts = metenAan ? " https://cdn.shopify.com" : "";
+const shopifyMeetserver = metenAan ? " https://monorail-edge.shopifysvc.com" : "";
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${dev ? " 'unsafe-eval'" : ""}`,
+  `script-src 'self' 'unsafe-inline'${shopifyScripts}${dev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://cdn.shopify.com",
   "font-src 'self' data:",
-  `connect-src 'self'${dev ? " ws: wss:" : ""}`,
+  `connect-src 'self'${shopifyMeetserver}${dev ? " ws: wss:" : ""}`,
   "frame-src 'none'",
   "frame-ancestors 'self'",
   "form-action 'self'",

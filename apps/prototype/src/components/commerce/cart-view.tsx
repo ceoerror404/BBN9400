@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Suspense, useEffect, useState, type ReactNode } from "react";
-import { lopendeKassa, useCart, useWishlist } from "@/lib/store/stores";
+import { lopendeKassa, SHOPIFY_CART, useCart, useWishlist } from "@/lib/store/stores";
 import { useProducts } from "@/lib/store/use-products";
 import { routes } from "@/lib/routes";
 import { SITE } from "@/lib/site/config";
@@ -48,8 +48,9 @@ export function CartView({ departments }: { departments: ReactNode }) {
       });
       const data = (await res.json()) as { checkoutUrl?: string; cartId?: string; error?: string };
       if (data.checkoutUrl) {
-        // Onthouden welke cart naar de kassa ging: na betaling verdwijnen die regels (kassa-opvolging.tsx).
-        if (data.cartId) lopendeKassa.start(data.cartId, lines);
+        // Lokale mand: onthouden welke cart naar de kassa ging; na betaling verdwijnen die regels
+        // (kassa-opvolging.tsx). De Shopify-mand verdwijnt vanzelf zodra ze afgerekend is.
+        if (data.cartId && !SHOPIFY_CART) lopendeKassa.start(data.cartId, lines);
         window.location.href = data.checkoutUrl;
         return;
       }
@@ -257,12 +258,13 @@ export function CartView({ departments }: { departments: ReactNode }) {
               </button>
             </div>
           )}
-          <button type="button" onClick={afrekenen} disabled={bezig || geblokkeerd.length > 0} className="btn btn-primary mt-5 w-full">
+          {/* Shopify-mand: eerst wachten tot de laatste wijziging bevestigd is, anders rekent de klant een oudere mand af. */}
+          <button type="button" onClick={afrekenen} disabled={bezig || cart.bezig || geblokkeerd.length > 0} className="btn btn-primary mt-5 w-full">
             {bezig ? "Even geduld…" : "Veilig afrekenen"}
           </button>
-          {kassaFout && (
+          {(kassaFout || cart.fout) && (
             <p role="alert" className="mt-3 text-[13px] text-brand-dark">
-              {kassaFout}
+              {kassaFout || cart.fout}
             </p>
           )}
           <p className="mt-3 text-[12px] text-ink-60">U rondt uw bestelling af in de beveiligde kassa van onze webshop (Shopify).</p>

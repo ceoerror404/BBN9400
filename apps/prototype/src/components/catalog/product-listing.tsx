@@ -6,6 +6,7 @@ import type { ListingData } from "@/lib/catalog/listing";
 import { activeFilterCount, labelFor, PAGE_SIZE, serializeListState, SORTS, VARIANT_FACETS, type FacetGroup, type FacetLabelMap, type ListState, type SortOption } from "@/lib/catalog/filters";
 import { normalize } from "@/lib/catalog/tekst";
 import { useWielBinnen } from "@/lib/site/scroll";
+import { headerHoogteGemeten, naarCssPx } from "@/lib/site/zoom";
 import { Drawer } from "@/components/ui/drawer";
 import { Icon } from "@/components/ui/icon";
 import { ProductCard } from "./product-card";
@@ -16,7 +17,7 @@ const NO_LABELS: FacetLabelMap = {};
 const LANGE_LIJST = 10;
 const EERST_ZICHTBAAR = 8;
 
-const headerHoogte = () => Number.parseInt(getComputedStyle(document.documentElement).getPropertyValue("--header-h"), 10) || 106;
+const headerHoogte = () => headerHoogteGemeten(106);
 
 const VERTREK = "brunic-lijst-vertrek";
 
@@ -150,7 +151,7 @@ export function ProductListing({
     if (!el || !lijst) return;
     const desktop = window.matchMedia("(min-width: 1024px)");
     const meet = () => {
-      if (desktop.matches) lijst.style.setProperty("--filterbalk-h", `${Math.round(el.getBoundingClientRect().height)}px`);
+      if (desktop.matches) lijst.style.setProperty("--filterbalk-h", `${Math.round(naarCssPx(el.getBoundingClientRect().height))}px`);
       else lijst.style.removeProperty("--filterbalk-h");
     };
     const ro = new ResizeObserver(meet);
@@ -243,7 +244,8 @@ export function ProductListing({
         onFocus={(e) => {
           laatsteFocus.current = e.target;
         }}
-        className={`kleeft z-30 bg-white py-3 transition-transform duration-200 motion-reduce:transition-none lg:sticky lg:top-[var(--header-h,106px)] ${vast ? "mee-met-header" : ""}`}
+        className={/* 1px onder de header (die erboven ligt): geen naad bij schermschaal 125%/150%. */
+        "kleeft z-30 bg-white py-3 lg:sticky lg:top-[calc(var(--header-h,106px)-1px)]"}
       >
         <div className="flex flex-wrap items-center gap-2">
           <div className="hidden flex-wrap items-center gap-2 lg:flex">

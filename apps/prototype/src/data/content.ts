@@ -12,6 +12,7 @@
 import type { CategoryId, ImageRef } from "@/lib/catalog/types";
 import { BEELD } from "@/data/beelden";
 import { SITE } from "@/lib/site/config";
+import { BELEID_VERSIE } from "@/lib/consent/regels";
 
 const ADRES = `${SITE.address.street}, ${SITE.address.postalCode} ${SITE.address.city}`;
 
@@ -960,6 +961,142 @@ export type InfoPage = {
 
 const JURIDISCH_BIJGEWERKT = "2026-09-30";
 
+/**
+ * Metingen met toestemming (SHOPIFY_ANALYTICS) en de winkelmand bij Shopify
+ * (NEXT_PUBLIC_SHOPIFY_WINKELMAND), zie docs/analytics-en-cookies.md. De cookiepagina en de
+ * privacyverklaring volgen die schakelaars: de tekst zegt altijd wat de site op dat moment doet.
+ * Cookienamen, doelen en looptijden: gemeten in de browser op 16/11/2026 en naast Shopify's
+ * eigen cookielijst gelegd (shopify.com/legal/cookies, bijgewerkt 4/11/2026).
+ */
+const METEN = process.env.SHOPIFY_ANALYTICS === "1" || process.env.SHOPIFY_ANALYTICS === "test";
+const MAND_BIJ_SHOPIFY = process.env.NEXT_PUBLIC_SHOPIFY_WINKELMAND === "1";
+const COOKIES_BIJGEWERKT = METEN || MAND_BIJ_SHOPIFY ? "2026-11-16" : JURIDISCH_BIJGEWERKT;
+
+/** Cookiepagina zolang er niets gemeten wordt en de winkelmand lokaal blijft. */
+const COOKIES_ZONDER_METINGEN: InfoPage["sections"] = [
+  {
+    heading: "Wat zijn cookies en lokale opslag?",
+    paragraphs: [
+      "Cookies zijn kleine tekstbestanden die een website in uw browser plaatst. Lokale opslag werkt gelijkaardig: de website bewaart gegevens in uw browser, zodat ze er bij een volgend bezoek nog zijn. Beide technieken kunnen dienen om een website te laten werken, maar ook om surfgedrag te volgen. Wij gebruiken ze enkel voor het eerste.",
+    ],
+  },
+  {
+    heading: "Wat wij bewaren",
+    paragraphs: [
+      "Deze website bewaart enkel functionele gegevens in de lokale opslag van uw browser:",
+      "• uw winkelmand;",
+      "• uw verlanglijst, zodat u die later kunt bekijken of afdrukken;",
+      "• de producten die u recent bekeken hebt.",
+      "Deze gegevens blijven op uw toestel, worden niet naar ons verstuurd en worden niet gebruikt om u te volgen of te profileren. Omdat ze strikt noodzakelijk zijn voor functies die u zelf gebruikt, vragen wij hiervoor geen toestemming.",
+    ],
+  },
+  {
+    heading: "Geen statistieken, geen advertenties",
+    paragraphs: [
+      "Wij plaatsen geen statistische cookies of marketingcookies en werken niet met advertentienetwerken. Willen wij later statistieken bijhouden of marketingcookies gebruiken, dan vragen wij eerst uw toestemming via een duidelijke keuze op deze website, en passen wij deze pagina aan.",
+    ],
+  },
+  {
+    heading: "Gegevens wissen",
+    paragraphs: [
+      "U kunt de opgeslagen gegevens op elk moment wissen via de instellingen van uw browser, bij de websitegegevens of de browsegeschiedenis. Uw winkelmand, verlanglijst en recent bekeken producten zijn daarna leeg.",
+    ],
+  },
+  {
+    heading: "Externe websites",
+    paragraphs: [
+      "Klikt u door naar een externe website, zoals Google Maps, Facebook of Instagram, dan gelden de cookieregels van die website. Daar hebben wij geen invloed op.",
+    ],
+  },
+];
+
+/** Cookiepagina met de Shopify-winkelmand en/of metingen met toestemming. Ontwerp: na te lezen door Brunic. */
+const COOKIES_MET_SHOPIFY: InfoPage["sections"] = [
+  {
+    heading: "Wat zijn cookies en lokale opslag?",
+    paragraphs: [
+      "Cookies zijn kleine tekstbestanden die een website in uw browser plaatst. Lokale opslag werkt gelijkaardig: de website bewaart gegevens in uw browser, zodat ze er bij een volgend bezoek nog zijn. Beide technieken kunnen dienen om een website te laten werken, maar ook om te meten hoe ze gebruikt wordt.",
+    ],
+  },
+  {
+    heading: "Wie plaatst ze?",
+    paragraphs: [
+      `Deze website is van ${SITE.legalName}, ${SITE.address.street}, ${SITE.address.postalCode} ${SITE.address.city} (${SITE.email}). Onze webshop draait op het platform van Shopify. De cookies hieronder worden geplaatst op het domein van deze website; Shopify verwerkt de gegevens in onze opdracht.`,
+    ],
+  },
+  {
+    heading: "Noodzakelijke cookies en opslag",
+    paragraphs: [
+      "Deze zijn nodig om de webshop te laten werken. Wij vragen er geen toestemming voor.",
+      ...(METEN
+        ? [
+            "• _shopify_essential (cookie, 1 jaar): houdt uw sessie en de overgang naar de kassa bij en beveiligt de webshop tegen misbruik.",
+            "• _shopify_cmp (cookie, 1 jaar): onthoudt uw cookiekeuze.",
+          ]
+        : []),
+      ...(MAND_BIJ_SHOPIFY ? ["• cart (cookie, 14 dagen): verwijst naar uw winkelmand, zodat ze er bij uw volgende bezoek nog is en u ze kunt afrekenen."] : ["• Uw winkelmand (lokale opslag)."]),
+      "• Uw verlanglijst en de producten die u recent bekeken hebt (lokale opslag). Deze gegevens blijven op uw toestel en worden niet naar ons verstuurd.",
+    ],
+  },
+  ...(METEN
+    ? [
+        {
+          heading: "Statistieken, enkel met uw toestemming",
+          paragraphs: [
+            "Geeft u toestemming, dan meten wij hoe onze webshop gebruikt wordt: welke pagina’s, categorieën en producten bekeken worden, waarnaar gezocht wordt, wat in een winkelmand komt en of een bezoek tot een bestelling leidt. Daarbij horen technische gegevens zoals het type browser, de pagina waarvan u kwam en uw IP-adres. Wij gebruiken die cijfers enkel om onze webshop te verbeteren.",
+            "• _shopify_analytics (cookie, 1 jaar): herkent uw browser en uw bezoek, zodat bezoeken correct geteld worden.",
+            ...(MAND_BIJ_SHOPIFY ? ["• cartLastUpdatedAt (lokale opslag): voorkomt dat een wijziging van uw winkelmand twee keer geteld wordt."] : []),
+            "De metingen gaan naar Shopify, dat ze in onze opdracht verwerkt (Shopify Analytics). Wij delen ze niet met advertentienetwerken. Over de verwerking van gegevens buiten de Europese Economische Ruimte leest u meer in onze privacyverklaring.",
+            "Zonder uw toestemming plaatsen wij deze cookie niet en meten wij uw bezoek niet. Trekt u uw toestemming in, dan wordt de cookie verwijderd.",
+          ],
+        },
+        {
+          heading: "Uw keuze aanpassen of intrekken",
+          paragraphs: [
+            "Bij uw eerste bezoek vragen wij uw keuze. Aanvaarden en weigeren zijn even eenvoudig, en weigeren heeft geen gevolgen voor het gebruik van de webshop. U kunt uw keuze op elk moment bekijken, aanpassen of intrekken via de link ‘Cookievoorkeuren’ onderaan elke pagina.",
+            "Uw keuze geldt 6 maanden. Daarna, of wanneer dit cookiebeleid wijzigt, vragen wij ze opnieuw.",
+          ],
+        },
+        {
+          heading: "Geen advertentiecookies",
+          paragraphs: ["Wij plaatsen geen marketingcookies en werken niet met advertentienetwerken. Verandert dat, dan passen wij deze pagina aan en vragen wij eerst opnieuw uw toestemming."],
+        },
+      ]
+    : [
+        {
+          heading: "Geen statistieken, geen advertenties",
+          paragraphs: [
+            "Wij plaatsen geen statistische cookies of marketingcookies en werken niet met advertentienetwerken. Willen wij later statistieken bijhouden of marketingcookies gebruiken, dan vragen wij eerst uw toestemming via een duidelijke keuze op deze website, en passen wij deze pagina aan.",
+          ],
+        },
+      ]),
+  {
+    heading: "In de kassa",
+    paragraphs: [
+      `U rondt uw bestelling af in de beveiligde kassa van Shopify. Daar plaatst Shopify de cookies die nodig zijn om uw bestelling en betaling af te handelen.${METEN ? " Uw cookiekeuze wordt aan de kassa doorgegeven: statistische cookies komen er enkel als u die toestond." : ""}`,
+    ],
+  },
+  {
+    heading: "Gegevens wissen",
+    paragraphs: [
+      "U kunt cookies en opgeslagen gegevens op elk moment wissen via de instellingen van uw browser, bij de websitegegevens of de browsegeschiedenis. Uw winkelmand, verlanglijst en recent bekeken producten zijn daarna leeg, en wij vragen uw cookiekeuze opnieuw.",
+    ],
+  },
+  {
+    heading: "Uw rechten",
+    paragraphs: [
+      `Meer over hoe wij met uw gegevens omgaan en over uw rechten (inzage, verbetering, wissen, bezwaar) leest u in onze privacyverklaring. Voor vragen mailt u naar ${SITE.email}. U hebt ook het recht om klacht in te dienen bij de Gegevensbeschermingsautoriteit, Drukpersstraat 35, 1000 Brussel (www.gegevensbeschermingsautoriteit.be).`,
+      `Dit is versie ${BELEID_VERSIE} van ons cookiebeleid.`,
+    ],
+  },
+  {
+    heading: "Externe websites",
+    paragraphs: [
+      "Klikt u door naar een externe website, zoals Google Maps, Facebook of Instagram, dan gelden de cookieregels van die website. Daar hebben wij geen invloed op.",
+    ],
+  },
+];
+
 // Juridische teksten = ontwerp; te valideren door Brunic vóór livegang.
 export const INFO_PAGES: InfoPage[] = [
   {
@@ -1132,45 +1269,13 @@ export const INFO_PAGES: InfoPage[] = [
   {
     slug: "cookies",
     title: "Cookies",
-    intro:
-      "Deze website gebruikt geen tracking- of advertentiecookies. Wij bewaren enkel wat nodig is om de website te laten werken, en dat lokaal in uw browser.",
-    updated: JURIDISCH_BIJGEWERKT,
-    sections: [
-      {
-        heading: "Wat zijn cookies en lokale opslag?",
-        paragraphs: [
-          "Cookies zijn kleine tekstbestanden die een website in uw browser plaatst. Lokale opslag werkt gelijkaardig: de website bewaart gegevens in uw browser, zodat ze er bij een volgend bezoek nog zijn. Beide technieken kunnen dienen om een website te laten werken, maar ook om surfgedrag te volgen. Wij gebruiken ze enkel voor het eerste.",
-        ],
-      },
-      {
-        heading: "Wat wij bewaren",
-        paragraphs: [
-          "Deze website bewaart enkel functionele gegevens in de lokale opslag van uw browser:",
-          "• uw winkelmand;",
-          "• uw verlanglijst, zodat u die later kunt bekijken of afdrukken;",
-          "• de producten die u recent bekeken hebt.",
-          "Deze gegevens blijven op uw toestel, worden niet naar ons verstuurd en worden niet gebruikt om u te volgen of te profileren. Omdat ze strikt noodzakelijk zijn voor functies die u zelf gebruikt, vragen wij hiervoor geen toestemming.",
-        ],
-      },
-      {
-        heading: "Geen statistieken, geen advertenties",
-        paragraphs: [
-          "Wij plaatsen geen statistische cookies of marketingcookies en werken niet met advertentienetwerken. Willen wij later statistieken bijhouden of marketingcookies gebruiken, dan vragen wij eerst uw toestemming via een duidelijke keuze op deze website, en passen wij deze pagina aan.",
-        ],
-      },
-      {
-        heading: "Gegevens wissen",
-        paragraphs: [
-          "U kunt de opgeslagen gegevens op elk moment wissen via de instellingen van uw browser, bij de websitegegevens of de browsegeschiedenis. Uw winkelmand, verlanglijst en recent bekeken producten zijn daarna leeg.",
-        ],
-      },
-      {
-        heading: "Externe websites",
-        paragraphs: [
-          "Klikt u door naar een externe website, zoals Google Maps, Facebook of Instagram, dan gelden de cookieregels van die website. Daar hebben wij geen invloed op.",
-        ],
-      },
-    ],
+    intro: METEN
+      ? "Deze website bewaart wat nodig is om te werken. Statistische cookies plaatsen wij enkel als u daarvoor toestemming geeft. Hier leest u welke cookies dat zijn, waarvoor ze dienen en hoe u uw keuze aanpast."
+      : MAND_BIJ_SHOPIFY
+        ? "Deze website gebruikt geen tracking- of advertentiecookies. Wij bewaren enkel wat nodig is om de website en uw winkelmand te laten werken."
+        : "Deze website gebruikt geen tracking- of advertentiecookies. Wij bewaren enkel wat nodig is om de website te laten werken, en dat lokaal in uw browser.",
+    updated: COOKIES_BIJGEWERKT,
+    sections: METEN || MAND_BIJ_SHOPIFY ? COOKIES_MET_SHOPIFY : COOKIES_ZONDER_METINGEN,
   },
   {
     slug: "algemene-voorwaarden",
@@ -1276,7 +1381,7 @@ export const INFO_PAGES: InfoPage[] = [
     slug: "privacy",
     title: "Privacyverklaring",
     intro: `${SITE.legalName} gaat zorgvuldig om met uw persoonsgegevens. In deze verklaring leest u welke gegevens wij verwerken, waarom, hoe lang we ze bewaren en welke rechten u hebt.`,
-    updated: JURIDISCH_BIJGEWERKT,
+    updated: COOKIES_BIJGEWERKT,
     sections: [
       {
         heading: "Wie is verantwoordelijk?",
@@ -1288,7 +1393,14 @@ export const INFO_PAGES: InfoPage[] = [
         heading: "Welke gegevens verwerken wij?",
         paragraphs: [
           "Wij verwerken enkel de gegevens die wij nodig hebben: uw naam en voornaam, uw e-mailadres, uw telefoon- of gsm-nummer, uw adres of postcode, de beschrijving van uw project en de foto’s die u zelf meestuurt, de maten die wij bij een opmeting noteren, en gegevens over uw offertes, bestellingen, leveringen en betalingen.",
-          "Uw verlanglijst, winkelmand en recent bekeken producten worden enkel lokaal in uw browser bewaard. Die gegevens komen niet bij ons terecht, tenzij u ze zelf met ons deelt, bijvoorbeeld door een afgedrukte verlanglijst mee te brengen naar de winkel.",
+          MAND_BIJ_SHOPIFY
+            ? "Uw verlanglijst en recent bekeken producten worden enkel lokaal in uw browser bewaard. Die gegevens komen niet bij ons terecht, tenzij u ze zelf met ons deelt, bijvoorbeeld door een afgedrukte verlanglijst mee te brengen naar de winkel. Uw winkelmand wordt bewaard bij Shopify, het platform van onze webshop, zodat u ze kunt afrekenen. Ze is niet aan uw naam gekoppeld zolang u niet bestelt."
+            : "Uw verlanglijst, winkelmand en recent bekeken producten worden enkel lokaal in uw browser bewaard. Die gegevens komen niet bij ons terecht, tenzij u ze zelf met ons deelt, bijvoorbeeld door een afgedrukte verlanglijst mee te brengen naar de winkel.",
+          ...(METEN
+            ? [
+                "Gaf u toestemming voor statistieken, dan verwerken wij ook gegevens over uw bezoek aan de webshop: de bekeken pagina’s en producten, uw zoekopdrachten, technische gegevens zoals het type browser en uw IP-adres. Meer daarover leest u op onze pagina Cookies.",
+              ]
+            : []),
         ],
       },
       {
@@ -1299,6 +1411,9 @@ export const INFO_PAGES: InfoPage[] = [
           "• Om te voldoen aan onze wettelijke verplichtingen, zoals de boekhoudkundige en fiscale bewaarplicht.",
           "• Om u onze nieuwsbrief te sturen, enkel als u daarvoor toestemming gaf. U kunt zich op elk moment uitschrijven via de link in de nieuwsbrief of door ons te mailen.",
           "• Om onze website veilig en goed te laten werken, op basis van ons gerechtvaardigd belang.",
+          ...(METEN
+            ? ["• Om te meten hoe onze webshop gebruikt wordt (statistieken), enkel als u daarvoor toestemming gaf. U kunt die toestemming op elk moment intrekken via ‘Cookievoorkeuren’ onderaan elke pagina."]
+            : []),
           "Wij gebruiken uw gegevens niet voor geautomatiseerde besluitvorming of profilering, en wij verkopen ze nooit aan derden.",
         ],
       },
@@ -1316,6 +1431,7 @@ export const INFO_PAGES: InfoPage[] = [
           "• Klant- en projectgegevens, zoals maten, offertes en bestellingen: zolang dat nodig is voor de uitvoering, de wettelijke garantie en eventuele nabestellingen, en in principe tot vijf jaar na de laatste levering of plaatsing.",
           "• Facturen en boekhoudkundige stukken: zolang de wettelijke bewaartermijnen dat vereisen.",
           "• Nieuwsbrief: tot u zich uitschrijft.",
+          ...(METEN ? ["• Statistieken: de cookie die uw bezoek herkent, blijft hoogstens één jaar staan en verdwijnt zodra u uw toestemming intrekt. Uw cookiekeuze vragen wij om de 6 maanden opnieuw."] : []),
           "Daarna verwijderen of anonimiseren wij uw gegevens.",
         ],
       },

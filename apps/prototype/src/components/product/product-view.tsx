@@ -20,6 +20,9 @@ import { useCart, useRecentlyViewed } from "@/lib/store/stores";
 import { useProducts } from "@/lib/store/use-products";
 import { SITE } from "@/lib/site/config";
 import { isOpMaat, type Maatwerk } from "@/lib/site/maatwerk";
+import { headerHoogteGemeten } from "@/lib/site/zoom";
+import { meldWeergave } from "@/lib/analytics/bus";
+import { productPayload } from "@/lib/analytics/payloads";
 import { routes } from "@/lib/routes";
 import { useCartUi } from "@/components/commerce/cart-ui";
 import { WishlistButton } from "@/components/commerce/wishlist-button";
@@ -79,6 +82,14 @@ export function ProductView({
 
   useEffect(() => track(basis.id), [basis.id, track]);
 
+  // Meting "product bekeken": één keer per bezoek aan de pagina, met de uitvoering waarop de
+  // pagina opent (?variant=… uit de link, anders de standaard) — niet bij elke kleurwissel.
+  useEffect(() => {
+    const gevraagd = new URLSearchParams(window.location.search).get("variant");
+    const getoond = (gevraagd && variantById(basis, gevraagd)) || standaardVariant(basis);
+    meldWeergave("product", basis.id, { products: [productPayload(basis, getoond)] });
+  }, [basis]);
+
   // ?variant=… uit een gedeelde link toepassen (enkel in de browser, zie boven).
   useEffect(() => {
     const gevraagd = new URLSearchParams(window.location.search).get("variant");
@@ -96,7 +107,7 @@ export function ProductView({
     const el = buyRef.current;
     if (!el) return;
     // Bovenmarge = kleverige header: een knop die onder de header schuift telt als "uit beeld".
-    const headerH = Number.parseInt(getComputedStyle(document.documentElement).getPropertyValue("--header-h"), 10) || 110;
+    const headerH = headerHoogteGemeten(110);
     const io = new IntersectionObserver(([e]) => setStickyVisible(!e.isIntersecting && e.boundingClientRect.top < headerH), {
       threshold: 0,
       rootMargin: `-${headerH}px 0px 0px 0px`,
@@ -176,7 +187,7 @@ export function ProductView({
         </div>
 
         <aside className="[grid-area:buy]" aria-label="Bestellen">
-          <div className="kleeft mee-met-header transition-transform duration-200 motion-reduce:transition-none lg:sticky lg:top-[calc(var(--header-h,106px)+16px)]">
+          <div className="kleeft lg:sticky lg:top-[calc(var(--header-h,106px)+16px)]">
             {/* Bovenregel: merk · type · collectie; de productnaam is de hoofdtitel (B15). */}
             <p className="text-[13px] font-medium uppercase tracking-wide text-ink-60">
               {[product.brand ?? "Brunic", product.facets.type?.[0]].filter(Boolean).join(" · ")}

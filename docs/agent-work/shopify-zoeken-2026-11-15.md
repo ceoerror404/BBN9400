@@ -2,7 +2,7 @@
 
 **Eigenaar:** Alexander (met Claude) · 15/11/2026
 
-**Status:** code klaar en lokaal geverifieerd, **niet gecommit en niet gedeployd**. Aan Shopify is niets gewijzigd: alle verzoeken waren leesverzoeken via de Storefront API.
+**Status:** code klaar en lokaal geverifieerd. Gecommit op `master` als c223f18 "Aanpassing Zoekbalk" (door Alexander; volgens de lokale git-stand gelijk met `origin/master`). De aanvulling van later op 15/11 (deel 1b van de test en de docs over zoeken op betekenis, zie onderaan) is nog niet gecommit. Aan Shopify is niets gewijzigd: alle verzoeken waren leesverzoeken via de Storefront API.
 
 **Beslissing (van Alexander, 15/11):** de eigen zoekmotor wordt volledig vervangen door Shopify Storefront Search en Predictive Search. Geen terugvaloptie, geen tweede zoekmotor, geen eigen rangschikking of synoniemen bovenop Shopify.
 
@@ -68,6 +68,17 @@ Meegenomen omdat de regel toch wijzigde: "U hebt 1 van 1 producten bekeken" is n
 | R6-17 kop en lijst | verschillend aantal | opgelost: één aantal, in de lijst |
 | R6-52 tikfout en dienst | geen hulp | "behnag" en "Rampor" werken, "vloerkled" niet; de dienstpagina vraagt een Shopify-pagina (stap 8) |
 
+## Nagekomen op 15/11: Shopify zoekt ook op betekenis
+
+Alexander meldde: "deurmat" geeft behang "… mat zwart …". Oorzaak: Shopify vult aan met producten die het verwant vindt (semantic search), ook als geen enkel product het woord bevat. Dit stond niet in mijn eerste verslag: de reeks van 55 bevat één woord buiten het assortiment ("xyzzyqq"), en dat geeft wel niets.
+
+- Gemeten: voor wat Brunic verkoopt, klopt de eerste pagina (24 van 24 met het woord). Voor "deurmat", "laminaat", "kunstgras", "rolgordijn", "badmat": 33 tot 238 resultaten, geen enkel met het woord. Sorteren op prijs haalt de verwante producten naar voren ("lamp", prijs oplopend: eerst vinylvloeren).
+- Uitzetten: volgens het Help Center is er geen instelling. Via de API geprobeerd: aanhalingstekens, veldsyntaxis, `*`, `AND`, haakjes, `searchableFields`. Geen ervan is bruikbaar. Cijfers en bronnen: `docs/zoeken.md` § Zoeken op betekenis.
+- Gedaan: die paragraaf in `zoeken.md`, en deel 1b in `scripts/test-zoeken.mjs` (negen woorden die in geen enkel product staan; telt niet mee voor de uitslag). `test:zoeken` na de wijziging: 51 van 55, 1b 9 van 9 met producten, 15 van 15 codetests.
+- Aan de zoekcode is niets gewijzigd.
+
+**Open beslissing (Alexander of Jeroen):** laten zoals het is en eerst de stappen in Shopify proberen (winkeltaal, schakelaar of Support), of een controle op het woord zelf in de site bouwen. Dat laatste is een eigen laag bovenop Shopify en gaat tegen de beslissing van 15/11 in.
+
 ## Volgende actie
 
-Alexander of Jeroen: diff nakijken, committen, een preview-deploy, daar `/zoeken?q=vloerkleed` en het zoekveld proberen, dan naar `master`. Daarna de stappen in Shopify, met na elke stap `pnpm --filter @brunic/prototype test:zoeken`.
+Alexander of Jeroen: de aanvulling committen (test en docs). In Shopify: winkeltaal op Nederlands (stap 3) en in Search & Discovery kijken of semantic search een schakelaar heeft; daarna `pnpm --filter @brunic/prototype test:zoeken` en deel 1b vergelijken met 9 van 9. Dan beslissen over de controle in de site. De overige stappen in Shopify blijven zoals in `zoeken.md`.

@@ -4,6 +4,8 @@ import { SITE } from "@/lib/site/config";
 import { routes } from "@/lib/routes";
 import { USPS } from "@/components/layout/usp-band";
 import { Icon } from "@/components/ui/icon";
+import { CookievoorkeurenKnop } from "@/components/consent/cookievoorkeuren-knop";
+import { analyticsStand } from "@/lib/shopify/hydrogen";
 
 /**
  * Kassa-layout (referentie: winkelmand zonder hoofdnavigatie): logo + USP's.
@@ -45,6 +47,7 @@ export default function CheckoutLayout({ children }: { children: React.ReactNode
             <Link href={routes.info("privacy")} className="hover:underline">
               Privacyverklaring
             </Link>
+            {analyticsStand() !== "uit" && <CookievoorkeurenKnop className="hover:underline" />}
             <Link href={routes.store()} className="hover:underline">
               Hulp & contact
             </Link>

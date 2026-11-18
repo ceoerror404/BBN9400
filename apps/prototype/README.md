@@ -58,6 +58,8 @@ pnpm --filter @brunic/prototype build     # haalt eerst zelf de catalogus op (pr
 | `CRON_SECRET` | beveiligt `/api/catalogus/vernieuwen` (Vercel Cron stuurt het zelf mee) |
 | `SHOPIFY_WEBHOOK_SECRET` | optioneel: HMAC-controle van de Shopify-webhooks (anders het client secret van de app) |
 | `ALERT_WEBHOOK_URL` | optioneel: Slack/Teams/Discord/Make-webhook voor meldingen (mislukte aanvraag, kassa, serverfout) |
+| `NEXT_PUBLIC_SHOPIFY_WINKELMAND=1` | winkelmand in Shopify in plaats van lokaal in de browser (bij het bouwen ingebakken) → [docs/analytics-en-cookies.md](../../docs/analytics-en-cookies.md) |
+| `SHOPIFY_ANALYTICS=1` + `SHOPIFY_SHOP_ID` | Shopify Analytics en de cookiemelding. `1` verstuurt enkel op de productieomgeving van Vercel; `test` ook lokaal (nooit op Vercel zetten). Zonder: geen scripts, geen melding, geen metingen |
 
 ## 4. Livegang — checklist
 
@@ -66,7 +68,8 @@ pnpm --filter @brunic/prototype build     # haalt eerst zelf de catalogus op (pr
 3. Deploy Hook aanmaken → `VERCEL_DEPLOY_HOOK_URL`; `CRON_SECRET` zetten; daarna `node packages/catalog/register-webhooks.mjs https://www.brunic.be --producten` (eerst `--dry-run`). Testen: een producttitel wijzigen in Shopify → binnen enkele minuten een nieuwe deploy.
 4. Uptime-monitor op `https://www.brunic.be/api/status` en eventueel `ALERT_WEBHOOK_URL`.
 5. Domein: `brunic.be` → 301 naar `www.brunic.be` (Vercel › Domains) **met behoud van het pad**, HTTPS actief; de oude URL's controleren op het echte domein: `node apps/prototype/scripts/test-oude-urls.mjs https://brunic.be --stappen 2` en `… https://www.brunic.be` (verwacht: 0 × niet-200). Vooraf een Search Console-export van brunic.be bewaren (docs/audits/2026-11-14-seo-geo/measurement-plan.md).
-6. Juridische teksten (`src/data/content.ts`, comment boven `INFO_PAGES`) laten valideren door Brunic.
+6. Juridische teksten (`src/data/content.ts`, comment boven `INFO_PAGES`) laten valideren door Brunic. Met de metingen of de Shopify-winkelmand aan tonen de cookiepagina en de privacyverklaring een andere tekst (`COOKIES_MET_SHOPIFY`): die ook laten nalezen.
+   Metingen en cookiemelding aanzetten: de stappen en de instellingen in de Shopify-admin staan in [docs/analytics-en-cookies.md](../../docs/analytics-en-cookies.md) §Aanzetten.
 7. Gebruiksrecht op de leveranciersfoto's bevestigen (dealerafspraken).
 8. Niets live vóór getekende offerte + voorschot (CLAUDE.md).
 
@@ -75,5 +78,5 @@ pnpm --filter @brunic/prototype build     # haalt eerst zelf de catalogus op (pr
 - **Prijzen**: alle 2.386 producten staan nu op etalage/€ 0 → overal "Prijs op aanvraag". Zodra de ERP-prijzen in Shopify staan, werken winkelmand en kassa zonder codewijziging.
 - **Meterware** (stof per 0,1 m): de kassa kent enkel gehele aantallen; verkoopmodel (variant per 10 cm of lengte als regel-eigenschap) ligt bij Brunic.
 - **Eigen foto's** (atelier, winkel, klanten): na de fotoshoot in `src/data/beelden.ts` zetten.
-- **Analytics + cookiebanner** (GA4 onder Bruno's account, Consent Mode v2): nog niet ingebouwd — de site plaatst vandaag geen trackingcookies.
+- **Analytics + cookiebanner**: Shopify Analytics met een eigen cookiemelding is gebouwd (16/11/2026) maar staat uit; aanzetten gebeurt in Vercel, zie `TODO.md` §5 "Vercel bij de livegang (voor Jeroen)". Tot dan plaatst de site geen trackingcookies. Google (GA4 of Ads onder Bruno's account, Consent Mode v2) volgt bij de start van de advertenties.
 - Dode code: verwijderd op 20/10/2026 (demobestanden, accountpagina, ongebruikte iconen/route). Controle: TypeScript-analyse (geen onbereikbare bestanden of ongebruikte exports), `pnpm lint`. De iconen `truck` en `shield` lijken ongebruikt maar horen bij de icoonkeuzes "Levering" en "Schild" van de metaobjects — laten staan.

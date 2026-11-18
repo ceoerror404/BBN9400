@@ -1,6 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Poppins } from "next/font/google";
+import { Suspense } from "react";
+import { ShopifyRuntime } from "@/components/analytics/shopify-runtime";
+import { PaginaTracker } from "@/components/analytics/trackers";
 import { CartUiProvider } from "@/components/commerce/cart-ui";
+import { CookieMelding } from "@/components/consent/cookie-melding";
+import { analyticsStand, SHOPIFY_VALUTA, shopifyI18n } from "@/lib/shopify/hydrogen";
 import { VloeiendeAnkers } from "@/components/ui/vloeiende-ankers";
 import { SITE } from "@/lib/site/config";
 import { BEELD } from "@/data/beelden";
@@ -30,10 +35,37 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = { themeColor: "#ffffff" };
 
+/**
+ * Metingen en cookiemelding (docs/analytics-en-cookies.md) staan enkel aan met SHOPIFY_ANALYTICS
+ * én een shop-ID. Naar Shopify's rapporten versturen gebeurt alleen op productie, zodat lokaal
+ * en previewverkeer de cijfers niet vervuilen ("test" dwingt het af om te verifiëren).
+ */
+function metingen() {
+  const stand = analyticsStand();
+  const shopId = process.env.SHOPIFY_SHOP_ID;
+  const winkelDomein = process.env.SHOPIFY_STORE_DOMAIN;
+  if (stand === "uit" || !shopId || !winkelDomein) return null;
+  return { shopId, winkelDomein, versturen: stand === "test" || process.env.VERCEL_ENV === "production" };
+}
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const meten = metingen();
+  const { language, country } = shopifyI18n.defaultLocale;
   return (
     <html lang="nl-BE" className={`${poppins.variable} ${fraunces.variable}`}>
+      {meten && (
+        <head>
+          <ShopifyRuntime shopId={meten.shopId} winkelDomein={meten.winkelDomein} taal={language} land={country} valuta={SHOPIFY_VALUTA} versturen={meten.versturen} />
+        </head>
+      )}
       <body>
+        {/* Vooraan in de pagina: toetsenbord en schermlezer komen de melding eerst tegen. */}
+        {meten && <CookieMelding />}
+        {meten && (
+          <Suspense fallback={null}>
+            <PaginaTracker />
+          </Suspense>
+        )}
         <VloeiendeAnkers />
         <CartUiProvider>{children}</CartUiProvider>
       </body>

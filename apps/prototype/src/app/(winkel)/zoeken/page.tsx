@@ -11,6 +11,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Icon } from "@/components/ui/icon";
 import { ProductListing } from "@/components/catalog/product-listing";
 import { CategoryTile } from "@/components/catalog/category-tile";
+import { ZoekTracker } from "@/components/analytics/trackers";
 import { categoryImage } from "@/lib/catalog/imagery";
 
 type Props = { searchParams: Promise<SearchParamsRecord> };
@@ -51,6 +52,8 @@ export default async function SearchPage({ searchParams }: Props) {
 
   return (
     <div className="shell-inset">
+      {/* Meting "zoekresultaten bekeken": enkel wanneer er echt een resultatenpagina is. */}
+      {q && resultaat && !mislukt && <ZoekTracker term={q} aantal={listing?.total ?? null} />}
       <Breadcrumbs items={[{ label: "Zoeken" }]} />
       <div className="py-3">
         <h1 className="font-display text-[34px] leading-tight lg:text-[44px]">{q ? <>Resultaten voor “{q}”</> : "Zoeken"}</h1>

@@ -102,7 +102,7 @@ const COLLECTIONS = /* GraphQL */ `
   query Collecties($after: String) {
     collections(first: 100, after: $after) {
       pageInfo { hasNextPage endCursor }
-      nodes { handle title description image { ${IMG} } }
+      nodes { id handle title description image { ${IMG} } }
     }
   }
 `;

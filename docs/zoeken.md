@@ -78,11 +78,55 @@ Gemeten op 15/11/2026 met de 55 vaste zoekopdrachten uit de QA-audits: **51 van 
 | Filters | het filtersysteem van de site, met aantallen | de filters van Search & Discovery, zonder aantallen | filters toevoegen in de app |
 | Kaart bij een kleurfilter | toonde de gekozen kleur | toont de standaardkleur | – |
 | Meer dan 1000 resultaten | alles bereikbaar | Shopify stopt bij 1000 | grens van Shopify |
-| Brede woorden | elk woord moest voorkomen | Shopify geeft ook verwante resultaten ("linnen": 76 → het maximum van 1000) | – |
+| Brede woorden | elk woord moest voorkomen | Shopify geeft ook verwante resultaten ("linnen": 76 → het maximum van 1000) | zie [Zoeken op betekenis](#zoeken-op-betekenis) |
+| Een woord dat in geen enkel product staat ("deurmat", "laminaat") | 0 resultaten, met de lege staat | tientallen "verwante" producten, zonder dat woord | zie [Zoeken op betekenis](#zoeken-op-betekenis) |
 
 **Wat Shopify doorzoekt**: titel, beschrijving, product type, vendor, tags, en van de varianten de titel (de optiewaarden, bv. een kleurnaam), het artikelnummer en de barcode ([bron](https://help.shopify.com/en/manual/online-store/storefront-search/search-behavior)). Metafields staan niet in die lijst. Een artikelnummer werkt ook op zijn eerste tekens. Tikfouten: één verkeerde of twee verwisselde letters, niet in artikelnummers.
 
 Let op: ook interne tags zijn doorzoekbaar (`leveranciersimport`, `bron:ddept`, `prijs-ontbreekt`, `uitlopend`). Een klant die "uitlopend" intikt, krijgt het maximum van 1000 producten (gemeten 15/11/2026). Dat tags werken, is ook het bewijs voor stap 7 hieronder.
+
+## Zoeken op betekenis
+
+Shopify zoekt niet alleen op woorden maar ook op betekenis ("semantic search"). Vindt het weinig of niets met het woord zelf, dan vult het aan met producten die het verwant vindt. Shopify noemt dat "fewer no-result searches". Gevolg: een woord dat in geen enkel product staat, geeft toch resultaten. Gemeld door Alexander op 15/11/2026 met "deurmat": in het zoekveld stond behang "… mat zwart …" bij de eerste zes.
+
+Gemeten op 15/11/2026. "Met het woord" = het woord staat, ook als deel van een langer woord, in een veld dat Shopify doorzoekt.
+
+| Zoekterm | Resultaten | Met het woord, bij de eerste 24 |
+|---|---|---|
+| vloerkleed, behang, vinyl, gordijnstof, tapijt, blauw, bloemen | 372 tot 1000 | 24 van 24 |
+| Rampur | 23 | 19 (de vier andere staan achteraan) |
+| lamp | 351 | 2 (de twee lampen staan vooraan) |
+| deurmat | 33 | 0 |
+| laminaat | 75 | 0 |
+| kunstgras | 238 | 0 |
+| rolgordijn | 128 | 0 |
+| badmat | 96 | 0 |
+| zwembad | 8 | 0 |
+
+- **Voor wat Brunic verkoopt, klopt de eerste pagina.** De echte treffers staan vooraan, de verwante erachter.
+- **Voor wat Brunic niet verkoopt, komt er geen "niets gevonden" meer.** De kop zegt "Resultaten voor …" en de lijst telt producten, terwijl geen ervan het woord bevat.
+- **Sorteren op prijs haalt de verwante producten naar voren.** "lamp", prijs oplopend: de eerste zes zijn vinylvloeren en vloerkleden, geen lamp. Bij "Rampur", prijs oplopend, staat een Ripley-kleed vooraan.
+- Het lijkt alsof Shopify de Nederlandse teksten deels als Engels leest: "lamp" geeft "Hi Light" en "Light Grey", "deurmat" geeft behang "mat zwart" (Engels *mat*). De winkel staat in het Engels (stap 3). Niet getest of de winkeltaal dit verandert.
+
+**Uitzetten kan niet, voor zover gedocumenteerd.** Het Help Center: "Semantic understanding is included in online store search", en "There's no setting that controls how broadly search matches" ([zoekgedrag](https://help.shopify.com/en/manual/online-store/storefront-search/search-behavior), [Search & Discovery](https://help.shopify.com/en/manual/online-store/storefront-search/search-and-discovery-modify-search), gelezen op 15/11/2026). Een bericht van Shopify uit september 2024 spreekt nog van inschakelen in de app Search & Discovery; of die schakelaar er nog staat, is enkel in de admin te zien.
+
+**Geprobeerd via de API (15/11/2026), zonder bruikbaar resultaat:**
+
+| Poging | Uitkomst |
+|---|---|
+| Aanhalingstekens (`"deurmat"`) | geen verwante producten meer, maar ook geen woorddelen en geen tikfouten: "lamp" 0, "fiets" 0 (er is behang met "fietsen"), "Tarkett vinyl" 0 |
+| Veldsyntaxis (`title:… OR product_type:… OR body:…`) | enkel hele woorden: `title:lamp` vindt "Staanlamp" niet, `title:rampor` vindt niets |
+| `*`, `AND`, haakjes | niet strikter: meestal méér resultaten ("deurmat*": 1000) |
+| `searchableFields` bij `predictiveSearch` | geen effect |
+
+Er is dus geen instelling in de code die dit oplost en toch woorddelen en tikfouten behoudt.
+
+**Wat wel kan**
+
+1. In Shopify (zie de stappen hieronder): de winkeltaal op Nederlands (stap 3), in Search & Discovery kijken of er een schakelaar voor semantic search staat, en anders de vraag aan Shopify Support stellen. Voor een woord dat klanten gebruiken voor iets wat Brunic wél heeft ("deurmat" voor de schoonloopmat Defend AD19): het woord als tag of synoniem toevoegen, dan staat dat product vooraan (stappen 5 en 7).
+2. Op de site: een controle op het woord zelf. Dat is een eigen laag bovenop Shopify, tegen de beslissing van 15/11 in, en dus een beslissing van Alexander of Jeroen. Twee vormen: enkel de kop eerlijk maken ("Geen producten gevonden voor 'deurmat'. Verwante producten:") als geen enkel resultaat het woord bevat, of resultaten zonder het woord niet tonen. De tweede vorm kost de hulp bij tikfouten en raakt de filters, de aantallen en de paginering.
+
+Meten: deel 1b van `test:zoeken` draait negen woorden die in geen enkel product staan en toont wat Shopify ervoor teruggeeft. Stand op 15/11/2026: 9 van 9 geven producten.
 
 ## Instellen in Shopify
 
@@ -92,7 +136,7 @@ Niets hiervan is uitgevoerd: aan Shopify is niets gewijzigd. Na elke stap `pnpm 
 
 **2. Privé-token (Vercel, vóór de livegang).** De site belt Shopify vanaf de server met een publieke token. Shopify meet het verkeer van een publieke token per IP-adres van de bezoeker; vanaf een server lijkt alles van één adres te komen en kan Shopify verzoeken weigeren (HTTP 430). Zet in `SHOPIFY_STOREFRONT_API_TOKEN` de privé-token van het Headless-kanaal (`shpat_…`). De code stuurt dan vanzelf het IP-adres van de bezoeker mee (`Shopify-Storefront-Buyer-IP`).
 
-**3. Winkeltaal Nederlands (Instellingen › Talen).** De winkel staat in het Engels. Shopify herkent woordvormen (enkelvoud, meervoud) per taal. Dat verklaart wellicht waarom "vloerkleden" geen vloerkleden vindt. Niet getest: we weten pas na de wijziging of dit het oplost. Het zet ook de filternamen "Price" en "Availability" in het Nederlands.
+**3. Winkeltaal Nederlands (Instellingen › Talen).** De winkel staat in het Engels. Shopify herkent woordvormen (enkelvoud, meervoud) per taal. Dat verklaart wellicht waarom "vloerkleden" geen vloerkleden vindt. Niet getest: we weten pas na de wijziging of dit het oplost. Het zet ook de filternamen "Price" en "Availability" in het Nederlands. Kijk na de wijziging ook naar deel 1b van de test: mogelijk verandert de taal wat Shopify "verwant" vindt (zie [Zoeken op betekenis](#zoeken-op-betekenis)).
 
 **4. Search & Discovery › Filters.** Toevoegen: **Product type**. Dan kan een klant bij "tapijt" kiezen tussen Vloerkleed, Vasttapijt en Tapijttegel; de site toont de filter als "Type". Te overwegen: Motief en Stijl (metafields). Niet toevoegen zonder overleg: **Vendor**, want die toont "Desso" als merk terwijl de site Desso overal onder Tarkett zet. De namen "Breedte (cm)", "Lengte (cm)" en "Kleurfamilie" komen uit de app en zijn daar aan te passen.
 
@@ -116,12 +160,13 @@ Niets hiervan is uitgevoerd: aan Shopify is niets gewijzigd. Na elke stap `pnpm 
 pnpm --filter @brunic/prototype test:zoeken
 ```
 
-Leest alleen. Deel 1 draait de 55 zoekopdrachten tegen de echte Shopify Search en zegt per regel of het verwachte product, merk of type bij de eerste tien staat. Een rode regel daar is werk in Shopify, geen codefout. Deel 2 en 3 testen de code: aantallen, paginering, filters (OF en EN), prijsklassen, sortering, suggesties. Die horen groen te zijn; enkel dan eindigt het script met een fout.
+Leest alleen. Deel 1 draait de 55 zoekopdrachten tegen de echte Shopify Search en zegt per regel of het verwachte product, merk of type bij de eerste tien staat. Een rode regel daar is werk in Shopify, geen codefout. Deel 1b toont ter informatie wat Shopify teruggeeft voor negen woorden die in geen enkel product staan. Deel 2 en 3 testen de code: aantallen, paginering, filters (OF en EN), prijsklassen, sortering, suggesties. Die horen groen te zijn; enkel dan eindigt het script met een fout.
 
 Stand op 15/11/2026: 51 van 55, en 15 van 15 codetests. De vier rode regels: "vloerkleden", "vloerkled", "wasbaar" en "opmeting" (stappen 3, 7 en 8 hierboven).
 
 ## Beperkingen
 
+- Shopify geeft ook producten die het verwant vindt, zonder het zoekwoord. Een woord buiten het assortiment geeft daardoor zelden "niets gevonden", en sorteren op prijs mengt verwante producten tussen de echte treffers. Zie [Zoeken op betekenis](#zoeken-op-betekenis).
 - Het resultaat hangt af van de catalogus-momentopname. Een product dat nieuwer is dan de laatste build wordt door Shopify gevonden maar niet getoond tot de volgende build (webhook, hoogstens een kwartier later).
 - Een dubbelepunt in de zoekterm wordt een spatie. In Shopify is `veld:waarde` zoeksyntaxis en schakelt die de tikfoutcorrectie uit.
 - Zoekstatistieken (wat klanten zoeken, wat niets oplevert) meet Shopify enkel met zijn eigen tracking. Die staat niet aan: de site zegt "geen statistieken" (vraag 23 in `vragen-aan-brunic.md`).

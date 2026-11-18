@@ -2,6 +2,8 @@ import Link from "next/link";
 import { FOOTER_COLUMNS } from "@/lib/site/navigation";
 import { SITE } from "@/lib/site/config";
 import { Icon, type IconName } from "@/components/ui/icon";
+import { CookievoorkeurenKnop } from "@/components/consent/cookievoorkeuren-knop";
+import { analyticsStand } from "@/lib/shopify/hydrogen";
 import { NewsletterBand } from "./newsletter-band";
 import { UspBand } from "./usp-band";
 import { SeoText } from "./seo-text";
@@ -134,9 +136,13 @@ export function SiteFooter({ showNewsletter = true }: { showNewsletter?: boolean
             © {new Date().getFullYear()} {SITE.legalName} · {SITE.address.street}, {SITE.address.postalCode} {SITE.address.city}
             {SITE.companyNumber && ` · Ondernemingsnummer ${SITE.companyNumber}`}
           </p>
-          <p className="flex items-center gap-2 rounded-[var(--radius-field)] border border-line-strong/50 bg-white px-3 py-2">
-            <span aria-hidden="true">🇧🇪</span> België · Nederlands
-          </p>
+          <div className="flex flex-wrap items-center gap-4">
+            {/* Vaste link op elke pagina: toestemming bekijken, aanpassen of intrekken. */}
+            {analyticsStand() !== "uit" && <CookievoorkeurenKnop className="min-h-10 underline underline-offset-2 hover:text-ink" />}
+            <p className="flex items-center gap-2 rounded-[var(--radius-field)] border border-line-strong/50 bg-white px-3 py-2">
+              <span aria-hidden="true">🇧🇪</span> België · Nederlands
+            </p>
+          </div>
         </div>
       </div>
     </footer>

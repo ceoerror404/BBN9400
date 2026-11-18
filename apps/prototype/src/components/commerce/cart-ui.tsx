@@ -7,8 +7,9 @@ import { Icon } from "@/components/ui/icon";
 import { ImageSlot } from "@/components/ui/image-slot";
 import type { ImageRef, Price as PriceT } from "@/lib/catalog/types";
 import { formatMoney, formatQuantity, lineTotal, UNIT_NAME } from "@/lib/catalog/product";
-import { useCart } from "@/lib/store/stores";
+import { SHOPIFY_CART, useCart } from "@/lib/store/stores";
 import { routes } from "@/lib/routes";
+import { WinkelmandMetingen } from "@/components/analytics/winkelmand-metingen";
 import { KassaOpvolging } from "./kassa-opvolging";
 
 type Added = { title: string; image?: ImageRef; variantLabel?: string; quantity: number; price: PriceT };
@@ -34,6 +35,7 @@ export function CartUiProvider({ children }: { children: ReactNode }) {
     <Ctx.Provider value={value}>
       {children}
       <KassaOpvolging />
+      {SHOPIFY_CART && <WinkelmandMetingen />}
       <Drawer
         open={added !== null}
         onClose={close}
@@ -53,6 +55,12 @@ export function CartUiProvider({ children }: { children: ReactNode }) {
           </div>
         }
       >
+        {/* Shopify-mand: weigerde Shopify de toevoeging (niet meer te koop, storing), dan zeggen we dat hier. */}
+        {added && cart.fout && (
+          <p role="alert" className="mx-5 mt-5 rounded-[var(--radius-field)] bg-attention-bg p-4 text-[14px] text-attention">
+            Dit product kon niet aan uw winkelmand worden toegevoegd. {cart.fout}
+          </p>
+        )}
         {added && (
           <div className="flex gap-4 p-5">
             <ImageSlot src={added.image?.src} alt="" className="aspect-square w-24 shrink-0 rounded-2xl" />

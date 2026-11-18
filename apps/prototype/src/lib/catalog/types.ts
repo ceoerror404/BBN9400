@@ -41,6 +41,8 @@ export type Category = {
   display?: CategoryDisplay;
   /** Niet tonen in menu's, wel bereikbaar via URL. */
   hidden?: boolean;
+  /** De collectie achter deze categorie in de commerce-motor (voor metingen). `id` ontbreekt in een oudere momentopname. */
+  bron?: { handle: string; id?: string };
 };
 
 /** Een categorie met haar afgeleide positie in de boom. */
@@ -138,6 +140,11 @@ export type Variant = {
   maatKlasse?: string;
   /** Vorm uit de maat ("Rond", "Rechthoekig"…). */
   vorm?: string;
+  /**
+   * Het product waartoe deze variant in de commerce-motor behoort, als dat een ander is dan het
+   * product op de site (samengevoegd ontwerp, lib/catalog/ontwerpen.ts). Voor metingen.
+   */
+  bronProductId?: string;
 };
 
 export type Spec = { label: string; value: string };
