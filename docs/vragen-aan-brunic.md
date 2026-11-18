@@ -13,18 +13,18 @@ Stand van 14/11/2026. Deze vragen komen uit de controles van de nieuwe webshop. 
 
 ## Overzicht
 
-**25 vragen: 18 open, 1 deels beantwoord, 6 beantwoord.**
+**25 vragen: 16 open, 2 deels beantwoord, 7 beantwoord.**
 
 | Nr. | Onderwerp | Status | Wanneer nodig | Uit |
 |---:|---|---|---|---|
-| [1](#v1) | Prijs van twee Senso-vloeren | **Open** | Dringend: online te bestellen | QA 03/11 (R5-28, R6-30) |
+| [1](#v1) | Prijs van twee Senso-vloeren | Beantwoord 18/11 | Dringend: online te bestellen | QA 03/11 (R5-28, R6-30) |
 | [2](#v2) | Producten zonder prijs | **Open** | Vóór de livegang | QA 03/11 (R5-33, R6-45) |
 | [3](#v3) | Twee tapijtprijzen die opvallen | **Open** | Dringend: online te bestellen | QA 03/11 (R5-38, R6-41) |
 | [4](#v4) | Garantie bij vinyl | Beantwoord 13/11 | – | QA 03/11 (R5-29) |
 | [5](#v5) | Tekst bij Louis De Poortere | Beantwoord 13/11 | – | QA 03/11 (R5-30) |
 | [6](#v6) | Beloftes van Brunic op de site | Beantwoord 13/11 | – | QA 03/11 (R5-35) |
 | [7](#v7) | Levertermijnen | Beantwoord 13/11 | – | QA 03/11 (R5-10, R5-34) |
-| [8](#v8) | Rechten op drie foto's | **Open** | Vóór de livegang | QA 03/11 (R5-31, R6-33) |
+| [8](#v8) | Rechten op drie foto's | Deels: Prime uit de webshop 18/11, **Trude open** | Vóór de livegang | QA 03/11 (R5-31, R6-33) |
 | [9](#v9) | Betere of ontbrekende foto's | **Open** | Kan daarna | QA 03/11 (R5-36 e.a.) |
 | [10](#v10) | Artikelnummers van Lalee en Ragolle | **Open** | Kan daarna | QA 03/11 (R5-20, R6-19) |
 | [11](#v11) | Merken in de inleidende teksten | Deels: behang beantwoord, **tapijten open** | Kan daarna | QA 03/11 (R5-27, R6-25) |
@@ -48,21 +48,6 @@ Stand van 14/11/2026. Deze vragen komen uit de controles van de nieuwe webshop. 
 # Deel 1 — Open vragen
 
 ## A. Dringend: een klant kan dit vandaag al online bestellen
-
-<a id="v1"></a>
-### 1. Prijs van twee Senso-vloeren (R5-28)
-
-| Product | Wat de site nu toont | Inhoud van de doos | Prijs per m² als het bedrag voor de doos geldt |
-|---|---|---|---|
-| Senso Wallstreet Light Urban | € 55,48 per m² | 2,22 m² | ± € 24,99 |
-| Senso Premium Grey Marble | € 48,90 per m² | 7 tegels, samen 2,04 m² | ± € 24 |
-
-Bij Senso Wallstreet staat ook "enkel verkocht per doos", maar de klant kan op de site 1 m² bestellen.
-
-- **Is dit bedrag de prijs per doos of per m²?**
-- **Verkoopt u deze producten enkel per doos?**
-
-Antwoord:
 
 <a id="v3"></a>
 ### 3. Twee tapijtprijzen die opvallen (R5-38)
@@ -107,6 +92,9 @@ Deze producten staan nu met "Prijs op aanvraag" en "Advies en offerte in de wink
 
 Antwoord:
 
+- **Boråstapeter, 18/11/2026 (Alexander):** het behang krijgt de Belgische winkelprijs per rol van borastapeter.com (prijs incl. btw zoals een bezoeker uit België ze ziet, bv. Elm Tree € 84,90). Bij outletkleuren de volle prijs, niet de actieprijs van Boråstapeter. De murals in Behang (Florence, Wild Forest, Marion's, Nightingale Garden) ook per rol. **Doorgevoerd op 18/11/2026** met `packages/catalog/set-boras-prijzen.mjs`: 867 kleuren geprijsd, 349 van de 366 behangen online te koop. De 17 behangen waarvan niet elke kleur een prijs kreeg (24 kleuren staan niet meer op borastapeter.com) staan sinds 18/11/2026 op draft in Shopify, niet meer op aanvraag (log: `..\Data\BORAS_DRAFT_LOG_2026-11-18.json`). Fotobehang op maat (143) blijft op aanvraag. Pushlog: `..\Data\BORAS_PRIJZEN_SHOPIFY_PUSH_LOG_2026-11-18T13-30-37.json`.
+- **De andere groepen** (gordijnstoffen, vasttapijt, Louis De Poortere): nog geen antwoord.
+
 <a id="v8"></a>
 ### 8. Rechten op drie foto's (R5-31)
 
@@ -118,6 +106,9 @@ Deze foto's komen van de oude site. Hun bestandsnamen wijzen op Amazon en Facebo
 **Weet u waar deze foto's vandaan komen, en mogen we ze gebruiken? Zo niet, kan u andere foto's bezorgen of opvragen bij de leverancier?**
 
 Antwoord:
+
+- **Prime Zelfklevend 1m², 18/11/2026 (Alexander):** product uit de webshop gehaald, staat op draft in Shopify (de foto's zelf zijn niet verwijderd). Oude URL's vallen terug op Vinylvloeren. Log: `..\Data\SENSO_PRIME_LOG_2026-11-18.json`.
+- **Kindervinyl Trude:** nog geen antwoord.
 
 <a id="v22"></a>
 ### 22. Toegang tot Google Search Console (SEO-1-01)
@@ -270,6 +261,23 @@ Antwoord:
 # Deel 2 — Beantwoord
 
 Deze antwoorden gelden als regel. Ze zijn uitgevoerd in de code en in Shopify; details in `docs/teksten-en-beloftes.md` §D.
+
+<a id="v1"></a>
+### 1. Prijs van twee Senso-vloeren (R5-28)
+
+| Product | Wat de site toonde | Inhoud van de doos | Prijs per m² als het bedrag voor de doos geldt |
+|---|---|---|---|
+| Senso Wallstreet Light Urban | € 55,48 per m² | 2,22 m² | ± € 24,99 |
+| Senso Premium Grey Marble | € 48,90 per m² | 7 tegels, samen 2,04 m² | ± € 24 |
+
+Bij Senso Wallstreet stond ook "enkel verkocht per doos", maar de klant kon op de site 1 m² bestellen.
+
+- **Is dit bedrag de prijs per doos of per m²?**
+- **Verkoopt u deze producten enkel per doos?**
+
+Antwoord (18/11/2026, Alexander): **vinyl in dozen wordt altijd per doos verkocht, en het bedrag is de prijs per doos.** Dat geldt voor de Gerflor-tegels (Senso Premium Grey Marble, Senso Wallstreet Light Urban, Prime Zelfklevend). Het rolvinyl (274 producten van Beauflor, Tarkett en Gerflor, gesneden op 2, 3 of 4 m breed) blijft per m².
+
+**Doorgevoerd op 18/11/2026:** de keuzelijst van `brunic.verkoop_eenheid` kreeg "Per doos" erbij, en de drie tegels staan op "Per doos". Grey Marble kreeg het kenmerk "Oppervlakte / doos: 2,04 m²" (7 tegels van 73 × 39,9 cm). De site kent de eenheid doos: "€ 48,90 / doos", en op de productpagina ook de prijs per m² (Grey Marble ± € 23,97, Wallstreet ± € 24,99). Log: `..\Data\SENSO_PRIME_LOG_2026-11-18.json`. Regel voor elke audit: een product in dozen zonder eenheid "Per doos" is een fout.
 
 <a id="v4"></a>
 ### 4. Garantie bij vinyl (R5-29)

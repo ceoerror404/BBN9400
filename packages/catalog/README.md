@@ -44,7 +44,7 @@ Alle definities filterable via Search & Discovery; namespace-voorstel `brunic`.
 | `rolbreedte_cm` | number_integer | product | behang (53), wasdoek, vasttapijt, kamerhoogte-stoffen (270/320) |
 | `etalage` | boolean | product | alle (true = tonen-niet-verkopen; front-end verbergt prijs/koopknop, chatbot noemt geen prijs) |
 | `erp_familie` | text | product | alle (herkomst-koppeling `LLL FFF`) |
-| `verkoop_eenheid` | text | product | alle — `lopende meter` / `m2` / `rol` / `stuk` (vervangt het eerdere `verkoop_per_meter`-voorstel; UX per-meter-verkoop nog open) |
+| `verkoop_eenheid` | text | product | alle — keuzelijst `Per stuk` / `Per lopende meter` / `Per rol` / `Per m²` / `Per doos` (doos sinds 18/11/2026: de site toont dan ook de prijs per m² uit het kenmerk "Oppervlakte / doos") (vervangt het eerdere `verkoop_per_meter`-voorstel; UX per-meter-verkoop nog open) |
 
 ## Domeinregels (vastgelegd 09/07/2026, uit de data geverifieerd)
 - **`breedte = min(a, b)`, `lengte = max(a, b)`** — bronnamen zijn niet consistent georiënteerd (Woo: "Herati 141x72", "Tosserkhan 230x140"). Het maatfilter draait op breedte, dus normaliseren is verplicht.
@@ -78,3 +78,13 @@ node packages/catalog/set-leveranciersteksten.mjs --rollback <log> # zet de oude
 node packages/catalog/set-leveranciersteksten.mjs --controle       # live: wij/je-vorm, aanhef, leverbeloftes, winkellocator, "??", garantiezin — doel 0
 ```
 De dry-run meldt "niet herschreven" (zinnen die na de mapping nog tegen de regels ingaan) en mappingzinnen die nergens gevonden zijn. Een nieuwe scraping of sync kan de oude tekst terugzetten: draai dan opnieuw, en vul de mapping aan voor nieuwe zinnen. Na `--apply` pas zichtbaar op de site na een nieuwe build (momentopname).
+
+## `set-boras-prijzen.mjs` — Boråstapeter-behang per rol (18/11/2026)
+Zet de Belgische winkelprijs per rol van borastapeter.com op het Boråstapeter-behang (`productType` Behang; fotobehang op maat blijft op aanvraag). Koppeling: variant-SKU = artikelnummer. Borastapeter.com toont de prijs per land van de bezoeker en remt scripts sterk af (429), dus de prijzen komen uit een browserscript dat iemand in België zelf in de console van borastapeter.com plakt (`boras-prijzen-browser.js` is het sjabloon).
+```
+node packages/catalog/set-boras-prijzen.mjs --browserscript                 # → ..\Data\BORAS_PRIJZEN_<datum>\prijzen-ophalen.js
+node packages/catalog/set-boras-prijzen.mjs "<boras-prijzen-BE.json>"       # dry-run: verdeling, uitschieters, deels geprijsde producten
+node packages/catalog/set-boras-prijzen.mjs "<…json>" --verkoopbaar --go    # schrijven + etalage uit; pushlog in ..\Data\
+node packages/catalog/set-boras-prijzen.mjs --rollback "<pushlog>" --go     # terugzetten
+```
+Gewone prijs incl. btw (bij een actie op hun site de doorgestreepte). Enkel een product met een prijs voor élke kleur gaat online te koop; de rest blijft op aanvraag.

@@ -89,8 +89,9 @@ const EENHEID: Record<string, SalesUnit> = {
   "per meter": "meter",
   "per rol": "rol",
   "per set": "set",
+  "per doos": "doos",
 };
-const EENHEID_LABEL: Record<SalesUnit, string> = { stuk: "Per stuk", meter: "Per lopende meter", m2: "Per m²", rol: "Per rol", set: "Per set" };
+const EENHEID_LABEL: Record<SalesUnit, string> = { stuk: "Per stuk", meter: "Per lopende meter", m2: "Per m²", rol: "Per rol", set: "Per set", doos: "Per doos" };
 
 /**
  * Hoeveelheidsregels per verkoopeenheid. Gehele aantallen: een Shopify-winkelmand kent
@@ -103,6 +104,7 @@ const QTY: Record<SalesUnit, QuantityRule> = {
   set: { min: 1, step: 1, max: 50 },
   meter: { min: 1, step: 1, max: 100 },
   m2: { min: 1, step: 1, max: 500 },
+  doos: { min: 1, step: 1, max: 200 },
 };
 
 // Alt-teksten typt het personeel zelf in de admin: een gewoon streepje (-) telt even goed als –.
@@ -355,7 +357,7 @@ function mapProduct(p: RawProduct, collectieNaarCategorie: Map<string, CategoryI
       sku: v.sku || kortId(v.id),
       options: Object.fromEntries(v.selectedOptions.filter((o) => o.name !== "Title").map((o) => [o.name, o.value])),
       price,
-      availability: v.availableForSale ? "op-voorraad" : "uitverkocht",
+      availability: v.availableForSale ? "beschikbaar" : "uitverkocht",
       ...(kleurfamilies ? { kleurfamilies } : {}),
       ...(maatKlasse ? { maatKlasse } : {}),
       ...(vorm ? { vorm } : {}),

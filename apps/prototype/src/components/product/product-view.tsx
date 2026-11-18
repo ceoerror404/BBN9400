@@ -10,6 +10,7 @@ import {
   imagesForVariant,
   isPurchasable,
   lineTotal,
+  m2PerDoos,
   standaardVariant,
   toonHeleFoto,
   UNIT_NAME,
@@ -118,6 +119,7 @@ export function ProductView({
 
   const images = useMemo(() => imagesForVariant(product, variant), [product, variant]);
   const unit = variant.price?.unit ?? "stuk";
+  const doosM2 = unit === "doos" ? m2PerDoos(product) : null;
   const purchasable = isPurchasable(product, variant);
 
   const choose = (optionName: string, value: string) => {
@@ -196,7 +198,15 @@ export function ProductView({
             {product.line && !product.title.includes(product.line) && <p className="mt-1 text-[15px] text-ink-80">Collectie {product.line}</p>}
 
             <Price price={variant.price} pricing={product.pricing} size="lg" className="mt-3" />
-            {product.pricing === "fixed" && unit !== "stuk" && variant.price && (
+            {product.pricing === "fixed" && unit === "doos" && variant.price && (
+              <p className="mt-1 text-[13px] text-ink-60">
+                {doosM2
+                  ? `Prijs per doos van ${formatQuantity(doosM2)} m², of ${formatMoney(variant.price.amount.amount / doosM2)} per m²`
+                  : "Prijs per doos"}{" "}
+                · u kiest hieronder het aantal dozen.
+              </p>
+            )}
+            {product.pricing === "fixed" && unit !== "stuk" && unit !== "doos" && variant.price && (
               <p className="mt-1 text-[13px] text-ink-60">Prijs per {UNIT_NAME[unit].one} · u kiest hieronder de hoeveelheid in {UNIT_NAME[unit].many}.</p>
             )}
 

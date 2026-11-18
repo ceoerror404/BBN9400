@@ -31,7 +31,7 @@ async function liveBeschikbaarheid(productIds: string[]): Promise<Map<string, Av
     const status = new Map<string, Availability>();
     nodes.forEach((n, i) => {
       if (!n) status.set(`product:${productIds[i]}`, "uitverkocht");
-      else for (const v of n.variants.nodes) status.set(kortId(v.id), v.availableForSale ? "op-voorraad" : "uitverkocht");
+      else for (const v of n.variants.nodes) status.set(kortId(v.id), v.availableForSale ? "beschikbaar" : "uitverkocht");
     });
     return status;
   } catch (e) {

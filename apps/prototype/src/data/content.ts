@@ -1141,7 +1141,7 @@ export const INFO_PAGES: InfoPage[] = [
     slug: "levering",
     title: "Levering & afhalen",
     intro:
-      "Online bestellingen leveren wij binnen de week, of u haalt ze af in onze winkel in Ninove. Maatwerk wordt geleverd en geplaatst door vakmannen.",
+      "Online bestellingen leveren wij binnen de week; moet het product nog bij de leverancier besteld worden, dan kan het langer duren. U kunt ook afhalen in onze winkel in Ninove. Maatwerk wordt geleverd en geplaatst door vakmannen.",
     sections: [
       {
         heading: "Maatwerk: levering en plaatsing door vakmannen",

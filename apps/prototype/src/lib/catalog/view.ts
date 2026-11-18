@@ -78,7 +78,7 @@ export type ListingItem = CardProduct & {
   standaardId?: string;
 };
 
-const AVAIL_RANK: Availability[] = ["op-voorraad", "beperkt", "op-bestelling", "uitverkocht"];
+const AVAIL_RANK: Availability[] = ["beschikbaar", "beperkt", "op-bestelling", "uitverkocht"];
 
 /** Liefst beschikbaar en geen staal. */
 export function liefstVerkoopbaar(lijst: VariantKaart[]): VariantKaart[] {

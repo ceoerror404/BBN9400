@@ -125,6 +125,9 @@ export const VERVANGINGEN = [
   // ── Levering (vraag 7) ───────────────────────────────────────────────
   ["Maatwerk leveren en plaatsen wij met onze eigen mensen. Andere bestellingen laat u leveren of haalt u af in onze winkel in Ninove.",
    "Online bestellingen leveren wij binnen de week, of u haalt ze af in onze winkel in Ninove. Maatwerk wordt geleverd en geplaatst door vakmannen."],
+  // 18/11/2026: "binnen de week" nooit zonder het voorbehoud. Het voorbehoud vooraan, zodat het ook in een ingekorte meta description staat.
+  ["Online bestellingen leveren wij binnen de week, of u haalt ze af in onze winkel in Ninove. Maatwerk wordt geleverd en geplaatst door vakmannen.",
+   "Online bestellingen leveren wij binnen de week; moet het product nog bij de leverancier besteld worden, dan kan het langer duren. U kunt ook afhalen in onze winkel in Ninove. Maatwerk wordt geleverd en geplaatst door vakmannen."],
   ["Maatwerk: levering en plaatsing door onze eigen mensen", "Maatwerk: levering en plaatsing door vakmannen"],
   ["Gordijnen op maat, raamdecoratie, vasttapijt en tapijten op maat leveren wij bij u thuis met onze eigen mensen.", "Gordijnen op maat, raamdecoratie, vasttapijt en tapijten op maat worden bij u thuis geleverd door vakmannen."],
   ["Bestelt u een product rechtstreeks online, dan ziet u bij het afrekenen welke leveringsmogelijkheden er zijn, wat ze eventueel kosten en wanneer u uw bestelling mag verwachten, nog voor u de bestelling bevestigt.",
@@ -153,4 +156,6 @@ export const VERBODEN = [
   /\bslaapcomfort\b/i,
   /\bverf\b/i,
   /gemaakt in ons atelier|maken we in ons|maken onze|gemaakt door onze/i,
+  // Leverbelofte zonder voorbehoud (audit 18/11/2026): het voorbehoud moet in dezelfde tekst staan.
+  /binnen de week(?!.*leverancier)/i,
 ];

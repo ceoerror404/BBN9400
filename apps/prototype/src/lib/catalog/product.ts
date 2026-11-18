@@ -17,6 +17,7 @@ export const UNIT_SUFFIX: Record<SalesUnit, string> = {
   m2: "/ m²",
   rol: "/ rol",
   set: "/ set",
+  doos: "/ doos",
 };
 
 export const UNIT_NAME: Record<SalesUnit, { one: string; many: string; short: string }> = {
@@ -25,7 +26,18 @@ export const UNIT_NAME: Record<SalesUnit, { one: string; many: string; short: st
   m2: { one: "m²", many: "m²", short: "m²" },
   rol: { one: "rol", many: "rollen", short: "rol" },
   set: { one: "set", many: "sets", short: "set" },
+  doos: { one: "doos", many: "dozen", short: "doos" },
 };
+
+/**
+ * m² per doos uit het kenmerk "Oppervlakte / doos" ("2,22 m²"). Bij verkoop per doos toont de
+ * productpagina daarmee ook de prijs per m² (eenheidsprijs), zodat de klant kan vergelijken.
+ */
+export function m2PerDoos(p: Product): number | null {
+  const s = [...p.specs, ...p.dimensions].find((x) => /oppervlakte\s*\/\s*doos|m²\s*(per|\/)\s*doos/i.test(x.label));
+  const n = Number(s?.value.match(/(\d+(?:[.,]\d+)?)\s*m/)?.[1]?.replace(",", "."));
+  return n > 0 ? n : null;
+}
 
 /** Volgorde van de foto's: productfoto, overige foto's, details, sfeerfoto's, en de rolfoto als laatste. */
 export const FOTO_RANG: Record<FotoSoort, number> = { product: 0, overig: 1, detail: 2, sfeer: 3, rol: 9 };

@@ -72,7 +72,7 @@ export type ImageRef = {
  * Er worden géén omrekeningen tussen eenheden gemaakt (bv. m² uit breedte × lengte):
  * de klant kiest rechtstreeks een aantal in deze eenheid.
  */
-export type SalesUnit = "stuk" | "meter" | "m2" | "rol" | "set";
+export type SalesUnit = "stuk" | "meter" | "m2" | "rol" | "set" | "doos";
 
 export type Money = {
   /** Bedrag incl. btw, in euro. */
@@ -101,7 +101,12 @@ export type QuantityRule = {
   max?: number;
 };
 
-export type Availability = "op-voorraad" | "beperkt" | "op-bestelling" | "uitverkocht";
+/**
+ * Of de klant de variant kan bestellen — géén voorraad: er is geen ERP gekoppeld en Shopify volgt
+ * geen voorraad. "beschikbaar" = Shopify laat ze verkopen. Deze waarde staat in de pagina-data
+ * en in /api/producten, dus geen woord dat voorraad belooft (R6-47).
+ */
+export type Availability = "beschikbaar" | "beperkt" | "op-bestelling" | "uitverkocht";
 
 /** Soort foto, uit de alt-tekst of de bestandsnaam. Bepaalt de volgorde en wat vooraan mag staan. */
 export type FotoSoort = "product" | "overig" | "detail" | "sfeer" | "rol";

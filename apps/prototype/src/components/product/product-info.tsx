@@ -123,7 +123,9 @@ export function ProductInfo({ product, category, maatwerk }: { product: Product;
             U haalt uw bestelling af in onze winkel ({SITE.address.street}, {SITE.address.city}) of wij leveren ze bij u thuis
             {isOpMaat(maatwerk) ? "; de plaatsing gebeurt door vakmannen." : "."}{" "}
             {/* Levertermijn van Brunic zelf (13/11/2026), enkel bij wat online te bestellen is. Nooit die van de leverancier. */}
-            {product.pricing === "fixed" && "Online bestellingen leveren wij binnen de week; u krijgt meteen een bevestiging van wanneer we kunnen leveren. "}
+            {/* Dezelfde voorwaarde als op /info/levering en in de FAQ: de belofte nooit zonder het voorbehoud (audit 18/11/2026). */}
+            {product.pricing === "fixed" &&
+              "Online bestellingen leveren wij binnen de week; u krijgt meteen een bevestiging van wanneer we kunnen leveren. Moet het product nog bij de leverancier besteld worden, dan kan het langer duren; ook dat laten we u dan meteen weten. "}
             <Link href={routes.info("levering")} className="underline underline-offset-2">
               Alles over levering & afhalen
             </Link>

@@ -142,7 +142,8 @@ const CONTROLES = {
   wij: /\b(wij|we|ons|onze)\b/i,
   je: /\b(je|jij|jou|jouw|jullie)\b/i,
   aanhef: /beste klant/i,
-  levering: /levertijd|levertermijn|snelle levering|thuis geleverd|rechtstreeks .*geleverd|gratis op\b|halen .* gratis|gratis .*ophalen/i,
+  // 18/11/2026 uitgebreid: termijnen, verzending en voorraad (een leverbelofte komt enkel van Brunic zelf).
+  levering: /levertijd|levertermijn|snelle levering|thuis geleverd|rechtstreeks .*geleverd|gratis op\b|halen .* gratis|gratis .*ophalen|werkdag|binnen (de|een|\d+) (week|weken|dagen)|verzend|verzonden|op voorraad|uit voorraad|morgen in huis/i,
   winkellocator: /winkellocator|retailer/i,
   // Terugname, ophalen of inzamelen door de fabrikant: zegt Brunic bij de levering, niet op de site (14/11/2026).
   terugname: /take care|restart®|terugname|terugneem|terug naar (louis|de fabrikant|tarkett)|qr-code|ophal|inzamel|tweede thuis|doorverkoop/i,

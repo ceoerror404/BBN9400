@@ -120,6 +120,7 @@ export function categoryCrumbs(trail: CategoryNode[]) {
 const PRIJS_PER: Partial<Record<SalesUnit, { code: string; tekst: string }>> = {
   meter: { code: "MTR", tekst: "per lopende meter" },
   m2: { code: "MTK", tekst: "per m²" },
+  doos: { code: "BX", tekst: "per doos" },
 };
 
 function offers(p: Product) {
