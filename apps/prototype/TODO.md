@@ -80,6 +80,13 @@ Bronnen, geraadpleegd via een onderzoeksagent: WER op Justel (geconsolideerd tot
 - [ ] Vóór de domeinoverdracht: Search Console-export van brunic.be (16 maanden, query × pagina) bewaren als nulmeting — docs/audits/2026-11-14-seo-geo/measurement-plan.md.
 - [ ] Metingen en cookiemelding aanzetten: zie "Vercel bij de livegang (voor Jeroen)" hieronder. Tot dan zegt de cookieverklaring terecht "geen tracking". Google (GA4 of Ads, Consent Mode v2) volgt later, bij de start van de advertenties (`docs/analytics-en-cookies.md` §10).
 - [ ] Shopify: verzendtarieven, betalingen (Bancontact), btw en checkout-branding instellen. Niet gecontroleerd: de app mist de leesrechten daarvoor.
+- [ ] Kassa in de stijl van Brunic (voorbereid op 19/11/2026, nog in te stellen). Dit kan enkel met de hand in de Shopify-admin: de API voor de kassastijl werkt alleen op Plus- en ontwikkelwinkels, en de winkel staat op Basic. Op Basic zijn logo, kleuren en lettertypes aanpasbaar; de opbouw van de pagina ligt vast.
+  - Settings › Checkout › Configurations › **Edit** bij "Brunic-configuratie 2" (de gepubliceerde) › tandwiel (Settings).
+  - Logo: `brunic-kassa-logo.png` uit de bibliotheek (staat al in Content › Files: mascotte + woordmerk zoals de header van de site, transparant, 1360 × 480). Breedte 180 px, links.
+  - Kleuren, uit `src/app/globals.css`: knoppen `#130c0c` (inkt), accent `#130c0c`, achtergrond hoofdgedeelte `#ffffff`, achtergrond besteloverzicht `#f4f1f0` (mist).
+  - Lettertypes: koppen **Fraunces**, gewone tekst **Poppins** (zoals de site). Staat Fraunces niet in de lijst: ook Poppins voor de koppen.
+  - Komt het vectorlogo van de klant binnen: het logo opnieuw samenstellen en hier vervangen.
+  - De kassa is nog Engels (`/en-be`): Nederlands publiceren staat in `docs/analytics-en-cookies.md` §7.
 - [ ] Vectorlogo (staat al open in de README)
 
 ### Vercel bij de livegang (voor Jeroen)
@@ -114,6 +121,13 @@ Terugdraaien: de drie variabelen weghalen en opnieuw deployen, zonder codewijzig
 **Na de domeinverhuizing** (Vercel › Domains, README §4 punt 5)
 
 - [ ] De cookies opnieuw nakijken op `www.brunic.be`: staat `_shopify_cmp` er (op `localhost` weigerde de browser hem), en gaat de cookiekeuze mee naar de kassa. Dat is enkel lokaal getest.
+- [ ] De teruglink vanuit de Shopify-kassa naar het nieuwe domein laten wijzen. Sinds 19/11/2026 stuurt het live thema "Brunic redirect naar brunic.vercel.app" (het officiële Hydrogen Redirect Theme) elk bezoek aan `brunic-3.myshopify.com` door naar de eigen site, ook de klik op "Brunic" linksboven in de kassa. Het doeladres staat op één plek, in Shopify; in de code verandert er niets.
+  - Pas doen zodra `brunic.be` echt naar de nieuwe site op Vercel wijst. Eerder komt wie in de kassa op "Brunic" klikt op de oude WooCommerce-site terecht.
+  - Shopify › Online Store › Themes › bij dat thema **Customize** › Theme settings › Storefront › **Hostname**: `brunic.vercel.app` vervangen door `www.brunic.be` (zonder `https://`) en **Save**. Met `brunic.be` zonder `www` werkt het ook, maar dan krijgt de klant een extra tussenstap.
+  - De twee eigen regels in hetzelfde scherm blijven staan: `/cart > /winkelmand` en `/products > /product`.
+  - Het thema hernoemen via ⋯ › Rename (de naam is enkel een label).
+  - Daarna opnieuw testen in een privévenster: product in de winkelmand, "Veilig afrekenen", in de kassa op "Brunic" klikken → de homepage van `www.brunic.be`; en `brunic-3.myshopify.com` rechtstreeks openen → dezelfde homepage, zonder lus.
+  - De kassa zelf (`/checkouts/…`, `/cart/c/…`) valt buiten het thema. Terugdraaien: het thema "Horizon" opnieuw publiceren.
 
 Staat elders en hoort ook bij Vercel: `SITE_URL` en `SITE_INDEXEREN=1` (eerste punt van deze checklist), de Deploy Hook, `CRON_SECRET`, het domein en de uptime-monitor (`README.md` §4), en de limiet op formulieren in Vercel Firewall (B03).
 
