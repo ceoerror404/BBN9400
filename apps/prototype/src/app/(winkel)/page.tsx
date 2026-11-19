@@ -3,6 +3,7 @@ import Link from "next/link";
 import { catalog } from "@/lib/catalog/repository";
 import { toCard } from "@/lib/catalog/view";
 import { getBrands } from "@/lib/catalog/brands";
+import { MERK_BEELD } from "@/data/merken";
 import { IS_SFEER, sfeerfoto } from "@/lib/catalog/imagery";
 import { routes } from "@/lib/routes";
 import { SITE } from "@/lib/site/config";
@@ -43,6 +44,7 @@ export default async function HomePage() {
     [hero.image, ...[...afdelingen.tegels, ...selecties.kaarten, ...trends.kaarten, ...inspiratie.tegels].map((t) => t.image)].flatMap((i) => (i ? [i.src.split("?")[0]] : [])),
   );
   const brands = (await getBrands()).map((b) => {
+    if (MERK_BEELD[b.slug]) return b; // vaste achtergrond (data/merken.ts)
     const eigen = b.products.flatMap((p) => p.images.filter((i) => IS_SFEER.test(i.alt))).find((i) => !gebruikt.has(i.src.split("?")[0]));
     return { ...b, image: eigen ?? b.image };
   });

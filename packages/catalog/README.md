@@ -88,3 +88,13 @@ node packages/catalog/set-boras-prijzen.mjs "<…json>" --verkoopbaar --go    # 
 node packages/catalog/set-boras-prijzen.mjs --rollback "<pushlog>" --go     # terugzetten
 ```
 Gewone prijs incl. btw (bij een actie op hun site de doorgestreepte). Enkel een product met een prijs voor élke kleur gaat online te koop; de rest blijft op aanvraag.
+
+## `novilon-ophalen.mjs` + `novilon-import.mjs` — Forbo Novilon-rolvinyl (19/11/2026)
+50 dessins in drie lijnen (Basic 10, Viva 20, Traffic 20) uit de dessinlijst `Forbo_Novilon_dessins.xlsx` (een tabblad per lijn, met links naar forbo.com/nl-be). Model zoals het andere rolvinyl (Tarkett): één product per dessin, titel = lijn + dessin ("Basic Light Timber"), vendor **Novilon**, `productType` Vinylvloer, optie **Breedte** (2/3/4 m; Traffic 2/4 m), SKU `NOV-<dessinnummer van die breedte>`, per m², collecties `vloerbekleding` + `vloerbekleding-vinyl`, gepubliceerd op Brunic Headless. Kenmerken (`brunic.specificaties`) uit de Forbo-pagina's: dikte, slijtlaag, rolmaten, gebruiksklassen, brandklasse, 17 dB, R10, LRV (Traffic ook NCS en 18 % gerecycleerd). Kleurfamilie en uitzicht per dessin staan in `DESSIN` in het importscript (nagekeken op de foto's). Prijs 0 bij de import = op aanvraag tot de prijs er is.
+```
+node packages/catalog/novilon-ophalen.mjs "<Forbo_Novilon_dessins.xlsx>"   # pagina's + foto's → ..\Data\Novilon\<Lijn Dessin>\<nr>\ + NOVILON_BRON.json
+node packages/catalog/novilon-import.mjs                                   # dry-run → ..\Data\Novilon\NOVILON_IMPORT_REVIEW_<tijd>.md
+node packages/catalog/novilon-import.mjs --go [--alleen <handle>]           # aanmaken (bestaande handles worden overgeslagen); pushlog in ..\Data\
+node packages/catalog/novilon-import.mjs --rollback "<pushlog>" --go       # aangemaakte producten verwijderen
+```
+Let op: Viva Dark Grey bestaat enkel in 4 en 3 m; het 3 m-nummer is 73622 (wijkt af van Forbo's gewone reeks, waar …2 = 2 m).

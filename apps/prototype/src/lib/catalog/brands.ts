@@ -2,7 +2,7 @@ import { catalog } from "./repository";
 import { sfeerfoto } from "./imagery";
 import { normalize } from "./tekst";
 import type { ImageRef, Product } from "./types";
-import { MERK_LOGO, MERK_ONDER } from "@/data/merken";
+import { MERK_BEELD, MERK_LOGO, MERK_ONDER } from "@/data/merken";
 
 export type Brand = { name: string; slug: string; count: number; types: string[]; image?: ImageRef; logo?: { src: string; wit?: boolean }; products: Product[] };
 
@@ -29,8 +29,8 @@ export async function getBrands(): Promise<Brand[]> {
     .map(([name, products]) => {
       const sorted = [...products].sort((a, b) => b.popularity - a.popularity);
       const types = [...new Set(products.flatMap((p) => p.facets.type ?? []))];
-      const image = sorted.map(sfeerfoto).find(Boolean) ?? sorted.find((p) => p.images[0])?.images[0];
       const slug = brandSlug(name);
+      const image = MERK_BEELD[slug] ?? sorted.map(sfeerfoto).find(Boolean) ?? sorted.find((p) => p.images[0])?.images[0];
       return { name, slug, count: products.length, types, image, logo: MERK_LOGO[slug], products: sorted };
     })
     .sort((a, b) => b.count - a.count);

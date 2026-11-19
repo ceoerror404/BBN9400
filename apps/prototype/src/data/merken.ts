@@ -26,6 +26,16 @@ export const MERK_LOGO: Record<string, { src: string; wit?: boolean }> = {
   tarkett: { src: "/merken/tarkett.svg" },
   lalee: { src: "/merken/lalee.svg" },
   ragolle: { src: "/merken/ragolle.svg" },
+  novilon: { src: "/merken/novilon.svg" },
+};
+
+/**
+ * Vaste achtergrond van de merktegel (homepage, /merken en de kop van de merkpagina), in plaats
+ * van een automatisch gekozen sfeerfoto uit het assortiment. Beelden in public/merken/.
+ * Novilon: een staal uit het eigen gamma (Viva Natural Herringbone 5446), gevraagd op 19/11/2026.
+ */
+export const MERK_BEELD: Record<string, { src: string; alt: string }> = {
+  novilon: { src: "/merken/novilon-staal.jpg", alt: "Novilon Viva Natural Herringbone, vinylvloer in visgraatmotief" },
 };
 
 /**

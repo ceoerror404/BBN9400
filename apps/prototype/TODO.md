@@ -92,6 +92,7 @@ Gebouwd op 16/11/2026 en lokaal getest, maar uit: zonder de drie variabelen hier
 
 Bedoeld voor de livegang, niet eerder. "Production" is vandaag de testsite brunic.vercel.app: wie de variabelen nu al zet, toont daar de melding en stuurt de testbezoeken naar de rapporten van Brunic.
 
+- [ ] Nog te beslissen (vraag van Alexander, 18/11/2026): blijft het bij drie variabelen die apart gezet worden, of gaat alles vanzelf aan zodra `SITE_INDEXEREN=1` staat? Het tweede kan bij de livegang niet vergeten worden, maar dan moeten de cookietekst en de Shopify-admin klaar zijn vóór die dag. Het vraagt een kleine codewijziging. "Standaard aan, uitzetten in Vercel" is afgeraden: dan staat alles bij de eerstvolgende push aan op de testsite. Tot de beslissing geldt de lijst hieronder.
 - [ ] Eerst buiten Vercel: de cookie- en privacytekst is nagelezen door Brunic (`COOKIES_MET_SHOPIFY` in `src/data/content.ts`), en de instellingen in de Shopify-admin zijn gedaan (`docs/analytics-en-cookies.md` §7: toestemming vereist voor de hele EER, Nederlands toegevoegd, wachtwoordpagina weg, Shopify's eigen cookiebanner nagekeken).
 - [ ] Settings › Environment Variables, omgeving Production:
   - `NEXT_PUBLIC_SHOPIFY_WINKELMAND` = `1`
