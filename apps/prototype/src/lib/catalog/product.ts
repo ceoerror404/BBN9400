@@ -160,7 +160,7 @@ export function variantLabel(v: Variant): string {
 
 /** "1 product" / "3 producten". */
 export function productCount(n: number): string {
-  return `${n} ${n === 1 ? "product" : "producten"}`;
+  return `${n.toLocaleString("nl-BE")} ${n === 1 ? "product" : "producten"}`;
 }
 
 /**

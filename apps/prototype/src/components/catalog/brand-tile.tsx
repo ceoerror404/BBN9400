@@ -28,7 +28,7 @@ export function BrandTile({
     <Link href={href} className={`group relative block overflow-hidden rounded-[var(--radius-pill)] ${className}`}>
       <ImageSlot src={image?.src} alt="" tone={tone} sizes={sizes} className="absolute inset-0" imgClassName="transition-transform duration-700 group-hover:scale-[1.04]" />
       <span className="absolute inset-0 bg-[rgb(19_12_12/0.28)] transition-colors duration-300 group-hover:bg-[rgb(19_12_12/0.4)]" aria-hidden="true" />
-      <span className="absolute inset-0 flex items-center justify-center p-8">
+      <span className="absolute inset-0 flex items-center justify-center p-4 sm:p-8">
         {logo ? (
           // eslint-disable-next-line @next/next/no-img-element -- klein, statisch merklogo (SVG/PNG)
           <img
@@ -39,7 +39,7 @@ export function BrandTile({
             }`}
           />
         ) : (
-          <span className="text-center font-display text-[34px] leading-tight text-white [text-shadow:0_2px_16px_rgb(0_0_0/0.35)] lg:text-[42px]">{name}</span>
+          <span className="text-center font-display text-[21px] leading-tight text-white [overflow-wrap:break-word] [text-shadow:0_2px_16px_rgb(0_0_0/0.35)] sm:text-[34px] lg:text-[42px]">{name}</span>
         )}
       </span>
     </Link>
