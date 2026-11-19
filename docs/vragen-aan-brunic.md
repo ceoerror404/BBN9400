@@ -366,7 +366,7 @@ Antwoord (via Alexander, 13/11/2026): verf en slaapcomfort gaan helemaal weg van
 | Open punten van de laatste webshop-controle (12/11) | `docs/audits/2026-11-12-webshop-qa/rapport.md` §6 en §13 |
 | Open punten SEO en migratie (14/11) | `docs/audits/2026-11-14-seo-geo/issues.csv` |
 | Beslissingen van 13/11 en hoe ze uitgevoerd zijn | `docs/teksten-en-beloftes.md` §D |
-| Bekende bugs en de lanceringschecklist | `apps/prototype/TODO.md` |
+| Bekende bugs, de lanceringschecklist en de open taken van het team | `docs/todo.md` |
 
 ## Stand van het rapport van 03/11
 

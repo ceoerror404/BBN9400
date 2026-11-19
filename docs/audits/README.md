@@ -14,7 +14,7 @@ Begin hier. Laatst bijgewerkt op 14/11/2026.
 | Wat er op de dag van de livegang moet gebeuren | [`2026-11-14-seo-geo/measurement-plan.md`](2026-11-14-seo-geo/measurement-plan.md) en [`apps/prototype/README.md`](../../apps/prototype/README.md) §4 |
 | Wat Brunic beslist heeft over teksten en beloftes | [`../teksten-en-beloftes.md`](../teksten-en-beloftes.md) §D |
 | Wat er na een audit gewijzigd is, en door wie | [`../agent-work/`](../agent-work/) (zie de kolom "Opvolging" hieronder) |
-| Bekende bugs en de lanceringschecklist | [`apps/prototype/TODO.md`](../../apps/prototype/TODO.md) |
+| Bekende bugs, de lanceringschecklist en de open taken van het team | [`../todo.md`](../todo.md) |
 
 ## Alle audits, nieuwste eerst
 
@@ -38,7 +38,7 @@ De bevindingen van R1 en R2 kregen in R3 een nieuw nummer. Wie de geschiedenis v
 | 24/10/2026 | Filtersysteem: audit en optimalisatie | [`../agent-work/filtersysteem.md`](../agent-work/filtersysteem.md), specificatie in [`../filtersysteem.md`](../filtersysteem.md) |
 | 20/10/2026 | SEO-, AI-search- en conversie-audit, met verbeteringen | [`../agent-work/seo-groei.md`](../agent-work/seo-groei.md) |
 | 20/10/2026 | Audit vóór "productieklaar": het werk dat eruit volgde | [`../agent-work/productieklaar.md`](../agent-work/productieklaar.md). Schermafbeeldingen van 21/10 staan buiten de repo, in de map `audit-2026-10-21` naast de repo-map |
-| 30/09/2026 | Code-audit van het prototype (B-nummers) | [`apps/prototype/TODO.md`](../../apps/prototype/TODO.md) |
+| 30/09/2026 | Code-audit van het prototype (B-nummers) | [`../todo.md`](../todo.md) (tot 19/11/2026 `apps/prototype/TODO.md`) |
 
 ## Wat staat waar in een rapport
 
@@ -79,7 +79,7 @@ De oudere rapporten hebben minder hoofdstukken; de nummering verschilt per ronde
 |---|---|---|
 | `R<ronde>-<nr>` | Bevinding uit een webshop-QA-ronde. R1 = 31/10 (18:53) … R6 = 12/11 | R6-34 |
 | `SEO-<ronde>-<nr>` | Punt uit een SEO/GEO-ronde | SEO-1-06 |
-| `B<nr>` | Bevinding uit de code-audit van 30/09, in `TODO.md` | B17 |
+| `B<nr>` | Bevinding uit de code-audit van 30/09, in `../todo.md` | B17 |
 | Vraag `<nr>` | Vraag aan Brunic in `../vragen-aan-brunic.md`. In het rapport van 12/11 heetten 13 tot 17 nog A tot E; in dat van 14/11 heetten 18 tot 23 nog V1 tot V6 | vraag 11 |
 
 ## Afspraken voor een nieuwe audit

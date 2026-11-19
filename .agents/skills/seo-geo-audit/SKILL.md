@@ -18,7 +18,7 @@ De volledige werkinstructie staat in **`draaiboek.md`** in deze map (versie 1.0,
 | Indexatie nieuwe site | Bewust `noindex` + `Disallow: /` tot de livegang (`SITE_INDEXEREN=1`). Dat is geen bevinding. Vermeld de stand | `src/app/robots.ts`, `layout.tsx` |
 | Markt en taal | België, enkel nl-BE, u-vorm | AGENTS.md |
 | Fysieke winkel | Ninove (NAP in `src/lib/site/config.ts`, door Brunic te valideren) | code |
-| Analytics | Nog geen GA4 op de nieuwe site; de cookieverklaring zegt "geen tracking" | TODO.md |
+| Analytics | Nog geen GA4 op de nieuwe site; de cookieverklaring zegt "geen tracking" | docs/todo.md |
 | Search Console | Geen export in de repo. Account hoort op naam van Brunic nv (eigendomsprincipe) | AGENTS.md |
 | Livegang | Niets live vóór een getekende offerte en een voorschot | AGENTS.md |
 

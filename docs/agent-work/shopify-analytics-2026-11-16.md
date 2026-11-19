@@ -26,7 +26,7 @@ Tijdens het testen zijn enkele tientallen testbezoeken en mandwijzigingen naar d
 | Punt | Voor wie |
 |---|---|
 | Committen en beslissen wanneer het aangaat. Een push naar `master` gaat live, maar zonder de variabelen op Vercel verandert er niets voor bezoekers. | Alexander / Jeroen |
-| Aanzetten in Vercel bij de livegang: de stappen staan als afvinklijst in `apps/prototype/TODO.md` §5 "Vercel bij de livegang (voor Jeroen)" (toegevoegd 18/11) | Jeroen |
+| Aanzetten in Vercel bij de livegang: de stappen staan als afvinklijst in `docs/todo.md` §5 "Vercel bij de livegang (voor Jeroen)" (toegevoegd 18/11) | Jeroen |
 | Shopify-admin: toestemming vereist voor de hele EER (nu enkel België), Nederlands toevoegen, wachtwoordpagina. `analytics-en-cookies.md` §7 | Jeroen (eigenaar: Bruno) |
 | Nieuwe cookie- en privacytekst laten nalezen (`COOKIES_MET_SHOPIFY` in `src/data/content.ts`) | Brunic, via README §4 punt 6 |
 | Rapporten in Shopify Analytics nakijken na het aanzetten; een testbestelling zodra de kassa bereikbaar is | Alexander / Jeroen |

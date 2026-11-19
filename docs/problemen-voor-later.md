@@ -1,6 +1,6 @@
 # Problemen voor later
 
-> **Intern.** Problemen die we kennen maar bewust nog niet oplossen: ze blokkeren de livegang niet, of ze wachten op een beslissing. Hoort het bij Brunic om te beslissen, dan staat het in `docs/vragen-aan-brunic.md`. Is het een taak in de front, dan staat het in `apps/prototype/TODO.md`. Nummers veranderen nooit, zodat andere documenten ernaar kunnen verwijzen ("probleem 1").
+> **Intern.** Problemen die we kennen maar bewust nog niet oplossen: ze blokkeren de livegang niet, of ze wachten op een beslissing. Hoort het bij Brunic om te beslissen, dan staat het in `docs/vragen-aan-brunic.md`. Is het een taak voor het team (code, Shopify, Vercel), dan staat het in `docs/todo.md`. Nummers veranderen nooit, zodat andere documenten ernaar kunnen verwijzen ("probleem 1").
 > - **Opgelost?** Zet de status in het overzicht op "Opgelost" met de datum, en schrijf onder het probleem wat er gebeurd is en waar.
 
 Stand van 18/11/2026.

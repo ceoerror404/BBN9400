@@ -1,4 +1,6 @@
-# TODO — prototype (`apps/prototype`)
+# To-do — webshop
+
+> Open taken voor het team (code, Shopify-instellingen, Vercel, livegang). Wat op Brunic wacht, staat in [`vragen-aan-brunic.md`](vragen-aan-brunic.md); wat bewust wacht, in [`problemen-voor-later.md`](problemen-voor-later.md). Tot 19/11/2026 stond deze lijst in `apps/prototype/TODO.md`. Paden zonder voorvoegsel (`src/…`, `scripts/…`, `components/…`, `lib/…`) zijn relatief tegenover `apps/prototype/`; "README" is `apps/prototype/README.md`.
 
 Bron: audit van 30/09/2026 (alleen `apps/prototype`, niet `apps/web`). Geauditeerde codeversie: stand van 23:12. De merkwijzigingen van 23:21 (merkenpagina, `brand-tile.tsx`, `data/merken.ts`, `brands.ts`, homepage) zijn niet opnieuw getest.
 
@@ -75,6 +77,14 @@ Bronnen, geraadpleegd via een onderzoeksagent: WER op Justel (geconsolideerd tot
 ## 5. Lanceringschecklist (bewust uitgeschakeld in de testfase)
 
 - [ ] `SITE_INDEXEREN=1` en `SITE_URL` zetten (nu overal noindex + `Disallow: /`)
+- [ ] **GitHub-repo privé zetten** (vastgesteld 19/11/2026: `github.com/ceoerror404/Brunic` staat publiek, terwijl `AGENTS.md` "Repo is privé" zegt). GitHub › de repo › Settings › General › onderaan "Danger Zone" › **Change repository visibility** › Private.
+  - Eerst nakijken op welk plan het Vercel-team staat: op het gratis plan (Hobby) bouwt Vercel bij een privérepo mogelijk enkel de commits van de accounteigenaar. Niet nagekeken.
+  - Daarna testen: een kleine push van Alexander én van Jeroen geeft elk een nieuwe deploy op Vercel.
+  - Daarna de opmerking "repo is publiek" in `.gitignore` aanpassen.
+- [ ] **Shopify-webhooks aanmelden** (nagekeken 19/11/2026: er is er geen enkele aangemeld). Zonder webhooks ververst de catalogus niet vanzelf bij een wijziging in Shopify, enkel bij een nieuwe push; teksten en foto's uit de metaobjects verschijnen wel, na hoogstens 5 minuten.
+  - Vooraf in Vercel (Production): `VERCEL_DEPLOY_HOOK_URL` (Settings › Git › Deploy Hooks, branch master) en `CRON_SECRET` (voor de dagelijkse controle als vangnet). Zie `.env.example`.
+  - Aanmelden op het definitieve adres, dus na de domeinverhuizing: `node packages/catalog/register-webhooks.mjs https://www.brunic.be --producten`, eerst met `--dry-run` (README §4 punt 3). Eerder aanmelden kan op `https://brunic.vercel.app`, maar dan na de verhuizing opnieuw.
+  - Testen: een producttitel wijzigen in Shopify → binnen enkele minuten start er een nieuwe deploy.
 - [x] 301-map van WooCommerce naar de nieuwe URL's — 20/10: alle 2.061 URL's uit de oude sitemaps → 308 naar een bestaande pagina (README §2). 14/11: één stap in plaats van twee, getest op een lokale build (2.060 URL's, alles 200).
 - [ ] Na de domeinoverdracht opnieuw testen: `node apps/prototype/scripts/test-oude-urls.mjs https://brunic.be --stappen 2` en op `https://www.brunic.be` (README §4 punt 5).
 - [ ] Vóór de domeinoverdracht: Search Console-export van brunic.be (16 maanden, query × pagina) bewaren als nulmeting — docs/audits/2026-11-14-seo-geo/measurement-plan.md.

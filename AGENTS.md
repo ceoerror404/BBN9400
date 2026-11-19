@@ -19,6 +19,7 @@ Dit is de **werkplaats** voor het Brunic-webshopproject (klant van HackersQuattr
 - Projectskills (`.agents/skills/`): `webshop-qa-audit` (QA van filters, beelden, productpagina's) en `seo-geo-audit` (SEO, migratie brunic.be → nieuwe site, AI-zichtbaarheid; draaiboek in `draaiboek.md`). Rapporten komen in `docs/audits/`; de index van alle audits is `docs/audits/README.md`.
 - **Vragen aan Brunic over de webshop staan op één plek: `docs/vragen-aan-brunic.md`** (overzicht met status bovenaan, vaste nummers). Een nieuwe vraag komt daar bij, niet enkel in een rapport of overdracht.
 - **Gekende problemen die bewust nog wachten staan in `docs/problemen-voor-later.md`** (vaste nummers, status bovenaan).
+- **Open taken van het team (code, Shopify-instellingen, Vercel, livegang) staan in `docs/todo.md`** (B-nummers uit de code-audit, lanceringschecklist, "Vercel bij de livegang (voor Jeroen)"). Een nieuwe taak komt daar bij, niet in een aparte TODO naast de code.
 
 ## Git & deploy (sinds 04/10/2026)
 - **Iedereen werkt op `master`** (Jeroen én Alexander) — geen aparte persoonlijke branches meer. Altijd eerst `git pull --rebase`, dan pushen.

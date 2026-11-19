@@ -25,7 +25,7 @@ Je bent een ervaren e-commerce QA-specialist. Controleer de webshop op de werkin
 **Waartegen je toetst**
 - `docs/filtersysteem.md` is de specificatie van het filtergedrag: OF binnen een filter, EN tussen filters, EN binnen Eigenschappen, aantallen, chips, URL-formaat, geschiedenis, scrollen, mobiele lade, lege staat, toegankelijkheid. Ook de filtermatrix per afdeling, de bewuste keuzes ("Bewust geen filter") en de bekende beperkingen staan daar.
 - Een afwijking van die specificatie is een fout. Gedrag dat er als **bekende beperking** of **bewuste keuze** staat, is geen nieuwe fout. Label het als "bekend (filtersysteem.md)" en neem het alleen op als het de klant echt hindert. Voorbeeld: Rolbreedte is een productfilter, geen variantfilter.
-- `apps/prototype/TODO.md` is de lijst met bekende punten (B-nummers), de lanceringschecklist en wat bewust uitstaat in de testfase. Een punt dat daar open staat, label je "bekend (TODO Bxx)".
+- `docs/todo.md` is de lijst met bekende punten (B-nummers), de lanceringschecklist en wat bewust uitstaat in de testfase. Een punt dat daar open staat, label je "bekend (TODO Bxx)".
 - Prijzen: ga niet uit van een vaste regel per afdeling. Op 03/11/2026 hadden 2.229 van de 2.724 behangen een prijs, en 305 producten in Vloerbekleding en 36 tapijten van Louis De Poortere niet. Een product zonder prijs staat op aanvraag ("Advies en offerte in de winkel"). Dat is correct zolang de tekst erbij past. Een prijs heeft altijd een eenheid (per m², per rol, per stuk). Zet in het rapport per type en merk hoeveel producten een prijs hebben, en meld wat verschoof tegenover de vorige ronde.
 - `docs/analytics-en-cookies.md` is de specificatie van de cookiemelding, de metingen (Shopify Analytics) en de winkelmand bij Shopify: wat er vóór en na een keuze gebeurt, welke cookies en opslag er staan en welke verzoeken naar buiten gaan. Alles zit achter drie schakelaars op Vercel (`SHOPIFY_ANALYTICS`, `SHOPIFY_SHOP_ID`, `NEXT_PUBLIC_SHOPIFY_WINKELMAND`). Op 17/11/2026 stonden ze uit op productie. Wat daar onder "Bekende beperkingen" staat, label je "bekend (analytics-en-cookies.md)". Hoe je toetst: §5b.
 
@@ -182,7 +182,7 @@ Beoordeel:
 
 **Snelheid en server-HTML.**
 - Meet op mobiel (390 × 844, `Emulation.setCPUThrottlingRate` 4, een trage 4G via `Network.emulateNetworkConditions`) de LCP, de CLS en de lange taken met een `PerformanceObserver`. Doe dat voor home, één lijst per afdeling en drie productpagina's, drie keer per pagina. De middelste meting telt.
-- Vergelijk met de tabel "Metingen" in `apps/prototype/TODO.md` en met de vorige ronde. Het zijn labwaarden: een duidelijke achteruitgang is een bevinding, het absolute cijfer niet.
+- Vergelijk met de tabel "Metingen" in `docs/todo.md` en met de vorige ronde. Het zijn labwaarden: een duidelijke achteruitgang is een bevinding, het absolute cijfer niet.
 - Haal dezelfde pagina's ook op zonder JavaScript (een gewone GET) en controleer of de h1, de prijs en de eerste kaarten in de HTML staan. Dat ze ontbraken, was ooit de zwaarste fout van de site (TODO B02), en een test in de browser ziet dat niet.
 
 ## 5. Controleer ook wat er niet staat
@@ -358,7 +358,7 @@ Neem ook deze hoofdstukken op:
 - **Status per eerdere bevinding:** elk punt van het vorige rapport, met opgelost, open of bekend, en of je het opnieuw testte.
 - **Vragen aan Brunic:** alles wat enkel Brunic kan beantwoorden in één lijst, klaar om door te sturen. Wat al in `docs/vragen-aan-brunic.md` staat, herhaal je niet: verwijs ernaar met het vraagnummer. Dat bestand is de enige centrale lijst. Schrijf elke nieuwe vraag er ook bij: het volgende vrije nummer, een rij in het overzicht bovenaan en de vraag zelf in deel 1 onder de passende urgentie, in dezelfde vorm (wat we zien, de vraag in het vet, "Antwoord:"). Gebruik in je rapport datzelfde nummer, geen eigen letters.
 - **Zelf na te kijken:** hoogstens tien stappen voor iemand met een echte iPhone en een Android-toestel, voor wat je enkel kon emuleren. Per stap de URL, de handeling en wat er hoort te gebeuren.
-- **Opdracht en specificatie bijwerken:** wat in deze opdracht, in `docs/filtersysteem.md` of in `TODO.md` niet meer klopt met de site.
+- **Opdracht en specificatie bijwerken:** wat in deze opdracht, in `docs/filtersysteem.md` of in `docs/todo.md` niet meer klopt met de site.
 - **Telling:** het aantal bevindingen per soort en prioriteit, en hoeveel er nieuw zijn.
 
 Sluit af met de geteste onderdelen, eventuele beperkingen en een prioriteitenlijst voor later herstel.
