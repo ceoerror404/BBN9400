@@ -25,7 +25,7 @@ Bron: audit van 30/09/2026 (alleen `apps/prototype`, niet `apps/web`). Geauditee
 - [ ] **B01 · P1 · M — €0-/etalageproducten ook in Shopify zelf afschermen.** Alle 16.620 varianten staan op €0, `availableForSale = true`, voorraad niet gevolgd. De enige blokkade is `src/app/api/kassa/route.ts` (die werkt: 409). → Ook in Shopify blokkeren, bv. voorraad volgen op 0 met "niet verkopen zonder voorraad" voor etalageproducten, of een checkout-validatie. (bevestigd)
 - [x] **B02 — opgelost 20/10** (PDP rendert server-side, `?variant=` na het laden; getest met `next build` + headless Chrome). Oorspronkelijke bevinding: **B02 · P1 · K–M — Productpagina's missen hun inhoud in de server-HTML.** In een productiebuild staan galerij, h1, prijs, offerteknop en beschrijving niet in de HTML (`BAILOUT_TO_CLIENT_SIDE_RENDERING`). Oorzaak: `useSearchParams()` in `components/product/product-view.tsx` binnen `<Suspense>` op een statische route. Gevolg: Lighthouse CLS 0,638 (desktop) / 0,846 (mobiel), LCP 5,6 s mobiel. Hetzelfde op `/nieuw-binnen` (0 productlinks in de HTML). De dev-server toont dit niet. → Variant server-side lezen (searchParams van de pagina) of een fallback met identieke layout; controleren met `next build` + `curl`. (bevestigd)
 - [x] **B03 — grotendeels opgelost 20/10**: bestaande klant enkel op e-mail, nooit naam/telefoon overschrijven, marketingbewijs niet wissen, rate limit 5/kwartier/IP, `_t` verplicht. Open: double opt-in voor de nieuwsbrief (beslissing Brunic) en een harde limiet over alle Vercel-instanties (Vercel Firewall). Oorspronkelijke bevinding: **B03 · P1 · M — Formulieren kunnen klantfiches overschrijven.** `src/lib/leads/klant.ts`: een aanvraag met het e-mailadres of telefoonnummer van een bestaande klant voert `customerUpdate` uit, met naam, telefoon, notitie en toestemmingsvelden uit het formulier. `schrijfInVoorNieuwsbrief` en het marketingvinkje zetten elk adres op `SUBSCRIBED` zonder bevestiging. Spamfilter en rate limiting moeten sterker. → Bestaande klant nooit overschrijven (enkel notitie/tag toevoegen), double opt-in, rate limiting/captcha. (bevestigd in code, niet uitgevoerd)
-- [ ] **B04 · P1 · K — App met te brede rechten.** De server gebruikt de Dev Dashboard-app met veel meer schrijfrechten dan nodig. Voor de formulieren volstaan `read_customers`, `write_customers` en `write_files`. → Aparte app met minimale scopes. (bevestigd)
+- [ ] **B04 · P1 · K — App met te brede rechten.** De server gebruikt de Dev Dashboard-app met veel meer schrijfrechten dan nodig. Voor de formulieren volstaan `read_customers`, `write_customers` en `write_files`. → Aparte app met minimale scopes; de stappen staan in "Sleutels en toegang (voor Jeroen)", punt 3. (bevestigd, opnieuw nagekeken 19/11/2026)
 - [ ] **B06 · P1 · G — Commerciële data ontbreekt** (klant/pipeline, geen programmeerfout): 0/2.386 producten hebben een prijs, er is geen voorraad, en Raamdecoratie, Verf en Slapen & wonen hebben 0 producten (404 + niet in het menu). (bevestigd)
 
 ---
@@ -74,9 +74,48 @@ Bronnen, geraadpleegd via een onderzoeksagent: WER op Justel (geconsolideerd tot
 
 ---
 
+## Sleutels en toegang (voor Jeroen)
+
+Toegevoegd op 19/11/2026, na een controle van alle sleutels vanaf de pc van Alexander. Uitkomst: er is niets gelekt.
+
+- `.env` staat niet in git. De ingevulde waarden staan nergens in de gevolgde bestanden of in de geschiedenis (40 commits, `master` en `Alexander`).
+- Ze staan ook niet in de HTML of de browserbestanden van brunic.vercel.app.
+- `/api/catalogus/vernieuwen` en `/api/webhooks/shopify` geven 401 zonder geldige sleutel of handtekening.
+
+Wat hieronder staat, kon vanaf die pc niet nagekeken of niet uitgevoerd worden. De volgorde is de prioriteit.
+
+- [ ] **1. GitHub-repo privé zetten, nu en niet pas bij de livegang.** De stappen en de test met Vercel staan in de lanceringschecklist (§5, "GitHub-repo privé zetten").
+  - De repo staat op het gebruikersaccount `ceoerror404`, niet op de org HackersQuattroOrg. Enkel de eigenaar van dat account kan de zichtbaarheid wijzigen. Hoort de repo naar de org te verhuizen?
+  - Daarna `AGENTS.md` ("Repo is privé, GitHub-org = HackersQuattroOrg") laten kloppen met de werkelijkheid.
+- [ ] **2. Vercel nakijken** (project `brunic`, team fruitcocktailbe-projects).
+  - Settings › Environment Variables: welke variabelen staan er, en in welke omgevingen? De namen die de code leest, staan in `.env.example`. Wat niet meer gebruikt wordt (bv. sleutels van `apps/web`): weghalen.
+  - Opgelet met `SHOPIFY_ADMIN_API_TOKEN` (nagekeken in de code op 20/11/2026): staat die op Vercel, dan gebruikt de site hem vóór `SHOPIFY_CLIENT_ID` + `SHOPIFY_CLIENT_SECRET` (`src/lib/shopify/admin.ts`). Hij is dus niet ongebruikt. Weghalen mag, maar enkel als de client ID en het client secret er staan; daarna opnieuw deployen en één aanvraagformulier testen. Zonder die twee komen aanvragen niet meer aan.
+  - Niet in `.env.example` maar wel gelezen door de site: `NEXT_PUBLIC_SITE_URL` (reserve voor `SITE_URL`). Wel in `.env.example` maar door geen enkele code gelezen, dus niet nodig op Vercel: `SHOPIFY_API_KEY` en `ANTHROPIC_API_KEY` (de chatbot is nog niet gebouwd). `VERCEL_ENV` en `NODE_ENV` zet Vercel zelf.
+  - De geheimen als type **Secret** bewaren (vroeger "Sensitive"): `SHOPIFY_CLIENT_SECRET`, en later ook `CRON_SECRET`, `VERCEL_DEPLOY_HOOK_URL`, `ALERT_WEBHOOK_URL` en de privé-token van de Storefront API. Een Secret kan na het opslaan door niemand meer uitgelezen worden, enkel vervangen. Een bestaande variabele zo nodig verwijderen en opnieuw aanmaken.
+  - Settings › Security › **Git Fork Protection** staat aan (de standaard). Zolang de repo publiek is, kan iedereen een pull request vanuit een fork indienen. Met deze instelling bouwt Vercel die pas na goedkeuring door een teamlid. Keur zo'n aanvraag nooit goed zonder de code te lezen: de build krijgt de sleutels mee.
+  - Team Settings › Members: wie heeft toegang, en heeft iedereen tweestapsverificatie aan? Dezelfde vraag voor GitHub en voor het Shopify-account.
+  - Het overbodige project `brunic-prototype` (zie `AGENTS.md`): staan daar nog sleutels in? Weghalen, of het project verwijderen.
+- [ ] **3. B04: een aparte Shopify-app voor de site.** **On hold (beslissing Alexander, 20/11/2026): de Shopify-sleutels worden niet gewijzigd, niet lokaal en niet op Vercel. Niets hieronder uitvoeren zonder zijn akkoord.** De site gebruikt vandaag dezelfde Dev Dashboard-app ("brunic") als de lokale scripts. Die app heeft bijna alle rechten van de winkel, terwijl de site enkel klantfiches en foto's van de formulieren schrijft.
+  - Dev Dashboard: een nieuwe app (bv. "brunic-site") met `read_customers`, `write_customers` en `write_files`. Voor de webhooks komen daar `read_products`, `read_metaobjects` en `read_metaobject_definitions` bij (niet getest met een smalle app). Installeren op `brunic-3`.
+  - Vercel: `SHOPIFY_CLIENT_ID` en `SHOPIFY_CLIENT_SECRET` vervangen door die van de nieuwe app, opnieuw deployen en één aanvraagformulier met foto testen. Die test maakt een echte klantfiche en start mogelijk de Flow-mail: gebruik een herkenbare testnaam en verwijder de fiche daarna.
+  - De webhooks aanmelden met de nieuwe app, niet met de brede. Shopify tekent een webhook met het geheim van de app die hem aanmaakte, en de site kent dan enkel nog het geheim van de smalle app. `register-webhooks.mjs` leest de root-`.env` maar laat bestaande omgevingsvariabelen staan: zet `SHOPIFY_CLIENT_ID` en `SHOPIFY_CLIENT_SECRET` van de smalle app in de shell en draai het script daarna.
+  - De brede app blijft enkel lokaal, in de root-`.env` van wie de catalogusscripts of het thema beheert. Vernieuw daarna haar geheim (Dev Dashboard › de app › Settings › client secret › Rotate), zodat de kopie die op Vercel stond waardeloos is. Bezorg het nieuwe geheim aan Alexander via een wachtwoordbeheerder, niet via chat of mail.
+- [ ] **4. J.A.R.V.I.S nakijken.** `clients/brunic/.env.client` (de logins van de klant) staat enkel op de pc van Jeroen.
+  - Staat het bestand in `.gitignore`?
+  - Komt het niet voor in de geschiedenis? `git log --all --oneline -- clients/brunic/.env.client` hoort niets te geven.
+  - Is die repo privé?
+
+---
+
 ## 5. Lanceringschecklist (bewust uitgeschakeld in de testfase)
 
-- [ ] `SITE_INDEXEREN=1` en `SITE_URL` zetten (nu overal noindex + `Disallow: /`)
+> **Stand 20/11/2026, 18:04 — de site staat live.** `brunic.be` en `www.brunic.be` wijzen naar Vercel (Combell: A `216.150.1.1`, CNAME `58fe819a756f925e.vercel-dns-017.com`, geen AAAA, geen CAA, de drie nameservers gelijk). "Production is de testsite" hieronder klopt dus niet meer. Twee dingen zijn dringend, allebei in Vercel:
+> 1. **Https: opgelost op 20/11/2026 om 18:12** (nagemeten 18:16). Beide namen hebben een geldig certificaat; `http://brunic.be` → `https://brunic.be` → `https://www.brunic.be` (308). Om 18:04 faalde https nog op beide namen.
+> 2. **Indexering: opgelost, nagemeten op 21/11/2026 om 12:38.** robots.txt staat open (`Allow: /`, met de sitemap), de sitemap geeft 4.181 adressen die allemaal op `https://www.brunic.be` staan, en de homepage en twee productpagina's tonen `index, follow`. Op 20/11 om 18:16 stond er nog `noindex, nofollow` en `Disallow: /`. `SITE_INDEXEREN=1` op Production zetten en opnieuw deployen (eerste punt hieronder). `SITE_URL` hoeft niet: de canonical wijst al naar `https://www.brunic.be`.
+>
+> Pas doen zodra https werkt: de Hostname in het Shopify-thema (onder "Na de domeinverhuizing"), de webhooks aanmelden en `test-oude-urls.mjs` op het echte domein.
+
+- [x] `SITE_INDEXEREN=1` zetten — gedaan door JP, nagemeten op 21/11/2026 (zie de stand hierboven). `SITE_URL` was niet nodig: de code valt terug op `https://www.brunic.be`.
 - [ ] **GitHub-repo privé zetten** (vastgesteld 19/11/2026: `github.com/ceoerror404/Brunic` staat publiek, terwijl `AGENTS.md` "Repo is privé" zegt). GitHub › de repo › Settings › General › onderaan "Danger Zone" › **Change repository visibility** › Private.
   - Eerst nakijken op welk plan het Vercel-team staat: op het gratis plan (Hobby) bouwt Vercel bij een privérepo mogelijk enkel de commits van de accounteigenaar. Niet nagekeken.
   - Daarna testen: een kleine push van Alexander én van Jeroen geeft elk een nieuwe deploy op Vercel.
@@ -84,6 +123,7 @@ Bronnen, geraadpleegd via een onderzoeksagent: WER op Justel (geconsolideerd tot
 - [ ] **Shopify-webhooks aanmelden** (nagekeken 19/11/2026: er is er geen enkele aangemeld). Zonder webhooks ververst de catalogus niet vanzelf bij een wijziging in Shopify, enkel bij een nieuwe push; teksten en foto's uit de metaobjects verschijnen wel, na hoogstens 5 minuten.
   - Vooraf in Vercel (Production): `VERCEL_DEPLOY_HOOK_URL` (Settings › Git › Deploy Hooks, branch master) en `CRON_SECRET` (voor de dagelijkse controle als vangnet). Zie `.env.example`.
   - Aanmelden op het definitieve adres, dus na de domeinverhuizing: `node packages/catalog/register-webhooks.mjs https://www.brunic.be --producten`, eerst met `--dry-run` (README §4 punt 3). Eerder aanmelden kan op `https://brunic.vercel.app`, maar dan na de verhuizing opnieuw.
+  - Aanmelden met de sleutels van de smalle site-app zodra die bestaat, niet met de brede app uit de root-`.env`: zie "Sleutels en toegang (voor Jeroen)", punt 3.
   - Testen: een producttitel wijzigen in Shopify → binnen enkele minuten start er een nieuwe deploy.
 - [x] 301-map van WooCommerce naar de nieuwe URL's — 20/10: alle 2.061 URL's uit de oude sitemaps → 308 naar een bestaande pagina (README §2). 14/11: één stap in plaats van twee, getest op een lokale build (2.060 URL's, alles 200).
 - [ ] Na de domeinoverdracht opnieuw testen: `node apps/prototype/scripts/test-oude-urls.mjs https://brunic.be --stappen 2` en op `https://www.brunic.be` (README §4 punt 5).
@@ -146,6 +186,8 @@ Staat elders en hoort ook bij Vercel: `SITE_URL` en `SITE_INDEXEREN=1` (eerste p
 ## 6. Nog handmatig of in een testomgeving te testen
 
 - [ ] Volledige checkout met een testbetaling in een afgeschermde winkel, inclusief de weigering van €0- en etalageproducten
+  - Sinds 19/11/2026 staat daarvoor "Testproduct betaaltest" in Shopify (€ 0,50 incl. btw, handle `testproduct-betaaltest`, geen verzending, dus geen verzendkost). Actief op Brunic Headless maar in geen enkele collectie: niet zichtbaar op de site of in de zoekresultaten. Nagekeken: `/api/kassa` op brunic.vercel.app aanvaardt het en de kassapagina toont € 0,50 met Bancontact, kaart en Klarna. De betaling zelf is nog niet gedaan. Het is een echte betaling (geen testmodus gezien): achteraf terugbetalen in Shopify › Orders.
+  - [ ] Vóór de livegang: het testproduct archiveren of verwijderen (Shopify › Products).
 - [ ] Formulieren versturen in dry-run en in een testwinkel: Flow-mail, foto-upload (≤ 5 foto's, limiet 4 MB), fout- en successtatussen
 - [ ] Echte toestellen: iOS Safari en Android Chrome, schermtoetsenbord, liggende weergave
 - [ ] Schermlezer (NVDA / VoiceOver), zoom tot 200 %, tekstafstand
