@@ -4,7 +4,15 @@ import { useEffect, useState } from "react";
 import type { Availability, Price, QuantityRule, SalesUnit } from "@/lib/catalog/types";
 import type { CardProduct } from "@/lib/catalog/view";
 
-export type LiteVariant = { id: string; sku: string; label: string; price: Price | null; availability: Availability };
+export type LiteVariant = {
+  id: string;
+  sku: string;
+  label: string;
+  price: Price | null;
+  availability: Availability;
+  /** Foto van deze uitvoering, enkel als die verschilt van de kaartfoto (bv. een andere kleur). */
+  image?: string;
+};
 export type LiteProduct = {
   card: CardProduct;
   unit: SalesUnit;

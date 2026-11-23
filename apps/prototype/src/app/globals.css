@@ -50,6 +50,27 @@
       opacity: 0;
     }
   }
+
+  /* Zijpaneel (components/ui/drawer.tsx): schuift in vanaf zijn kant, de achtergrond dimt mee.
+     Enkel gebruikt met motion-safe: wie minder beweging vraagt, krijgt het paneel meteen. */
+  --animate-lade-rechts: lade-rechts 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-lade-links: lade-links 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-dim: dim 0.2s ease-out;
+  @keyframes lade-rechts {
+    from {
+      transform: translateX(100%);
+    }
+  }
+  @keyframes lade-links {
+    from {
+      transform: translateX(-100%);
+    }
+  }
+  @keyframes dim {
+    from {
+      opacity: 0;
+    }
+  }
 }
 
 @layer base {

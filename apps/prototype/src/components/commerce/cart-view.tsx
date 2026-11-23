@@ -1,12 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useEffect, useState, type ReactNode } from "react";
-import { lopendeKassa, SHOPIFY_CART, useCart, useWishlist } from "@/lib/store/stores";
-import { useProducts } from "@/lib/store/use-products";
+import { Suspense, type ReactNode } from "react";
+import { useWishlist } from "@/lib/store/stores";
+import { useAfrekenen, useMand } from "@/lib/store/use-mand";
 import { routes } from "@/lib/routes";
-import { SITE } from "@/lib/site/config";
-import { formatMoney, formatQuantity, lineTotal, UNIT_NAME, UNIT_SUFFIX } from "@/lib/catalog/product";
+import { formatMoney, formatQuantity, UNIT_NAME, UNIT_SUFFIX } from "@/lib/catalog/product";
 import { ImageSlot } from "@/components/ui/image-slot";
 import { Icon } from "@/components/ui/icon";
 import { QuantityInput } from "@/components/product/quantity-input";
@@ -14,73 +13,19 @@ import { SearchBox } from "@/components/layout/search-box";
 import { RecentlyViewed } from "./recently-viewed";
 
 /**
- * Winkelmand: regels uit de lokale opslag, prijzen altijd vers uit de catalogus.
- * "Afrekenen" maakt een Shopify-cart aan (/api/kassa, met controle op etalage/prijs) en
- * stuurt door naar de beveiligde Shopify-kassa.
+ * Winkelmandpagina. Regels, bedragen en afrekenen komen uit lib/store/use-mand.ts, dezelfde
+ * bron als het winkelmandpaneel (cart-drawer.tsx): beide tonen altijd hetzelfde.
+ * "Afrekenen" vraagt de kassa-URL op (/api/kassa, met controle op etalage/prijs) en stuurt
+ * door naar de beveiligde Shopify-kassa.
  */
 export function CartView({ departments }: { departments: ReactNode }) {
-  const cart = useCart();
+  const { cart, rijen: rows, geldig: valid, geblokkeerd, subtotaal: subtotal, besparing: savings, laden } = useMand();
   const wish = useWishlist();
-  // Beschikbaarheid live uit Shopify: een intussen uitverkochte uitvoering ziet de klant hier al.
-  const { map, loading } = useProducts(
-    cart.lines.map((l) => l.productId),
-    { live: true },
-  );
-  const [bezig, setBezig] = useState(false);
-  const [kassaFout, setKassaFout] = useState("");
+  const { afrekenen, bezig, fout: kassaFout } = useAfrekenen();
 
-  // Met "terug" uit de Shopify-kassa (bfcache) stond de knop nog op "Even geduld…".
-  useEffect(() => {
-    const terug = (e: PageTransitionEvent) => e.persisted && setBezig(false);
-    window.addEventListener("pageshow", terug);
-    return () => window.removeEventListener("pageshow", terug);
-  }, []);
-
-  const afrekenen = async () => {
-    setBezig(true);
-    setKassaFout("");
-    try {
-      const lines = cart.lines.map((l) => ({ variantId: l.variantId, quantity: l.quantity }));
-      const res = await fetch("/api/kassa", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lines }),
-      });
-      const data = (await res.json()) as { checkoutUrl?: string; cartId?: string; error?: string };
-      if (data.checkoutUrl) {
-        // Lokale mand: onthouden welke cart naar de kassa ging; na betaling verdwijnen die regels
-        // (kassa-opvolging.tsx). De Shopify-mand verdwijnt vanzelf zodra ze afgerekend is.
-        if (data.cartId && !SHOPIFY_CART) lopendeKassa.start(data.cartId, lines);
-        window.location.href = data.checkoutUrl;
-        return;
-      }
-      setKassaFout(data.error ?? "Afrekenen lukte niet.");
-    } catch {
-      setKassaFout(`Afrekenen lukte niet. Probeer opnieuw of bel ons op ${SITE.phone.display}.`);
-    }
-    setBezig(false);
-  };
-
-  if (!cart.hydrated || (loading && cart.lines.length > 0)) {
+  if (laden) {
     return <p className="py-20 text-center text-ink-60">Uw winkelmand wordt geladen…</p>;
   }
-
-  const rows = cart.lines.map((line) => {
-    const p = map.get(line.productId);
-    const v = p?.variants.find((x) => x.id === line.variantId);
-    return { line, p, v };
-  });
-  const valid = rows.filter((r) => r.p && r.v?.price);
-  // Producten op aanvraag (geen prijs) of uitverkocht kunnen niet naar de kassa (B25).
-  const opAanvraag = (r: (typeof rows)[number]) => Boolean(r.p && r.v && (r.p.pricing === "on-request" || !r.v.price));
-  const geblokkeerd = rows.filter((r) => opAanvraag(r) || r.v?.availability === "uitverkocht");
-  // Elke regel eerst afronden op de cent, dan optellen (in centen, zonder zwevendekommafouten).
-  const subtotal = valid.reduce((cents, r) => cents + Math.round(lineTotal(r.v!.price!.amount.amount, r.line.quantity) * 100), 0) / 100;
-  const savings =
-    valid.reduce((cents, r) => {
-      const p = r.v!.price!;
-      return cents + Math.round((lineTotal(p.compareAt?.amount ?? p.amount.amount, r.line.quantity) - lineTotal(p.amount.amount, r.line.quantity)) * 100);
-    }, 0) / 100;
 
   if (cart.lines.length === 0) {
     return (
@@ -126,7 +71,7 @@ export function CartView({ departments }: { departments: ReactNode }) {
 
       <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
         <ul role="list" className="divide-y divide-line border-y border-line">
-          {rows.map(({ line, p, v }) => {
+          {rows.map(({ line, p, v, unit, aanvraag, bedrag }) => {
             if (!p || !v) {
               return (
                 <li key={line.variantId} className="flex items-center justify-between gap-4 py-5 text-ink-60">
@@ -137,13 +82,11 @@ export function CartView({ departments }: { departments: ReactNode }) {
                 </li>
               );
             }
-            const unit = v.price?.unit ?? p.unit;
-            const total = lineTotal(v.price?.amount.amount ?? 0, line.quantity);
-            const aanvraag = opAanvraag({ line, p, v });
+            const total = bedrag?.totaal ?? 0;
             return (
               <li key={line.variantId} className="grid grid-cols-[88px_1fr] gap-4 py-5 sm:grid-cols-[120px_1fr]">
                 <Link href={routes.product(p.card.slug, v.id)} tabIndex={-1} aria-label={p.card.title}>
-                  <ImageSlot src={p.card.image?.src} alt="" className="aspect-square w-full rounded-2xl" />
+                  <ImageSlot src={v.image ?? p.card.image?.src} alt="" className="aspect-square w-full rounded-2xl" />
                 </Link>
                 <div className="min-w-0">
                   <div className="flex flex-wrap justify-between gap-x-4 gap-y-1">
@@ -172,10 +115,10 @@ export function CartView({ departments }: { departments: ReactNode }) {
                     </p>
                   ) : (
                   <p className="mt-1 text-[13px] text-ink-80">
-                    {v.price && (
+                    {bedrag && (
                       <>
-                        {formatMoney(v.price.amount.amount)} {UNIT_SUFFIX[unit] || "/ stuk"}
-                        {v.price.compareAt && <s className="ml-2 text-ink-60">{formatMoney(v.price.compareAt.amount)}</s>}
+                        {formatMoney(bedrag.perEenheid)} {UNIT_SUFFIX[unit] || "/ stuk"}
+                        {bedrag.vergelijk !== null && <s className="ml-2 text-ink-60">{formatMoney(bedrag.vergelijk)}</s>}
                       </>
                     )}
                   </p>
@@ -258,7 +201,7 @@ export function CartView({ departments }: { departments: ReactNode }) {
               </button>
             </div>
           )}
-          {/* Shopify-mand: eerst wachten tot de laatste wijziging bevestigd is, anders rekent de klant een oudere mand af. */}
+          {/* Shopify-mand: de knop wacht tot de laatste wijziging bevestigd is, anders rekent de klant een oudere mand af. */}
           <button type="button" onClick={afrekenen} disabled={bezig || cart.bezig || geblokkeerd.length > 0} className="btn btn-primary mt-5 w-full">
             {bezig ? "Even geduld…" : "Veilig afrekenen"}
           </button>

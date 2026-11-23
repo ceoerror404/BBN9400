@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import type { CartLine, WishlistItem } from "@/lib/catalog/types";
 import { createLocalStore } from "./local-store";
-import { useShopifyCart } from "./shopify-cart";
+import { GEEN_KOSTEN, useShopifyCart, type MandKosten } from "./shopify-cart";
 
 const isObj = (x: unknown): x is Record<string, unknown> => typeof x === "object" && x !== null;
 
@@ -31,6 +31,10 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
 export const SHOPIFY_CART = process.env.NEXT_PUBLIC_SHOPIFY_WINKELMAND === "1";
 
 const GEEN_FOUT = () => {};
+/** De lokale mand wijzigt meteen: er valt niets af te wachten en er kan niets mislukken. */
+const METEEN_BEVESTIGD: (variantId?: string) => Promise<string> = () => Promise.resolve("");
+/** Bedragen van Shopify zijn er enkel bij de Shopify-mand; lokaal rekent het scherm met de catalogusprijs. */
+const LOKALE_KOSTEN: MandKosten = GEEN_KOSTEN;
 
 function useLocalCart() {
   const [lines, hydrated] = cartStore.useStore();
@@ -61,8 +65,8 @@ function useLocalCart() {
 
   const clear = useCallback(() => cartStore.set([]), []);
 
-  // `bezig` en `fout` bestaan enkel bij de Shopify-mand; lokaal kan een wijziging niet mislukken.
-  return { lines, hydrated, add, setQuantity, remove, clear, count: lines.length, bezig: false, fout: "", wisFout: GEEN_FOUT };
+  // `bezig`, `fout`, `kosten` en wachten op bevestiging bestaan enkel bij de Shopify-mand; lokaal kan een wijziging niet mislukken.
+  return { lines, hydrated, add, setQuantity, remove, clear, count: lines.length, bezig: false, fout: "", wisFout: GEEN_FOUT, bevestigd: METEEN_BEVESTIGD, kosten: LOKALE_KOSTEN };
 }
 
 /** De winkelmand van de bezoeker. Dezelfde hook voor beide opzetten (zie SHOPIFY_CART). */

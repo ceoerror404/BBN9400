@@ -193,7 +193,10 @@ Staat elders en hoort ook bij Vercel: `SITE_URL` en `SITE_INDEXEREN=1` (eerste p
   - [ ] Vóór de livegang: het testproduct archiveren of verwijderen (Shopify › Products).
 - [ ] Formulieren versturen in dry-run en in een testwinkel: Flow-mail, foto-upload (≤ 5 foto's, limiet 4 MB), fout- en successtatussen
 - [ ] Echte toestellen: iOS Safari en Android Chrome, schermtoetsenbord, liggende weergave
+  - Ook het winkelmandpaneel (23/11/2026, `docs/analytics-en-cookies.md` › "Winkelmandpaneel"): enkel getest in Chrome headless. Na te kijken op een echte telefoon: de voet blijft zichtbaar wanneer de adresbalk in- en uitschuift, en het paneel schuift vlot in.
 - [ ] Schermlezer (NVDA / VoiceOver), zoom tot 200 %, tekstafstand
+  - Ook het winkelmandpaneel: wordt "Mijn winkelmand (1), Toegevoegd aan uw winkelmand" voorgelezen bij het openen, en "… is verwijderd" na het verwijderen?
+- [ ] Winkelmandpaneel, zin over verzendkosten ("Levering of afhalen kiest u bij het afrekenen; daar ziet u ook de eventuele verzendkosten"): opnieuw lezen zodra de verzendtarieven en afhalen in Shopify ingesteld zijn (§5). De zin belooft niets, maar "afhalen" moet dan wel een keuze zijn in de kassa. Dezelfde bewering staat al op de winkelmandpagina.
 - [ ] INP en CWV-veldgegevens na publicatie (nu enkel labmetingen)
 - [ ] Merkwijzigingen van 30/09 23:21 (niet opnieuw geaudit)
 

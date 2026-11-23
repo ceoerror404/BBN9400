@@ -94,6 +94,18 @@ Campagnecodes (`utm_…`, `gclid`) blijven staan. Voor zo'n zoekterm gaat er ook
 - **Overgang:** wie nog een lokale mand heeft, krijgt die regels eenmalig in zijn Shopify-mand.
 - Producten op aanvraag kunnen niet in de Shopify-mand.
 
+### Winkelmandpaneel (23/11/2026)
+
+Het zijpaneel dat na "In winkelmand" opende, is nu de winkelmand zelf: productregels met −/+ en verwijderen, subtotaal, "Verder naar afrekenen" en "Verder winkelen". Het opent ook via het winkelmandicoon in de header; de link van dat icoon wijst nog altijd naar `/winkelmand` (nieuw tabblad, geen script). Het werkt met beide manden (Shopify en lokaal).
+
+- **Eerst bevestigen, dan tonen.** "In winkelmand" loopt via `voegToe` ([cart-ui.tsx](../apps/prototype/src/components/commerce/cart-ui.tsx)): de knop toont "Even geduld…", wacht op `bevestigd()` van de mand en opent pas dan het paneel met "Toegevoegd aan uw winkelmand". Mislukt het, dan opent er niets: de melding staat bij de knop (productpagina, verlanglijst) en de mand blijft wat Shopify bevestigde. Een tweede klik tijdens het wachten doet niets.
+- **Eén bron voor paneel en pagina.** [use-mand.ts](../apps/prototype/src/lib/store/use-mand.ts) levert de regels, het subtotaal en het afrekenen voor zowel het paneel ([cart-drawer.tsx](../apps/prototype/src/components/commerce/cart-drawer.tsx)) als de winkelmandpagina. Bedragen: zodra Shopify een regel bevestigd heeft, tonen beide wat Shopify aanrekent (`cost` van de cartregel); loopt het scherm nog vooruit, of leeft de mand lokaal, dan de catalogusprijs.
+- **Afrekenen** gaat zoals voorheen via `/api/kassa` (nieuwe controle van elke regel, dan de kassa-URL van de actieve cart). De knop wacht eerst op een openstaande wijziging; mislukte die, dan gaat de klant niet door.
+- **Hoogte.** Alle zijpanelen ([drawer.tsx](../apps/prototype/src/components/ui/drawer.tsx)) kwamen op desktop maar tot 90% van het scherm: de site staat daar op `zoom: 0.9` en de bovengrens was een kale `100dvh`. Die grens is nu gedeeld door de zoom.
+- **De foto in de mand** is die van de gekozen uitvoering: `/api/producten` stuurt per variant een `image` mee als die afwijkt van de kaartfoto.
+
+Getest op 23/11/2026 in Chrome headless (DevTools Protocol), lokaal, met de lokale mand en met de Shopify-mand tegen de echte Storefront API: één en meerdere producten, dezelfde variant opnieuw, verhogen en verlagen, verwijderen tot leeg, subtotaal na elke wijziging, sluiten en opnieuw openen (Escape, overlay, sluitknop), mobiel 390 px met negen regels en liggend, dubbelklikken op "In winkelmand", op + en op afrekenen, een fout van Shopify en een weggevallen verbinding (bij toevoegen en bij een wijziging in het paneel), een onbereikbare kassa, en de kassa-URL van de actieve cart. De navigatie naar de kassa is in de test tegengehouden: er is geen bestelling geplaatst. **Niet geverifieerd:** Safari, Firefox, echte toestellen en een schermlezer (`docs/todo.md` §6).
+
 ### Naar de kassa
 
 `/api/kassa` leest de mand met de cookies van de bezoeker erbij. De kassa-URL die Shopify teruggeeft draagt de sessie en de toestemming mee als parameters (gemeten):
@@ -214,7 +226,7 @@ Bij de start van de advertenties:
 | Proxy en CSP | `src/proxy.ts`, `next.config.ts` |
 | Toestemming | `src/lib/consent/regels.ts`, `toestemming.ts`; `src/components/consent/cookie-melding.tsx`, `cookievoorkeuren-knop.tsx` (nieuw) |
 | Metingen | `src/lib/analytics/payloads.ts`, `bus.ts`; `src/components/analytics/shopify-runtime.tsx`, `trackers.tsx`, `winkelmand-metingen.tsx` (nieuw) |
-| Winkelmand | `src/lib/store/shopify-cart.ts` (nieuw), `stores.ts`; `src/components/commerce/cart-ui.tsx`, `cart-view.tsx`; `src/app/api/kassa/route.ts` |
+| Winkelmand | `src/lib/store/shopify-cart.ts` (nieuw), `stores.ts`, `use-mand.ts`; `src/components/commerce/cart-ui.tsx`, `cart-drawer.tsx`, `cart-view.tsx`; `src/components/ui/drawer.tsx`; `src/app/api/kassa/route.ts` |
 | Aansluiting op pagina's | `src/app/layout.tsx`, `(kassa)/layout.tsx`, `(winkel)/catalogus/[...pad]/page.tsx`, `(winkel)/zoeken/page.tsx`; `src/components/product/product-view.tsx`, `layout/site-footer.tsx` |
 | ID's voor de metingen | `src/lib/catalog/types.ts`, `shopify-adapter.ts`, `ontwerpen.ts`; `scripts/sync-shopify.mjs` |
 | Teksten | `src/data/content.ts` (cookiepagina, privacyverklaring) |

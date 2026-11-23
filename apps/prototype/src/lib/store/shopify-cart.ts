@@ -76,6 +76,36 @@ function regels(): CartLine[] {
   return regelsCache;
 }
 
+/* ---------------- bedragen zoals Shopify ze aanrekent ---------------- */
+
+/**
+ * Per variant (kort ID): de bevestigde hoeveelheid en wat Shopify daarvoor aanrekent, in euro
+ * incl. btw. Dit is wat de kassa zal tonen; de schermen gebruiken het zodra een regel bevestigd is
+ * (lib/store/use-mand.ts). `vergelijk` = doorstreepte prijs per eenheid, enkel als die hoger ligt.
+ */
+export type MandKosten = ReadonlyMap<string, { quantity: number; totaal: number; perEenheid: number; vergelijk: number | null }>;
+export const GEEN_KOSTEN: MandKosten = new Map();
+
+let kostenVan: CartData | null = null;
+let kostenCache: MandKosten = GEEN_KOSTEN;
+
+function kosten(): MandKosten {
+  if (kostenVan === toestand.cart) return kostenCache;
+  kostenVan = toestand.cart;
+  const uit = new Map<string, { quantity: number; totaal: number; perEenheid: number; vergelijk: number | null }>();
+  for (const line of toestand.cart?.lines.nodes ?? []) {
+    // De site toont euro: een bedrag in een andere munt laten we liever weg dan het fout te tonen.
+    if (!line.merchandise || line.cost.totalAmount.currencyCode !== "EUR") continue;
+    const totaal = Number(line.cost.totalAmount.amount);
+    const perEenheid = Number(line.cost.amountPerQuantity.amount);
+    if (!Number.isFinite(totaal) || !Number.isFinite(perEenheid)) continue;
+    const vergelijk = Number(line.cost.compareAtAmountPerQuantity?.amount);
+    uit.set(kortId(line.merchandise.id), { quantity: line.quantity, totaal, perEenheid, vergelijk: vergelijk > perEenheid ? vergelijk : null });
+  }
+  kostenCache = uit.size ? uit : GEEN_KOSTEN;
+  return kostenCache;
+}
+
 /* ---------------- verkeer met /api/cart ---------------- */
 
 type Antwoord = { cart?: CartData | null; userErrors?: { message: string }[]; error?: { code?: string; message?: string } };
@@ -141,10 +171,15 @@ function start() {
 const ALGEMENE_FOUT = "Uw winkelmand kon niet worden bijgewerkt. Probeer het opnieuw of bel ons.";
 
 let loopt = false;
+/** Wie wacht tot Shopify de lopende ronde bevestigd of geweigerd heeft (shopifyCart.bevestigd). */
+let wachters: { variantId?: string; klaar: (fout: string) => void }[] = [];
+
 /** Werkt de doelen één voor één af; nieuwe doelen die intussen binnenkomen, gaan mee in dezelfde ronde. */
 async function verwerk() {
   if (loopt) return;
   loopt = true;
+  // Wat in deze ronde misliep, per variant: het antwoord voor wie op de bevestiging wacht.
+  const mislukt = new Map<string, string>();
   zet({ bezig: true });
   try {
     while (toestand.doelen.size > 0) {
@@ -178,6 +213,8 @@ async function verwerk() {
 
       if (status === 200 && data.cart) {
         // Shopify kan een deel weigeren (bv. meer dan de voorraad): de mand is dan wat Shopify ervan maakte.
+        if (data.userErrors?.length) mislukt.set(variantId, ALGEMENE_FOUT);
+        else mislukt.delete(variantId);
         zet({ cart: data.cart, ...(data.userErrors?.length ? { fout: ALGEMENE_FOUT } : {}) });
         klaar();
         continue;
@@ -185,13 +222,19 @@ async function verwerk() {
       // Mislukt: alle openstaande doelen vervallen, het scherm toont weer wat Shopify bevestigde.
       // Onze eigen meldingen (etalage, maximum) zijn Nederlands en mogen getoond worden; de rest krijgt de algemene tekst.
       const eigen = status === 409 || data.error?.code === "te_veel" || data.error?.code === "te_veel_regels" || data.error?.code === "controle_mislukt";
-      zet({ doelen: new Map(), fout: (eigen && data.error?.message) || ALGEMENE_FOUT });
+      const melding = (eigen && data.error?.message) || ALGEMENE_FOUT;
+      for (const id of toestand.doelen.keys()) mislukt.set(id, melding);
+      zet({ doelen: new Map(), fout: melding });
       // De mand kan intussen verdwenen zijn (afgerekend): opnieuw ophalen zet alles recht.
       await laad();
     }
   } finally {
     loopt = false;
     zet({ bezig: false });
+    const klaar = wachters;
+    wachters = [];
+    const eerste = mislukt.values().next().value ?? "";
+    for (const w of klaar) w.klaar(w.variantId ? (mislukt.get(w.variantId) ?? "") : eerste);
   }
 }
 
@@ -229,7 +272,20 @@ export const shopifyCart = {
     zet({ doelen, fout: "" });
     void verwerk();
   },
-  wisFout: () => zet({ fout: "" }),
+  wisFout: () => {
+    if (toestand.fout) zet({ fout: "" });
+  },
+  /**
+   * Wacht tot Shopify de openstaande wijzigingen bevestigd of geweigerd heeft. Het scherm loopt
+   * vooruit op Shopify; wie pas na de bevestiging iets mag tonen of doen ("Toegevoegd", naar de
+   * kassa), wacht hierop.
+   * @returns de melding als het misliep — voor die variant, of zonder variant voor om het even
+   * welke wijziging — en "" als alles bevestigd is of er niets openstond.
+   */
+  bevestigd(variantId?: string): Promise<string> {
+    if (!loopt) return Promise.resolve("");
+    return new Promise((klaar) => wachters.push({ variantId, klaar }));
+  },
   /** Opnieuw ophalen, bv. na "terug" uit de kassa. */
   ververs: () => laad(),
 };
@@ -259,7 +315,8 @@ export function useShopifyCart() {
     () => toestand.fout,
     () => SERVER.fout,
   );
-  return { lines, hydrated, bezig, fout, count: lines.length, ...shopifyCart };
+  const bedragen = useSyncExternalStore(subscribe, kosten, () => GEEN_KOSTEN);
+  return { lines, hydrated, bezig, fout, kosten: bedragen, count: lines.length, ...shopifyCart };
 }
 
 /* ---------------- voor Shopify's cart-tracker ---------------- */

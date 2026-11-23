@@ -60,6 +60,60 @@ export function clampQuantity(q: number, rule: QuantityRule): number {
 }
 
 /**
+ * Compacte −/+ voor een regel in het winkelmandpaneel: alle eenheden, in stappen van de
+ * productregel. Bewust zonder invoerveld: op een telefoon schuift er dan geen toetsenbord over
+ * de knoppen onderaan. Een knop op zijn grens blijft focusbaar (aria-disabled), zodat wie met
+ * het toetsenbord tot het minimum klikt zijn plek niet verliest.
+ */
+export function QuantityStepper({
+  unit,
+  rule,
+  value,
+  onChange,
+  naam,
+}: {
+  unit: SalesUnit;
+  rule: QuantityRule;
+  value: number;
+  onChange: (q: number) => void;
+  /** Productnaam, voor de labels van de knoppen. */
+  naam: string;
+}) {
+  const opMin = value <= rule.min;
+  const opMax = rule.max !== undefined && value >= rule.max;
+  // Knoppen van 44 × 44 px (raakvlak op een telefoon); de rand van het kader komt daar nog bij.
+  const knop = "flex size-11 items-center justify-center hover:bg-mist aria-disabled:cursor-not-allowed aria-disabled:text-ink-40 aria-disabled:hover:bg-transparent";
+  return (
+    <div role="group" aria-label={`Hoeveelheid: ${naam}`} className="inline-flex shrink-0 items-center rounded-[var(--radius-field)] border border-line-strong bg-white">
+      <button
+        type="button"
+        onClick={() => !opMin && onChange(clampQuantity(value - rule.step, rule))}
+        aria-disabled={opMin}
+        className={`${knop} rounded-l-[var(--radius-field)]`}
+        aria-label={`${formatQuantity(rule.step)} ${UNIT_NAME[unit].short} minder`}
+      >
+        <Icon name="minus" size={18} />
+      </button>
+      {/* Vaste minimumbreedte: van 9 naar 10 verschuift de +-knop niet. */}
+      <output className={`px-1 text-center text-[15px] tabular-nums ${unit === "stuk" ? "min-w-9" : "min-w-16"}`}>
+        <span className="sr-only">Hoeveelheid: </span>
+        {formatQuantity(value)}
+        {unit !== "stuk" && <span className="ml-1 text-[13px] text-ink-60">{UNIT_NAME[unit].short}</span>}
+      </output>
+      <button
+        type="button"
+        onClick={() => !opMax && onChange(clampQuantity(value + rule.step, rule))}
+        aria-disabled={opMax}
+        className={`${knop} rounded-r-[var(--radius-field)]`}
+        aria-label={`${formatQuantity(rule.step)} ${UNIT_NAME[unit].short} meer`}
+      >
+        <Icon name="plus" size={18} />
+      </button>
+    </div>
+  );
+}
+
+/**
  * Hoeveelheid kiezen in de verkoopeenheid. Stuks/rollen: keuzelijst (zoals de
  * referentie). Meter/m²: −/+ met invoerveld (decimaal, stap uit de productregel).
  */

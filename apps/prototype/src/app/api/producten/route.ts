@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { catalog } from "@/lib/catalog/repository";
 import { toCard } from "@/lib/catalog/view";
-import { variantLabel } from "@/lib/catalog/product";
+import { imagesForVariant, variantLabel } from "@/lib/catalog/product";
 import type { Availability, Product } from "@/lib/catalog/types";
 import { storefront } from "@/lib/shopify/storefront";
 
@@ -61,14 +61,22 @@ export async function GET(req: Request) {
 
   return NextResponse.json(
     {
-      products: products.map((p) => ({
-        card: toCard(p),
-        unit: p.variants.find((v) => v.price)?.price?.unit ?? "stuk",
-        quantity: p.quantity,
-        pricing: p.pricing,
-        variants: p.variants.map((v) => ({ id: v.id, sku: v.sku, label: variantLabel(v), price: v.price, availability: beschikbaarheid(p, v) })),
-        ...(p.aliases ? { aliases: p.aliases } : {}),
-      })),
+      products: products.map((p) => {
+        const card = toCard(p);
+        // De winkelmand toont de foto van de gekozen uitvoering (bv. de juiste kleur); enkel meegestuurd als ze afwijkt van de kaartfoto.
+        const eigenFoto = (v: Product["variants"][number]) => {
+          const src = imagesForVariant(p, v)[0]?.src;
+          return src && src !== card.image?.src ? { image: src } : {};
+        };
+        return {
+          card,
+          unit: p.variants.find((v) => v.price)?.price?.unit ?? "stuk",
+          quantity: p.quantity,
+          pricing: p.pricing,
+          variants: p.variants.map((v) => ({ id: v.id, sku: v.sku, label: variantLabel(v), price: v.price, availability: beschikbaarheid(p, v), ...eigenFoto(v) })),
+          ...(p.aliases ? { aliases: p.aliases } : {}),
+        };
+      }),
     },
     // Live: kort cachen (voorraad); momentopname: wijzigt pas bij een nieuwe deploy.
     { headers: { "Cache-Control": live ? "public, max-age=0, s-maxage=60, stale-while-revalidate=120" : "public, max-age=60, s-maxage=300" } },

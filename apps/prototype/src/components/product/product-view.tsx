@@ -15,9 +15,8 @@ import {
   toonHeleFoto,
   UNIT_NAME,
   variantById,
-  variantLabel,
 } from "@/lib/catalog/product";
-import { useCart, useRecentlyViewed } from "@/lib/store/stores";
+import { useRecentlyViewed } from "@/lib/store/stores";
 import { useProducts } from "@/lib/store/use-products";
 import { SITE } from "@/lib/site/config";
 import { isOpMaat, type Maatwerk } from "@/lib/site/maatwerk";
@@ -31,6 +30,7 @@ import { Price } from "@/components/catalog/price";
 import { Drawer } from "@/components/ui/drawer";
 import { Icon } from "@/components/ui/icon";
 import { ImageSlot } from "@/components/ui/image-slot";
+import { Spinner } from "@/components/ui/spinner";
 import { Gallery } from "./gallery";
 import { clampQuantity, QuantityInput } from "./quantity-input";
 
@@ -57,8 +57,9 @@ export function ProductView({
   /** Afdeling: wel of geen op-maatverhaal (lib/site/maatwerk.ts). */
   maatwerk: Maatwerk;
 }) {
-  const cart = useCart();
-  const { announceAdded } = useCartUi();
+  const { voegToe, bezigMet } = useCartUi();
+  /** Er wordt iets toegevoegd: de knop wacht op de bevestiging (een tweede klik doet niets). */
+  const toevoegen = bezigMet !== null;
   const { track } = useRecentlyViewed();
 
   // Live beschikbaarheid over de momentopname leggen (valt stil terug op de momentopname).
@@ -141,26 +142,22 @@ export function ProductView({
     window.history.replaceState(null, "", `${window.location.pathname}?${q.toString()}`);
   };
 
-  const add = () => {
+  // Het winkelmandpaneel opent pas als de toevoeging bevestigd is (cart-ui.tsx); mislukt ze, dan staat de melding hier bij de knop.
+  const add = async () => {
     if (!purchasable || !variant.price) {
       setError(variant.availability === "uitverkocht" ? "Deze variant is tijdelijk uitverkocht. Kies een andere maat of kleur." : "Dit product is niet online te koop.");
       return;
     }
-    const q = clampQuantity(qty, product.quantity);
-    const res = cart.add(product.id, variant.id, q, product.quantity.max);
-    if (res.capped) {
+    if (toevoegen) return;
+    setError("");
+    const res = await voegToe({ productId: product.id, variantId: variant.id, quantity: clampQuantity(qty, product.quantity), max: product.quantity.max });
+    if (res.status === "maximum") {
       setError(
         `U kunt maximaal ${formatQuantity(product.quantity.max ?? res.quantity)} ${UNIT_NAME[unit].many} van dit product online bestellen. Uw winkelmand bevat er nu ${formatQuantity(res.quantity)}.`,
       );
-      return;
+    } else if (res.status === "fout") {
+      setError(res.melding);
     }
-    announceAdded({
-      title: product.title,
-      image: images[0],
-      variantLabel: product.options.length ? variantLabel(variant) : undefined,
-      quantity: q,
-      price: variant.price,
-    });
   };
 
   const buyRow = (compact = false) =>
@@ -174,8 +171,23 @@ export function ProductView({
     ) : (
       <div className="flex items-center gap-2">
         <QuantityInput unit={unit} rule={product.quantity} value={qty} onChange={setQty} compact={compact} />
-        <button type="button" onClick={add} disabled={!purchasable} className={`btn btn-primary min-w-0 ${compact ? "px-4 sm:px-6" : "flex-1 px-3"}`}>
-          {variant.availability === "uitverkocht" ? "Tijdelijk uitverkocht" : "In winkelmand"}
+        {/* Tijdens het toevoegen aria-disabled, niet disabled: de knop houdt de focus, zodat die na het sluiten van het paneel hier terugkomt. */}
+        <button
+          type="button"
+          onClick={add}
+          disabled={!purchasable}
+          aria-disabled={toevoegen || undefined}
+          className={`btn btn-primary min-w-0 aria-disabled:cursor-progress ${compact ? "px-4 sm:px-6" : "flex-1 px-3"}`}
+        >
+          {variant.availability === "uitverkocht" ? (
+            "Tijdelijk uitverkocht"
+          ) : toevoegen ? (
+            <>
+              <Spinner /> Even geduld…
+            </>
+          ) : (
+            "In winkelmand"
+          )}
         </button>
         <WishlistButton productId={product.id} variantId={variant.id} title={product.title} variant="inline" />
       </div>
@@ -359,6 +371,8 @@ export function ProductView({
         aria-hidden={!stickyVisible}
         inert={!stickyVisible}
       >
+        {/* Wie hier bestelt, ziet de hoofdknop (en haar melding) niet: de melding staat dus ook hier. Voorgelezen wordt ze bij de hoofdknop. */}
+        {error && <p className="mb-2 max-w-[560px] text-center text-[13px] text-brand-dark">{error}</p>}
         <div className="flex items-center justify-center">{buyRow(true)}</div>
       </div>
 

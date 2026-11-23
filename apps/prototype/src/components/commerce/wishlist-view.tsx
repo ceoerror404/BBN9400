@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useWishlist, useCart } from "@/lib/store/stores";
+import { useState } from "react";
+import { useWishlist } from "@/lib/store/stores";
 import { useProducts } from "@/lib/store/use-products";
 import { routes } from "@/lib/routes";
 import { SITE } from "@/lib/site/config";
+import { formatQuantity, UNIT_NAME } from "@/lib/catalog/product";
 import { ImageSlot } from "@/components/ui/image-slot";
 import { Icon } from "@/components/ui/icon";
+import { Spinner } from "@/components/ui/spinner";
 import { Price } from "@/components/catalog/price";
 import { useCartUi } from "./cart-ui";
 import { RecentlyViewed } from "./recently-viewed";
@@ -14,8 +17,9 @@ import { RecentlyViewed } from "./recently-viewed";
 /** Verlanglijst (lokaal bewaard) — ook af te drukken als meeneemlijst voor een winkelbezoek. */
 export function WishlistView() {
   const wish = useWishlist();
-  const cart = useCart();
-  const { announceAdded } = useCartUi();
+  const { voegToe, bezigMet } = useCartUi();
+  /** Toevoegen aan de winkelmand lukte niet: de melding staat bij dat product. */
+  const [mandFout, setMandFout] = useState<{ productId: string; melding: string } | null>(null);
   const ids = wish.items.map((i) => i.productId);
   const { map, loading } = useProducts(ids);
 
@@ -97,13 +101,29 @@ export function WishlistView() {
                 {canAdd ? (
                   <button
                     type="button"
-                    onClick={() => {
-                      cart.add(p.card.id, v.id, p.quantity.min, p.quantity.max);
-                      announceAdded({ title: p.card.title, image: p.card.image, variantLabel: p.variants.length > 1 ? v.label : undefined, quantity: p.quantity.min, price: v.price! });
+                    onClick={async () => {
+                      if (bezigMet !== null) return;
+                      setMandFout(null);
+                      // Het winkelmandpaneel opent pas als de toevoeging bevestigd is (cart-ui.tsx).
+                      const res = await voegToe({ productId: p.card.id, variantId: v.id, quantity: p.quantity.min, max: p.quantity.max });
+                      if (res.status === "fout") setMandFout({ productId: item.productId, melding: res.melding });
+                      else if (res.status === "maximum") {
+                        setMandFout({
+                          productId: item.productId,
+                          melding: `U kunt maximaal ${formatQuantity(p.quantity.max ?? res.quantity)} ${UNIT_NAME[p.unit].many} van dit product online bestellen. Uw winkelmand bevat er nu ${formatQuantity(res.quantity)}.`,
+                        });
+                      }
                     }}
-                    className="btn btn-primary btn-sm"
+                    aria-disabled={bezigMet !== null || undefined}
+                    className="btn btn-primary btn-sm aria-disabled:cursor-progress"
                   >
-                    In winkelmand
+                    {bezigMet === v.id ? (
+                      <>
+                        <Spinner /> Even geduld…
+                      </>
+                    ) : (
+                      "In winkelmand"
+                    )}
                   </button>
                 ) : (
                   <Link href={p.pricing === "on-request" ? routes.quote({ product: p.card.slug, variant: v?.id }) : routes.product(p.card.slug, v?.id)} className="btn btn-outline btn-sm">
@@ -114,6 +134,11 @@ export function WishlistView() {
                   <Icon name="trash" size={16} /> Verwijderen
                 </button>
               </div>
+              {mandFout?.productId === item.productId && (
+                <p role="alert" className="no-print col-span-2 text-[13px] text-brand-dark sm:col-span-3">
+                  {mandFout.melding}
+                </p>
+              )}
             </li>
           );
         })}
