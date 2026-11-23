@@ -198,7 +198,8 @@ export function SearchBox({ className = "" }: { className?: string }) {
           aria-controls={`${panelId}-panel`}
           // Tekstgrootte op aanraakschermen: 16px via globals.css, anders zoomt iOS in bij focus.
           // Terwijl de uitnodiging typt, is de echte placeholder doorzichtig (behalve bij "minder beweging").
-          className={`h-[46px] w-full text-ellipsis rounded-[var(--radius-field)] border border-line-strong/70 bg-mist pl-12 pr-11 text-sm outline-none focus:border-ink focus:bg-white focus:ring-1 focus:ring-ink [&::-webkit-search-cancel-button]:hidden ${typt ? "motion-safe:placeholder:text-transparent motion-reduce:placeholder:text-ink-60" : "placeholder:text-ink-60"}`}
+          // Bewust geen andere kleur of rand bij focus (vraag Alexander 23/11): de tekstcursor toont de focus.
+          className={`h-[46px] w-full text-ellipsis rounded-[var(--radius-field)] border border-line-strong/70 bg-mist pl-12 pr-11 text-sm outline-none [&::-webkit-search-cancel-button]:hidden ${typt ? "motion-safe:placeholder:text-transparent motion-reduce:placeholder:text-ink-60" : "placeholder:text-ink-60"}`}
         />
         {typt && <TypendeUitnodiging />}
         {q && (
