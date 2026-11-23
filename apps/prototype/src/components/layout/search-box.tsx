@@ -14,6 +14,49 @@ const MIN_TEKENS = 2;
 /** Wachttijd na de laatste toetsaanslag (ms): wie doortypt, stuurt geen verzoek per letter. */
 const VERTRAGING = 220;
 
+/** Vaste uitnodiging in het veld: voor schermlezers, zonder JavaScript en bij "minder beweging". */
+const PLACEHOLDER = "Zoek een product of categorie";
+/** In een leeg veld typt de site deze uitnodigingen om de beurt; het gedeelde begin blijft staan. */
+const UITNODIGINGEN = ["Zoek een product", "Zoek een categorie"];
+/** Tempo van de typende uitnodiging (ms): per getypte letter, per gewiste letter, rust bij een volledige zin. */
+const TYPEN = 85;
+const WISSEN = 40;
+const RUST = 2200;
+
+/**
+ * Typende uitnodiging over het lege zoekveld: "Zoek een product", dan "Zoek een categorie", telkens
+ * letter per letter. Ze vertrekt van de vaste placeholder, zodat er bij het laden niets verspringt.
+ * Puur decoratief (aria-hidden): de echte placeholder blijft onzichtbaar in het veld staan.
+ */
+function TypendeUitnodiging() {
+  const [tekst, setTekst] = useState(PLACEHOLDER);
+  const [beurt, setBeurt] = useState(0);
+  const doel = UITNODIGINGEN[beurt % UITNODIGINGEN.length];
+  const rust = tekst === doel || tekst === PLACEHOLDER;
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // Eerst wissen tot wat er staat het begin van de volgende zin is, dan verder typen.
+    const typen = doel.startsWith(tekst);
+    const t = window.setTimeout(
+      () => {
+        if (tekst === doel) setBeurt((b) => b + 1);
+        else setTekst(typen ? doel.slice(0, tekst.length + 1) : tekst.slice(0, -1));
+      },
+      rust ? RUST : typen ? TYPEN : WISSEN,
+    );
+    return () => window.clearTimeout(t);
+  }, [tekst, doel, rust]);
+
+  return (
+    // Zelfde plaats en lettergrootte als de tekst in het veld (rand + pl-12 links, pr-11 rechts).
+    <span aria-hidden="true" className="veldtekst pointer-events-none absolute inset-y-0 left-[49px] right-[45px] flex items-center text-sm text-ink-60 motion-reduce:hidden">
+      <span className="overflow-hidden text-ellipsis whitespace-pre">{tekst}</span>
+      <span className={`ml-px h-[1.2em] w-[1.5px] shrink-0 bg-ink-60 ${rust ? "animate-knipper" : ""}`} />
+    </span>
+  );
+}
+
 /**
  * Groot zoekveld met suggesties tijdens het typen. De suggesties komen van Shopify Predictive
  * Search, via /api/zoeken: producten, en waar Shopify ze geeft ook zoektermen, categorieën en
@@ -26,6 +69,8 @@ export function SearchBox({ className = "" }: { className?: string }) {
   const params = useSearchParams();
   const [q, setQ] = useState(pathname === routes.search() ? (params.get("q") ?? "") : "");
   const [open, setOpen] = useState(false);
+  // Met de focus in het veld staat de uitnodiging stil: de vaste placeholder, zonder getyp naast de cursor.
+  const [inVeld, setInVeld] = useState(false);
   // Suggesties en fouten onthouden bij welke zoekterm ze horen: wat niet bij de huidige term hoort, telt als "nog bezig".
   const [resultaat, setResultaat] = useState<{ term: string; data: Zoeksuggesties } | null>(null);
   const [foutBij, setFoutBij] = useState<string | null>(null);
@@ -102,6 +147,7 @@ export function SearchBox({ className = "" }: { className?: string }) {
   };
 
   const showPanel = open && zoekt;
+  const typt = !q && !inVeld;
   const melding = !showPanel ? "" : fout ? "De suggesties zijn tijdelijk niet beschikbaar." : bezig ? "Bezig met zoeken." : leeg ? `Geen suggesties voor ${term}.` : "Suggesties beschikbaar. Blader met de pijltjestoetsen.";
   const rij = "block rounded-lg px-3 py-2.5 text-[15px] hover:bg-mist focus-visible:bg-mist";
 
@@ -123,9 +169,11 @@ export function SearchBox({ className = "" }: { className?: string }) {
             setOpen(true);
           }}
           onFocus={() => {
+            setInVeld(true);
             if (focusZonderOpenen.current) focusZonderOpenen.current = false;
             else setOpen(true);
           }}
+          onBlur={() => setInVeld(false)}
           onKeyDown={(e) => {
             if (e.key === "Escape") {
               e.preventDefault(); // anders wist de browser het zoekveld
@@ -144,12 +192,15 @@ export function SearchBox({ className = "" }: { className?: string }) {
           }}
           role="combobox"
           aria-autocomplete="list"
-          placeholder="Zoek een product of categorie"
+          placeholder={PLACEHOLDER}
           autoComplete="off"
           aria-expanded={showPanel}
           aria-controls={`${panelId}-panel`}
-          className="h-[46px] w-full rounded-[var(--radius-field)] border border-line-strong/70 bg-mist pl-12 pr-11 text-sm outline-none placeholder:text-ink-60 focus:border-ink focus:bg-white focus:ring-1 focus:ring-ink [&::-webkit-search-cancel-button]:hidden"
+          // Tekstgrootte op aanraakschermen: 16px via globals.css, anders zoomt iOS in bij focus.
+          // Terwijl de uitnodiging typt, is de echte placeholder doorzichtig (behalve bij "minder beweging").
+          className={`h-[46px] w-full text-ellipsis rounded-[var(--radius-field)] border border-line-strong/70 bg-mist pl-12 pr-11 text-sm outline-none focus:border-ink focus:bg-white focus:ring-1 focus:ring-ink [&::-webkit-search-cancel-button]:hidden ${typt ? "motion-safe:placeholder:text-transparent motion-reduce:placeholder:text-ink-60" : "placeholder:text-ink-60"}`}
         />
+        {typt && <TypendeUitnodiging />}
         {q && (
           <button
             type="button"

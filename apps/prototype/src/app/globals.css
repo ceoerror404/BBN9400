@@ -42,6 +42,14 @@
   --shadow-drawer: -12px 0 40px -12px rgb(19 12 12 / 0.25);
 
   --breakpoint-xs: 30rem;
+
+  /* Knipperende cursor achter de typende uitnodiging in het zoekveld */
+  --animate-knipper: knipper 1.1s step-end infinite;
+  @keyframes knipper {
+    50% {
+      opacity: 0;
+    }
+  }
 }
 
 @layer base {
@@ -328,6 +336,19 @@
     mask:
       radial-gradient(circle at 0 50%, #0000 var(--notch), #000 calc(var(--notch) + 0.5px)) left / 51% 100% no-repeat,
       radial-gradient(circle at 100% 50%, #0000 var(--notch), #000 calc(var(--notch) + 0.5px)) right / 51% 100% no-repeat;
+  }
+}
+
+/* Aanraakschermen: iOS Safari zoomt in zodra een veld met tekst kleiner dan 16px de focus krijgt,
+   en zoomt daarna niet vanzelf weer uit. Velden krijgen er daarom 16px. Bewust buiten een laag:
+   zo wint de regel van text-sm, text-[14px] en .field. .veldtekst is voor tekst die over een
+   veld ligt en even groot moet blijven (de typende uitnodiging in het zoekveld). */
+@media (pointer: coarse) {
+  input,
+  select,
+  textarea,
+  .veldtekst {
+    font-size: 1rem;
   }
 }
 
