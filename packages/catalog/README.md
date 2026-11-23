@@ -89,6 +89,17 @@ node packages/catalog/set-boras-prijzen.mjs --rollback "<pushlog>" --go     # te
 ```
 Gewone prijs incl. btw (bij een actie op hun site de doorgestreepte). Enkel een product met een prijs voor élke kleur gaat online te koop; de rest blijft op aanvraag.
 
+## `set-aw-prijzen.mjs` — Associated Weavers vasttapijt per m² (23/11/2026)
+Zet de **RRP-kolom** (adviesverkoopprijs, € per m²) uit `Data\Associated Weavers\BENELUX - Elsie - Pricelist tool AW Rolls 2026 - 2026-01-27.pdf` op elk AW-product (alle kleuren dezelfde prijs), haalt de tag `prijs-ontbreekt` weg en zet `brunic.etalage = false`. AW-producten zonder RRP in die lijst (enkel rol-/snitprijs, runners, Kids, niet in de lijst) gaan op **DRAFT**. De koppeling productnaam → RRP staat in `Data\Associated Weavers\AW-prijzen-shopify-plan-<datum>.csv` (handmatig uit de pdf; Orion/Secret/Sensation = "… NEW" in de lijst).
+```
+node packages/catalog/set-aw-prijzen.mjs "<plan.csv>"                 # dry-run
+node packages/catalog/set-aw-prijzen.mjs "<plan.csv>" --go            # schrijven; pushlog in ..\Data\
+node packages/catalog/set-aw-prijzen.mjs --rollback "<pushlog>" --go  # prijzen, tag, etalage en status terugzetten
+```
+Eerste run 23/11/2026: 65 geprijsd (1.589 varianten), 64 op draft — log `Data\AW_PRIJZEN_SHOPIFY_PUSH_LOG_2026-11-23T20-30-32.json`.
+
+**Voorstelprijzen (23/11/2026, `--tag=prijs-voorstel`):** voor de 38 kwaliteiten met enkel een rol- en/of snitprijs een eigen prijs volgens het patroon in de AW-lijst: RRP ≈ 2,18 × snitprijs (R² 0,97 op 96 kwaliteiten); zonder snitprijs eerst snit ≈ rol + € 4,57 (R² 0,94). Afgerond op € X,95 (onder € 30) of op AW's eigen prijspunten. Producten weer actief, tag `prijs-voorstel` (= geen AW-RRP; vervangen zodra AW een RRP geeft). Berekening per product: `Data\Associated Weavers\AW-voorstelprijzen-2026-11-23.csv`; log `Data\AW_PRIJZEN_SHOPIFY_PUSH_LOG_2026-11-23T21-14-42.json`. Nog op draft: 16 runners + 10 niet in de lijst (Durata, Galatea, Hydra, Livia, Numicus, Pisces, Pontus, Rubico, Liris, Tibet).
+
 ## `novilon-ophalen.mjs` + `novilon-import.mjs` — Forbo Novilon-rolvinyl (19/11/2026)
 50 dessins in drie lijnen (Basic 10, Viva 20, Traffic 20) uit de dessinlijst `Forbo_Novilon_dessins.xlsx` (een tabblad per lijn, met links naar forbo.com/nl-be). Model zoals het andere rolvinyl (Tarkett): één product per dessin, titel = lijn + dessin ("Basic Light Timber"), vendor **Novilon**, `productType` Vinylvloer, optie **Breedte** (2/3/4 m; Traffic 2/4 m), SKU `NOV-<dessinnummer van die breedte>`, per m², collecties `vloerbekleding` + `vloerbekleding-vinyl`, gepubliceerd op Brunic Headless. Kenmerken (`brunic.specificaties`) uit de Forbo-pagina's: dikte, slijtlaag, rolmaten, gebruiksklassen, brandklasse, 17 dB, R10, LRV (Traffic ook NCS en 18 % gerecycleerd). Kleurfamilie en uitzicht per dessin staan in `DESSIN` in het importscript (nagekeken op de foto's). Prijs 0 bij de import = op aanvraag tot de prijs er is.
 ```

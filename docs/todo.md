@@ -51,6 +51,7 @@ Bron: audit van 30/09/2026 (alleen `apps/prototype`, niet `apps/web`). Geauditee
   - niet-unieke landmarks;
   - header-transities negeren `prefers-reduced-motion`.
   (bevestigd, automatisch)
+- [x] **B24 — opgelost 22/11** (de afdelingen staan bovenaan de footerkolom "Winkelen", gevoed door de categorieboom: `components/layout/shop-chrome.tsx` → `site-footer.tsx`, vlag `metAfdelingen` in `lib/site/navigation.ts`; lokaal nagekeken in de HTML van vier pagina's en op desktop en mobiel, nog niet gecommit of gedeployd). Oorspronkelijke bevinding: **B24 · K — Afdelingen staan niet als link in het menu.** Het megamenu wordt pas opgebouwd na een klik op "Catalogus" (`components/layout/site-header.tsx`: `{megaOpen && <MegaMenu … />}`), en de footer linkt enkel naar `/catalogus`. Buiten de homepage ("Snel naar een afdeling") en het kruimelpad staat er dus op geen enkele pagina een gewone link naar Gordijnen & stoffen, Behang, Vloerbekleding of Tapijten. Nagemeten op 22/11/2026 in de HTML van productie (`/info/levering`, `/merken`, een productpagina): 0 links naar een afdeling in `<header>`. Google leidt de sitelinks onder het zoekresultaat "brunic" onder meer af uit de vaste navigatie. → De afdelingen als gewone links op elke pagina zetten: in de footerkolom "Winkelen", of het megamenu altijd in de HTML houden en verbergen tot de klik. (bevestigd)
 
 ### Data (pipeline / Shopify)
 
@@ -169,6 +170,8 @@ Terugdraaien: de drie variabelen weghalen en opnieuw deployen, zonder codewijzig
 - [ ] `SHOPIFY_STOREFRONT_API_TOKEN` op Production: de privé-token van het Headless-kanaal (`shpat_…`) in plaats van de publieke. Met een publieke token ziet Shopify al het verkeer van de server als één bezoeker en kan het verzoeken weigeren (HTTP 430). Met de winkelmand bij Shopify loopt ook elke mandwijziging via de server. Achtergrond: `docs/zoeken.md`, "Instellen in Shopify" stap 2.
 
 **Na de domeinverhuizing** (Vercel › Domains, README §4 punt 5)
+
+- [ ] `brunic.vercel.app` permanent laten doorverwijzen naar `www.brunic.be`. Nagemeten op 23/11/2026: het adres geeft nog de volledige site met status 200, met de canonical naar `www.brunic.be`. Dat is geen ramp, maar met een 308 ziet Google maar één site. Vercel › Domains: bij `brunic.vercel.app` "Redirect to" `www.brunic.be` (308). Pas daarna de teruglink in de Shopify-kassa omzetten (punt hieronder), anders loopt die via een extra stap.
 
 - [ ] De cookies opnieuw nakijken op `www.brunic.be`: staat `_shopify_cmp` er (op `localhost` weigerde de browser hem), en gaat de cookiekeuze mee naar de kassa. Dat is enkel lokaal getest.
 - [ ] De teruglink vanuit de Shopify-kassa naar het nieuwe domein laten wijzen. Sinds 19/11/2026 stuurt het live thema "Brunic redirect naar brunic.vercel.app" (het officiële Hydrogen Redirect Theme) elk bezoek aan `brunic-3.myshopify.com` door naar de eigen site, ook de klik op "Brunic" linksboven in de kassa. Het doeladres staat op één plek, in Shopify; in de code verandert er niets.

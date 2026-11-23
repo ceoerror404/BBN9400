@@ -13,7 +13,7 @@ export const SITE = {
   companyNumber: process.env.SITE_COMPANY_NUMBER || "BE 0446.774.674",
   tagline: "Sinds 1982 uw partner voor interieurdecoratie",
   description:
-    "Interieurzaak in Ninove: gordijnen op maat uit eigen atelier, behang, vasttapijt en tapijten. Advies in de winkel, gratis opmeting en plaatsing aan huis.",
+    "Gordijnen op maat uit eigen atelier, behang, vinyl, vasttapijt en tapijten in Ninove. Advies in de winkel, gratis opmeting en plaatsing aan huis.",
   /** Brunic bestaat sinds 1982 (bevestigd 13/11/2026); de nv dateert van 1992. */
   foundingDate: "1982",
   address: { street: "Ring-West 19", postalCode: "9400", city: "Ninove", region: "Oost-Vlaanderen", country: "België", countryCode: "BE" },

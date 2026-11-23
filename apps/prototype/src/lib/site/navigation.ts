@@ -28,7 +28,12 @@ export const MAIN_NAV: NavItem[] = [
   { key: "winkel", label: "Winkel & contact", href: routes.store(), enkelMobiel: true },
 ];
 
-export type FooterColumn = { title: string; links: { label: string; href: string }[] };
+export type FooterColumn = {
+  title: string;
+  links: { label: string; href: string }[];
+  /** De afdelingen uit de categorieboom komen bovenaan deze kolom (ShopChrome geeft ze door aan de footer). */
+  metAfdelingen?: boolean;
+};
 
 export const FOOTER_COLUMNS: FooterColumn[] = [
   {
@@ -53,6 +58,7 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
   },
   {
     title: "Winkelen",
+    metAfdelingen: true,
     links: [
       { label: "Catalogus", href: routes.catalog() },
       { label: "Merken", href: routes.brands() },

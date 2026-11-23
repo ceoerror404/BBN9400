@@ -67,6 +67,8 @@ export function websiteJsonLd() {
     "@type": "WebSite",
     "@id": `${SITE.url}/#website`,
     name: SITE.name,
+    // Sitenaam in Google: koppelt de oude schrijfwijze (BRUNIC nv) en de winkelnaam aan de site.
+    alternateName: [SITE.legalName, `${SITE.name} ${SITE.address.city}`],
     url: SITE.url,
     inLanguage: "nl-BE",
     publisher: { "@id": ORG_ID },

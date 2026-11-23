@@ -17,7 +17,7 @@ const fraunces = Fraunces({ subsets: ["latin"], axes: ["SOFT", "WONK", "opsz"], 
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
-  title: { default: "Brunic Ninove — gordijnen op maat, behang, vasttapijt & tapijten", template: "%s · Brunic Ninove" },
+  title: { default: "Brunic Ninove — gordijnen op maat, behang, vinyl, vasttapijt & tapijten", template: "%s · Brunic Ninove" },
   description: SITE.description,
   applicationName: SITE.name,
   openGraph: {

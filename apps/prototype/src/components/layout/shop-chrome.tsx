@@ -17,7 +17,7 @@ export async function ShopChrome({ children }: { children: ReactNode }) {
       <main id="inhoud" tabIndex={-1} className="min-h-[calc(100dvh-var(--header-h))] outline-none">
         {children}
       </main>
-      <SiteFooter />
+      <SiteFooter afdelingen={menu.map((m) => ({ label: m.name, href: m.href }))} />
     </>
   );
 }

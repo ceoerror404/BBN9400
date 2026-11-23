@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FOOTER_COLUMNS } from "@/lib/site/navigation";
+import { FOOTER_COLUMNS, type FooterColumn } from "@/lib/site/navigation";
 import { SITE } from "@/lib/site/config";
 import { Icon, type IconName } from "@/components/ui/icon";
 import { CookievoorkeurenKnop } from "@/components/consent/cookievoorkeuren-knop";
@@ -15,8 +15,12 @@ const TRUST: { icon: IconName; title: string; text: string }[] = [
   { icon: "scissors", title: "Eigen atelier", text: "Gordijnen op maat gebracht in ons atelier" },
 ];
 
-/** Footer met dezelfde opbouw als de referentie. */
-export function SiteFooter({ showNewsletter = true }: { showNewsletter?: boolean }) {
+/**
+ * Footer met dezelfde opbouw als de referentie. `afdelingen` zijn de hoofdcategorieën: zo linkt
+ * elke pagina met gewone links naar elke afdeling. Het megamenu staat pas na een klik in de HTML (B24).
+ */
+export function SiteFooter({ showNewsletter = true, afdelingen = [] }: { showNewsletter?: boolean; afdelingen?: FooterColumn["links"] }) {
+  const kolommen = FOOTER_COLUMNS.map((col) => (col.metAfdelingen ? { ...col, links: [...afdelingen, ...col.links] } : col));
   return (
     <footer className="mt-16 lg:mt-24">
       {showNewsletter && <NewsletterBand />}
@@ -34,7 +38,7 @@ export function SiteFooter({ showNewsletter = true }: { showNewsletter?: boolean
 
         {/* Mobiel: uitklapbare groepen (referentie). Desktop: open kolommen hieronder. */}
         <div className="mt-12 border-t border-line lg:hidden">
-          {FOOTER_COLUMNS.map((col) => (
+          {kolommen.map((col) => (
             <details key={col.title} className="group border-b border-line">
               <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between text-base font-medium [&::-webkit-details-marker]:hidden">
                 {col.title}
@@ -56,7 +60,7 @@ export function SiteFooter({ showNewsletter = true }: { showNewsletter?: boolean
         </div>
 
         <div className="mt-10 grid gap-10 sm:grid-cols-2 lg:mt-14 lg:grid-cols-[repeat(4,1fr)_auto]">
-          {FOOTER_COLUMNS.map((col) => (
+          {kolommen.map((col) => (
             <nav key={col.title} aria-label={col.title} className="hidden lg:block">
               <h2 className="text-base font-medium">{col.title}</h2>
               <ul role="list" className="mt-4 space-y-3">
