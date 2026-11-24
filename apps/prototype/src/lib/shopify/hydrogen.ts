@@ -10,10 +10,25 @@ import { createShopifyRequestContext, createStorefrontClient, defineShopifyI18n,
  */
 
 /**
- * Markt en taal zoals de winkel ze vandaag kent: enkel België, enkel Engels (nagekeken 16/11/2026
- * via `localization`). Komt Nederlands erbij in Shopify, dan wordt `language` hier "NL".
+ * Markt en taal van de site: België, Nederlands. De enige plek waar ze vastliggen: de winkelmand
+ * (winkelmand-handlers.ts), de kassa (app/api/kassa) en Shopify's scripts (layout.tsx) lezen ze hier.
+ *
+ * De taal van de aanvraag die de `checkoutUrl` teruggeeft, wordt de taal van de kassa: Shopify zet
+ * ze zelf in de kassa-URL (`/nl-be`). Wij schrijven die URL nooit om.
+ *
+ * Voorwaarde in Shopify: Nederlands is gepubliceerd (Settings › Languages). Een taal die enkel
+ * toegevoegd is, negeert de Storefront API zonder foutmelding en de kassa opent dan in de
+ * standaardtaal van de winkel (Engels, `/en-be`). Nakijken: `localization { availableLanguages }`.
  */
-export const shopifyI18n = defineShopifyI18n({ defaultLocale: { language: "EN", country: "BE" } });
+export const shopifyI18n = defineShopifyI18n({ defaultLocale: { language: "NL", country: "BE" } });
+
+/**
+ * Variabelen en richtlijn voor elke query of mutatie die markt en taal moet kennen. Shopify's
+ * aanvraag-gebonden client vult `$country` en `$language` zelf in; wie via lib/shopify/storefront.ts
+ * vraagt, geeft `shopifyI18n.defaultLocale` mee als variabelen.
+ */
+export const CONTEXT_VARIABELEN = "$country: CountryCode, $language: LanguageCode";
+export const IN_CONTEXT = "@inContext(country: $country, language: $language)";
 
 export const SHOPIFY_VALUTA = "EUR";
 

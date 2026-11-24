@@ -1,5 +1,6 @@
 import { createCartCookie, createShopifyRouteHandler, parseCartRequest, type CartData, type ShopifyRouteHandlerContext, type ShopifyRouteHandlerResult, type StorefrontClient } from "@shopify/hydrogen";
 import { GELDIG_VARIANT_ID, MAX_AANTAL, MAX_REGELS, nietTeKoop, nietTeKoopMelding } from "./etalage";
+import { CONTEXT_VARIABELEN as CONTEXT, IN_CONTEXT, shopifyI18n } from "./hydrogen";
 import { meld } from "@/lib/melding";
 
 /**
@@ -49,9 +50,6 @@ const MAND = /* GraphQL */ `
     }
   }
 `;
-const CONTEXT = "$country: CountryCode, $language: LanguageCode";
-const IN_CONTEXT = "@inContext(country: $country, language: $language)";
-
 const LEES = `query Mand($id: ID!, ${CONTEXT}) ${IN_CONTEXT} { cart(id: $id) { ...Mand } } ${MAND}`;
 const MAAK = `mutation MandMaak($input: CartInput!, ${CONTEXT}) ${IN_CONTEXT} { cartCreate(input: $input) { cart { ...Mand } userErrors { code field message } } } ${MAND}`;
 const VOEG_TOE = `mutation MandVoegToe($cartId: ID!, $lines: [CartLineInput!]!, ${CONTEXT}) ${IN_CONTEXT} { cartLinesAdd(cartId: $cartId, lines: $lines) { cart { ...Mand } userErrors { code field message } } } ${MAND}`;
@@ -158,7 +156,7 @@ export const winkelmandHandlers = {
       if (cartId) uitkomst = (await vraag<{ cartLinesAdd: Uitkomst | null }>(storefrontClient, VOEG_TOE, { cartId, lines })).cartLinesAdd;
       // Geen mand, of de mand uit de cookie bestaat niet meer (afgerekend, vervallen): een nieuwe.
       if (!uitkomst?.cart) {
-        uitkomst = (await vraag<{ cartCreate: Uitkomst | null }>(storefrontClient, MAAK, { input: { lines, buyerIdentity: { countryCode: "BE" } } })).cartCreate;
+        uitkomst = (await vraag<{ cartCreate: Uitkomst | null }>(storefrontClient, MAAK, { input: { lines, buyerIdentity: { countryCode: shopifyI18n.defaultLocale.country } } })).cartCreate;
         if (uitkomst?.cart?.id) nieuweCookie = createCartCookie(uitkomst.cart.id);
       }
     } else {

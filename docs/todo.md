@@ -137,7 +137,11 @@ Wat hieronder staat, kon vanaf die pc niet nagekeken of niet uitgevoerd worden. 
   - Kleuren, uit `src/app/globals.css`: knoppen `#130c0c` (inkt), accent `#130c0c`, achtergrond hoofdgedeelte `#ffffff`, achtergrond besteloverzicht `#f4f1f0` (mist).
   - Lettertypes: koppen **Fraunces**, gewone tekst **Poppins** (zoals de site). Staat Fraunces niet in de lijst: ook Poppins voor de koppen.
   - Komt het vectorlogo van de klant binnen: het logo opnieuw samenstellen en hier vervangen.
-  - De kassa is nog Engels (`/en-be`): Nederlands publiceren staat in `docs/analytics-en-cookies.md` §7.
+  - De taal van de kassa: zie het punt hieronder.
+- [x] Kassa in het Nederlands (24/11/2026). Nederlands stond in Shopify toegevoegd maar niet gepubliceerd, en de cart van de lokale mand werd zonder taalcontext gemaakt. Nu is Nederlands gepubliceerd en maakt de site elke cart in `NL`/`BE` (`src/lib/shopify/hydrogen.ts`): de kassa opent op `/nl-be`. Werking en test: `docs/analytics-en-cookies.md` §7 punt 3.
+  - [ ] Verzendmethodes hebben geen Nederlandse naam: in Shopify staan "Standard", "Express" en "International" zonder vertaling. Hernoemen in Settings › Shipping and delivery of vertalen in Translate & Adapt. Niet nagekeken welke namen de klant aan de kassa ziet: dat vraagt een ingevuld adres.
+  - [ ] Bestelmails nalezen in het Nederlands (Settings › Notifications): wie in het Nederlands afrekent, krijgt Shopify's Nederlandse versie. Een sjabloon dat enkel in het Engels is aangepast, heeft die aanpassing dan niet. Niet nagekeken.
+  - [ ] Te beslissen: Nederlands de standaardtaal van de winkel maken (Settings › Languages › Change default). Vandaag is dat Engels, terwijl alle producttitels en teksten Nederlands zijn. Voor de kassa is het niet nodig. Het raakt wel alles wat buiten de site om loopt (conceptbestellingen, mails aan klanten zonder taal) en mogelijk het zoeken (`docs/zoeken.md`: Shopify leest de Nederlandse teksten als Engels).
 - [ ] Vectorlogo (staat al open in de README)
 
 ### Vercel bij de livegang (voor Jeroen)
@@ -151,7 +155,7 @@ Gebouwd op 16/11/2026 en lokaal getest, maar uit: zonder de drie variabelen hier
 Bedoeld voor de livegang, niet eerder. "Production" is vandaag de testsite brunic.vercel.app: wie de variabelen nu al zet, toont daar de melding en stuurt de testbezoeken naar de rapporten van Brunic.
 
 - [ ] Nog te beslissen (vraag van Alexander, 18/11/2026): blijft het bij drie variabelen die apart gezet worden, of gaat alles vanzelf aan zodra `SITE_INDEXEREN=1` staat? Het tweede kan bij de livegang niet vergeten worden, maar dan moeten de cookietekst en de Shopify-admin klaar zijn vóór die dag. Het vraagt een kleine codewijziging. "Standaard aan, uitzetten in Vercel" is afgeraden: dan staat alles bij de eerstvolgende push aan op de testsite. Tot de beslissing geldt de lijst hieronder.
-- [ ] Eerst buiten Vercel: de cookie- en privacytekst is nagelezen door Brunic (`COOKIES_MET_SHOPIFY` in `src/data/content.ts`), en de instellingen in de Shopify-admin zijn gedaan (`docs/analytics-en-cookies.md` §7: toestemming vereist voor de hele EER, Nederlands toegevoegd, wachtwoordpagina weg, Shopify's eigen cookiebanner nagekeken).
+- [ ] Eerst buiten Vercel: de cookie- en privacytekst is nagelezen door Brunic (`COOKIES_MET_SHOPIFY` in `src/data/content.ts`), en de instellingen in de Shopify-admin zijn gedaan (`docs/analytics-en-cookies.md` §7: toestemming vereist voor de hele EER, wachtwoordpagina weg, Shopify's eigen cookiebanner nagekeken; Nederlands is gepubliceerd sinds 24/11/2026).
 - [ ] Settings › Environment Variables, omgeving Production:
   - `NEXT_PUBLIC_SHOPIFY_WINKELMAND` = `1`
   - `SHOPIFY_ANALYTICS` = `1`. Nooit `test`: die stand verstuurt ook vanaf previews en lokaal.

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { storefront } from "@/lib/shopify/storefront";
 import { GELDIG_VARIANT_ID, MAX_AANTAL, MAX_REGELS, nietTeKoop, nietTeKoopMelding, variantGid } from "@/lib/shopify/etalage";
-import { SHOPIFY_WINKELMAND, shopifyContext } from "@/lib/shopify/hydrogen";
+import { CONTEXT_VARIABELEN, IN_CONTEXT, SHOPIFY_WINKELMAND, shopifyContext, shopifyI18n } from "@/lib/shopify/hydrogen";
 import { mandVoorKassa } from "@/lib/shopify/winkelmand-handlers";
 import { meld } from "@/lib/melding";
 
@@ -20,8 +20,9 @@ import { meld } from "@/lib/melding";
 
 type Regel = { variantId: string; quantity: number };
 
+/** Deze mutatie geeft de kassa-URL terug; haar land en taal worden die van de kassa (`/nl-be`). */
 const MAAK_CART = /* GraphQL */ `
-  mutation MaakCart($input: CartInput!) {
+  mutation MaakCart($input: CartInput!, ${CONTEXT_VARIABELEN}) ${IN_CONTEXT} {
     cartCreate(input: $input) {
       cart { id checkoutUrl }
       userErrors { message }
@@ -90,11 +91,14 @@ export async function POST(req: Request) {
     const geweigerd = await nietTeKoop(lines.map((l) => l.variantId));
     if (geweigerd.length > 0) return NextResponse.json({ error: nietTeKoopMelding(geweigerd) }, { status: 409 });
 
+    const { country, language } = shopifyI18n.defaultLocale;
     const data = await storefront<{ cartCreate: { cart: { id: string; checkoutUrl: string } | null; userErrors: { message: string }[] } }>(MAAK_CART, {
       input: {
         lines: lines.map((l) => ({ merchandiseId: variantGid(l.variantId), quantity: l.quantity })),
-        buyerIdentity: { countryCode: "BE" },
+        buyerIdentity: { countryCode: country },
       },
+      country,
+      language,
     });
     const cart = data.cartCreate.cart;
     if (!cart?.checkoutUrl) throw new Error(data.cartCreate.userErrors.map((e) => e.message).join("; ") || "Geen kassa-URL");
